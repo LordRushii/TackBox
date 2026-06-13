@@ -28,6 +28,17 @@ export default function ProfilePage() {
     }
   }, [router]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess("");
@@ -139,32 +150,27 @@ export default function ProfilePage() {
 
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">Profile Picture URL</span>
+                  <span className="label-text font-semibold text-base-content/85">Profile Picture</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                      />
-                    </svg>
-                  </div>
+                <div className="flex items-center gap-4 mt-1">
                   <input
-                    type="url"
-                    placeholder="https://example.com/avatar.jpg"
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    className="input input-bordered w-full pl-11 bg-base-200/50 border-base-300 hover:border-primary/50 focus:border-primary focus:outline-none rounded-xl transition-all duration-200"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="file-input file-input-bordered file-input-primary w-full bg-base-200/50 border-base-300 hover:border-primary/50 transition-all duration-200 rounded-xl"
                   />
+                  {avatarUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setAvatarUrl("")}
+                      className="btn btn-circle btn-sm btn-ghost text-error"
+                      title="Remove Profile Picture"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
 

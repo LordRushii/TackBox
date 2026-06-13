@@ -28,7 +28,7 @@ export default function Header() {
 
     // Listen to storage changes to keep it in sync
     window.addEventListener("storage", checkUser);
-    
+
     // Also poll slightly or listen to custom custom events if standard storage events don't trigger on same window
     const interval = setInterval(checkUser, 1000);
 
@@ -53,23 +53,23 @@ export default function Header() {
               <span>S</span>
             </div>
             <span className="bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent font-extrabold tracking-tight transition-opacity group-hover:opacity-90">
-              Skillhub
+              SkillHub
             </span>
           </Link>
         </div>
         <div className="flex-none">
           <ul className="menu menu-horizontal px-1 gap-2 font-medium items-center">
             <li>
-              <Link 
-                href="/skills" 
+              <Link
+                href="/skills"
                 className="rounded-lg hover:bg-primary/10 hover:text-primary transition-all duration-200"
               >
                 Agent Skills
               </Link>
             </li>
             <li>
-              <Link 
-                href="/about" 
+              <Link
+                href="/about"
                 className="rounded-lg hover:bg-primary/10 hover:text-primary transition-all duration-200"
               >
                 About
@@ -78,8 +78,8 @@ export default function Header() {
             {user ? (
               <>
                 <li>
-                  <Link 
-                    href="/my-skills" 
+                  <Link
+                    href="/my-skills"
                     className="rounded-lg hover:bg-primary/10 hover:text-primary transition-all duration-200"
                   >
                     My Agent Skills
@@ -126,16 +126,16 @@ export default function Header() {
             ) : (
               <>
                 <li>
-                  <Link 
-                    href="/login" 
+                  <Link
+                    href="/login"
                     className="rounded-lg hover:bg-primary/10 hover:text-primary transition-all duration-200"
                   >
                     Login
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/register" 
+                  <Link
+                    href="/register"
                     className="btn btn-primary btn-sm rounded-lg shadow-sm hover:shadow transition-all duration-200"
                   >
                     Register
