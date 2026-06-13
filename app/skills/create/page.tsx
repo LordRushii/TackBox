@@ -4,6 +4,7 @@ import { useActionState, useState, useEffect } from "react";
 import { createSkill } from "@/app/actions/skills";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getCurrentUserAction } from "@/app/actions/auth";
 
 const initialState = {
   message: "",
@@ -15,12 +16,21 @@ export default function NewSkillPage() {
   const [descLength, setDescLength] = useState(0);
   const [content, setContent] = useState("");
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
 
   useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (!stored) {
-      router.push("/login?redirect=/skills/create");
+    async function syncSession() {
+      try {
+        const dbUser = await getCurrentUserAction();
+        if (!dbUser) {
+          localStorage.removeItem("user");
+          router.push("/login?redirect=/skills/create");
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
+    syncSession();
   }, [router]);
 
   const lineCount = content.split("\n").length;
@@ -108,8 +118,12 @@ export default function NewSkillPage() {
                       />
                     </svg>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-bold text-sm text-base-content/95 leading-none">Public</span>
-                      <span className="text-[10px] text-base-content/50 leading-none">Anyone can view this skill</span>
+                      <span className="font-bold text-sm text-base-content/95 leading-none">
+                        {visibility === "public" ? "Public" : "Private"}
+                      </span>
+                      <span className="text-[10px] text-base-content/50 leading-none">
+                        {visibility === "public" ? "Anyone can view this skill" : "Only you can view this skill"}
+                      </span>
                     </div>
                   </div>
                   <svg
@@ -128,23 +142,31 @@ export default function NewSkillPage() {
                   className="dropdown-content menu bg-base-300 rounded-xl z-50 w-full p-1.5 shadow-xl border border-base-200/50 mt-1"
                 >
                   <li>
-                    <a className="flex items-center gap-3 active:bg-primary/20 p-2.5 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setVisibility("public")}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg text-left ${visibility === "public" ? "active bg-primary/20" : "hover:bg-base-200/60"}`}
+                    >
                       <div className="flex flex-col gap-0.5">
                         <span className="font-bold text-sm text-base-content/90">Public</span>
                         <span className="text-xs text-base-content/50">Anyone can view this skill</span>
                       </div>
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200/60">
+                    <button
+                      type="button"
+                      onClick={() => setVisibility("private")}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg text-left ${visibility === "private" ? "active bg-primary/20" : "hover:bg-base-200/60"}`}
+                    >
                       <div className="flex flex-col gap-0.5">
                         <span className="font-bold text-sm text-base-content/90">Private</span>
                         <span className="text-xs text-base-content/50">Only you can view this skill</span>
                       </div>
-                    </a>
+                    </button>
                   </li>
                 </ul>
-                <input type="hidden" name="visibility" value="public" />
+                <input type="hidden" name="visibility" value={visibility} />
               </div>
             </div>
           </div>

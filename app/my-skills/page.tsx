@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchSkills } from "@/app/actions/skills";
+import { fetchUserSkills } from "@/app/actions/skills";
 import { Skill } from "@/app/skills/skills";
 import SkillCard from "@/components/SkillCard";
+import { getCurrentUserAction } from "@/app/actions/auth";
 
 export default function MySkillsPage() {
   const router = useRouter();
@@ -14,18 +15,18 @@ export default function MySkillsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check client-side authentication
-    const stored = localStorage.getItem("user");
-    if (!stored) {
-      router.push("/login?redirect=/my-skills");
-      return;
-    }
-    setUser(JSON.parse(stored));
-
-    // Load user's skills
     async function loadSkills() {
       try {
-        const data = await fetchSkills();
+        const dbUser = await getCurrentUserAction();
+        if (!dbUser) {
+          localStorage.removeItem("user");
+          router.push("/login?redirect=/my-skills");
+          return;
+        }
+        setUser(dbUser);
+        localStorage.setItem("user", JSON.stringify(dbUser));
+
+        const data = await fetchUserSkills();
         setSkills(data);
       } catch (err) {
         console.error("Failed to load agent skills:", err);

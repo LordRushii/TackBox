@@ -4,103 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import SkillCard from "@/components/SkillCard";
 
-type ShowcaseSkill = {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  author: {
-    name: string;
-    avatarColor: string;
-    role: string;
-  };
-  level: "Intermediate" | "Advanced" | "Expert";
-  starsCount: number;
-};
-
-const SHOWCASE_SKILLS: ShowcaseSkill[] = [
-  {
-    id: "sc-1",
-    name: "Next.js 15 & Server Components Integration",
-    category: "Frontend",
-    description: "Equips agents with deep traversal capabilities of Next.js App Router, enabling them to build, refactor, and optimize React Server Components.",
-    author: {
-      name: "AI Agent Alpha",
-      avatarColor: "from-pink-500 to-rose-500",
-      role: "Autonomous Frontend Agent",
-    },
-    level: "Expert",
-    starsCount: 142,
-  },
-  {
-    id: "sc-2",
-    name: "Kubernetes Orchestration & CLI Capability",
-    category: "DevOps",
-    description: "Allows agents to automatically containerize projects, compile Dockerfiles, write Kubernetes manifests, and manage deployments.",
-    author: {
-      name: "OpsBot v4",
-      avatarColor: "from-cyan-500 to-blue-600",
-      role: "SRE & Deployment Agent",
-    },
-    level: "Advanced",
-    starsCount: 98,
-  },
-  {
-    id: "sc-3",
-    name: "CSS Grid & Design Tokens Parser",
-    category: "Design",
-    description: "Enables agents to parse Figma JSON tokens and translate design choices directly into responsive CSS variables and micro-interactions.",
-    author: {
-      name: "StyleSync Agent",
-      avatarColor: "from-purple-500 to-indigo-500",
-      role: "Design System Compiler",
-    },
-    level: "Intermediate",
-    starsCount: 189,
-  },
-  {
-    id: "sc-4",
-    name: "Rust Asynchronous Systems Compiler",
-    category: "Backend",
-    description: "Provides systems-level capability for compiling Rust code safely, resolving borrow checker errors, and building high-performance async networks.",
-    author: {
-      name: "RustyAgent",
-      avatarColor: "from-amber-500 to-orange-600",
-      role: "Systems Programmer Bot",
-    },
-    level: "Expert",
-    starsCount: 76,
-  },
-  {
-    id: "sc-5",
-    name: "LLM Embedding & RAG Retriever Flow",
-    category: "AI / ML",
-    description: "Enables agents to execute vector search queries, optimize document embeddings, and chain contextual prompts for RAG execution.",
-    author: {
-      name: "RetrieverAI",
-      avatarColor: "from-emerald-400 to-teal-600",
-      role: "Knowledge Retrieval Agent",
-    },
-    level: "Intermediate",
-    starsCount: 231,
-  },
-  {
-    id: "sc-6",
-    name: "SQL Database Optimization Engine",
-    category: "Database",
-    description: "Equips agents to analyze query plans, recommend indices, rewrite slow SQL queries, and balance normalization rules dynamically.",
-    author: {
-      name: "DbOptimizer Bot",
-      avatarColor: "from-violet-500 to-purple-600",
-      role: "Database Tuning Agent",
-    },
-    level: "Advanced",
-    starsCount: 64,
-  },
-];
+import { fetchSkills } from "@/app/actions/skills";
+import { Skill } from "./skills";
 
 export default function AgentSkillsShowcasePage() {
   const [user, setUser] = useState<any>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [starredSkills, setStarredSkills] = useState<Record<string, boolean>>({});
@@ -119,6 +29,20 @@ export default function AgentSkillsShowcasePage() {
         }
       }
     }
+  }, []);
+
+  useEffect(() => {
+    async function loadSkills() {
+      try {
+        const data = await fetchSkills();
+        setSkills(data);
+      } catch (err) {
+        console.error("Failed to load public skills:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSkills();
   }, []);
 
   const handleStarToggle = (id: string) => {
@@ -146,13 +70,14 @@ export default function AgentSkillsShowcasePage() {
     }, 1500);
   };
 
-  const categories = ["All", ...Array.from(new Set(SHOWCASE_SKILLS.map((s) => s.category)))];
+  const categories = ["All", ...Array.from(new Set(skills.map((s) => s.category)))];
 
-  const filteredSkills = SHOWCASE_SKILLS.filter((skill) => {
+  const filteredSkills = skills.filter((skill) => {
+    const authorName = skill.authorName || "";
     const matchesSearch =
       skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      skill.author.name.toLowerCase().includes(searchQuery.toLowerCase());
+      authorName.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory = selectedCategory === "All" || skill.category === selectedCategory;
 
@@ -219,7 +144,30 @@ export default function AgentSkillsShowcasePage() {
       </div>
 
       {/* Showcase Grid */}
-      {filteredSkills.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mb-16">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="card bg-base-200/20 border border-base-200/40 p-6 flex flex-col justify-between h-[250px] rounded-2xl animate-pulse"
+            >
+              <div>
+                <div className="skeleton h-5 w-20 rounded-md mb-4 bg-base-content/10"></div>
+                <div className="skeleton h-7 w-3/4 rounded-md mb-5 bg-base-content/10"></div>
+                <div className="space-y-2 mt-4">
+                  <div className="skeleton h-3.5 w-full rounded bg-base-content/5"></div>
+                  <div className="skeleton h-3.5 w-5/6 rounded bg-base-content/5"></div>
+                  <div className="skeleton h-3.5 w-4/6 rounded bg-base-content/5"></div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-base-200/40">
+                <div className="skeleton h-4 w-28 rounded bg-base-content/5"></div>
+                <div className="skeleton h-4 w-16 rounded bg-base-content/10"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredSkills.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-base-200/60 rounded-2xl bg-base-200/10 max-w-lg mx-auto relative z-10">
           <h3 className="text-xl font-bold text-base-content/85">No matching agent skills found</h3>
           <p className="text-base-content/50 mt-2 max-w-xs text-sm">
@@ -230,7 +178,7 @@ export default function AgentSkillsShowcasePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mb-16">
           {filteredSkills.map((skill) => {
             const hasStarred = !!starredSkills[skill.id];
-            const displayStars = skill.starsCount + (hasStarred ? 1 : 0);
+            const displayStars = (skill.stars || 0) + (hasStarred ? 1 : 0);
 
             return (
               <SkillCard
@@ -238,11 +186,11 @@ export default function AgentSkillsShowcasePage() {
                 id={skill.id}
                 name={skill.name}
                 category={skill.category}
-                level={skill.level}
+                level={skill.level || "Intermediate"}
                 description={skill.description}
-                authorName={skill.author.name}
-                authorRole={skill.author.role}
-                authorAvatarColor={skill.author.avatarColor}
+                authorName={skill.authorName || "Anonymous"}
+                authorRole={skill.authorRole || "Developer"}
+                authorAvatarColor={skill.authorAvatarColor}
                 starsCount={displayStars}
                 hasStarred={hasStarred}
                 onStarToggle={handleStarToggle}

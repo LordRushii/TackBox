@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { registerAction } from "@/app/actions/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -29,28 +30,36 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
       return;
     }
 
     setLoading(true);
 
-    // Simulate API registration delay
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("confirmPassword", confirmPassword);
+
+      const result = await registerAction(null, formData);
+
+      if (result?.success) {
+        setSuccess("Registration successful! Redirecting to login...");
+        setTimeout(() => {
+          router.push(`/login?email=${encodeURIComponent(email)}`);
+        }, 1500);
+      } else {
+        setError(result?.message || "Registration failed. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      setSuccess("Registration successful! Redirecting to login...");
-
-      // Simulate storing registration data in localStorage
-      const users = JSON.parse(localStorage.getItem("mock_users") || "[]");
-      users.push({ name, email, password });
-      localStorage.setItem("mock_users", JSON.stringify(users));
-
-      setTimeout(() => {
-        // Redirect to login page and pre-fill the email
-        router.push(`/login?email=${encodeURIComponent(email)}`);
-      }, 1500);
-    }, 1200);
+    }
   };
 
   return (
@@ -206,7 +215,7 @@ export default function RegisterPage() {
                   </div>
                   <input
                     type="password"
-                    placeholder="•••••••• (Min. 6 chars)"
+                    placeholder="•••••••• (Min. 8 chars)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="input input-bordered w-full pl-11 bg-base-300/30 border-base-300 hover:border-primary/50 focus:border-primary focus:outline-none rounded-xl transition-all duration-200"

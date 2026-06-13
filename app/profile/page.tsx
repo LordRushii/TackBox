@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getCurrentUserAction } from "@/app/actions/auth";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -11,21 +12,22 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("user");
-      if (stored) {
-        try {
-          const user = JSON.parse(stored);
-          setName(user.name || "");
-          setAvatarUrl(user.avatarUrl || "");
-        } catch (e) {
-          // ignore
+    async function syncSession() {
+      try {
+        const dbUser = await getCurrentUserAction();
+        if (!dbUser) {
+          localStorage.removeItem("user");
+          router.push("/login");
+          return;
         }
-      } else {
-        // If not logged in, redirect
-        router.push("/login");
+        setName(dbUser.name || "");
+        setAvatarUrl(dbUser.image || "");
+        localStorage.setItem("user", JSON.stringify(dbUser));
+      } catch (e) {
+        console.error(e);
       }
     }
+    syncSession();
   }, [router]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

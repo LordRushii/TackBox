@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getCurrentUserAction, logoutAction } from "@/app/actions/auth";
 
 export default function Header() {
   const router = useRouter();
@@ -26,6 +27,22 @@ export default function Header() {
   useEffect(() => {
     checkUser();
 
+    // Sync session on mount with server database
+    async function syncSession() {
+      try {
+        const dbUser = await getCurrentUserAction();
+        if (dbUser) {
+          localStorage.setItem("user", JSON.stringify(dbUser));
+        } else {
+          localStorage.removeItem("user");
+        }
+        checkUser();
+      } catch (e) {
+        console.error("Failed to sync session with server:", e);
+      }
+    }
+    syncSession();
+
     // Listen to storage changes to keep it in sync
     window.addEventListener("storage", checkUser);
 
@@ -38,7 +55,12 @@ export default function Header() {
     };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutAction();
+    } catch (e) {
+      console.error("Failed to logout on server:", e);
+    }
     localStorage.removeItem("user");
     setUser(null);
     router.push("/");

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Skill } from "@/app/skills/skills";
-import { updateSkillAction, deleteSkillAction } from "@/app/actions/skills";
+import { updateSkillAction, deleteSkillAction, incrementViewsAction, incrementDownloadsAction } from "@/app/actions/skills";
+import { getCurrentUserAction } from "@/app/actions/auth";
 import SkillCard from "./SkillCard";
 import Toast from "./Toast";
 import ConfirmModal from "./ConfirmModal";
@@ -51,31 +52,32 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
 
   // Read logged in user on mount & increment view count
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("user");
-      if (stored) {
-        try {
-          const userObj = JSON.parse(stored);
-          setLoggedInUser(userObj);
-          
-          // Check if user is owner of the skill
-          // If skill has an author email/username matching the current user, or if isOwner prop is passed
-          if (
-            isOwner ||
-            userObj.name === skill.authorName ||
-            userObj.role === skill.authorRole ||
-            (userObj.email === "demo@skillhub.com" && skill.authorUsername === "demouser")
-          ) {
+    async function init() {
+      try {
+        const dbUser = await getCurrentUserAction();
+        if (dbUser) {
+          setLoggedInUser(dbUser);
+          localStorage.setItem("user", JSON.stringify(dbUser));
+          if (isOwner || dbUser.id === (skill as any).authorId) {
             setHasEditPermission(true);
           }
-        } catch (e) {
-          console.error(e);
+        } else {
+          setLoggedInUser(null);
+          localStorage.removeItem("user");
+          setHasEditPermission(false);
         }
+      } catch (err) {
+        console.error("Failed to sync session in detail view:", err);
       }
       
-      // Simulate incrementing views count on load
-      setViewsCount(prev => prev + 1);
+      try {
+        await incrementViewsAction(skill.id);
+        setViewsCount(prev => prev + 1);
+      } catch (err) {
+        console.error("Failed to increment views:", err);
+      }
     }
+    init();
   }, [skill, isOwner]);
 
   // Sync skill data when initialSkill changes
@@ -109,8 +111,9 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
     }
   };
 
-  const handleDownloadMd = () => {
+  const handleDownloadMd = async () => {
     try {
+      await incrementDownloadsAction(skill.id);
       const blob = new Blob([content], { type: "text/markdown" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

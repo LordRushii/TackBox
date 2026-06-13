@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function LoginPage() {
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -35,21 +36,20 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    // Simulate API request delay
-    setTimeout(() => {
-      setLoading(false);
-      // Hardcoded dummy credentials for validation
-      if (email === "demo@skillhub.com" && password === "Password123") {
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+
+      const result = await loginAction(null, formData);
+
+      if (result?.success) {
         setSuccess("Login successful! Redirecting...");
         
-        // Save dummy user session
+        // Save user session
         localStorage.setItem(
           "user",
-          JSON.stringify({
-            email: "demo@skillhub.com",
-            name: "Demo User",
-            role: "Member",
-          })
+          JSON.stringify(result.user)
         );
         
         // Dispatch custom event to let other components (like Header) know
@@ -61,9 +61,14 @@ export default function LoginPage() {
           router.push(redirectUrl);
         }, 1200);
       } else {
-        setError("Invalid email or password. Please use the demo credentials.");
+        setError(result?.message || "Invalid email or password.");
       }
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUseDemoCredentials = () => {
