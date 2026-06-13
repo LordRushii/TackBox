@@ -8,14 +8,18 @@ import { User, LogOut } from "lucide-react";
 
 export default function Header() {
   const router = useRouter();
-  const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string; image?: string } | null>(null);
 
   const checkUser = () => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("user");
       if (stored) {
         try {
-          setUser(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          setUser({
+            ...parsed,
+            avatarUrl: parsed.avatarUrl || parsed.image,
+          });
         } catch (e) {
           setUser(null);
         }

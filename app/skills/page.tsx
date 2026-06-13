@@ -134,6 +134,7 @@ export default function AgentSkillsShowcasePage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input input-bordered w-full pl-10 bg-base-100/40 border-base-200 focus:input-primary transition-all duration-200 placeholder:text-base-content/30"
+            suppressHydrationWarning={true}
           />
         </div>
 
@@ -148,6 +149,7 @@ export default function AgentSkillsShowcasePage() {
                   ? "bg-primary text-primary-content shadow-md shadow-primary/20"
                   : "bg-base-200/50 hover:bg-base-200 text-base-content/70"
               }`}
+              suppressHydrationWarning={true}
             >
               {category}
             </button>
