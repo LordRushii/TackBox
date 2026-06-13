@@ -12,6 +12,7 @@ export type Skill = {
   downloads?: number;
   saves?: number;
   stars?: number;
+  hasStarred?: boolean;
   version?: string;
   license?: string;
   authorName?: string;

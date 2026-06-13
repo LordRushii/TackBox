@@ -69,6 +69,7 @@ export const createSkill = mutation({
       authorId: args.authorId,
       views: 0,
       downloads: 0,
+      stars: 0,
       createdAt: now,
       updatedAt: now,
     });
@@ -97,7 +98,7 @@ export const updateSkill = mutation({
       throw new Error("Unauthorized: Only the owner can edit this skill");
     }
 
-    const { id, callerId, ...updates } = args;
+    const { id, callerId: _, ...updates } = args;
     await ctx.db.patch(id, {
       ...updates,
       updatedAt: Date.now(),
@@ -149,5 +150,50 @@ export const incrementDownloads = mutation({
       return true;
     }
     return false;
+  },
+});
+
+export const toggleStar = mutation({
+  args: {
+    skillId: v.id("skills"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const existingLike = await ctx.db
+      .query("likes")
+      .withIndex("by_userId_and_skillId", (q) =>
+        q.eq("userId", args.userId).eq("skillId", args.skillId)
+      )
+      .unique();
+
+    const skill = await ctx.db.get(args.skillId);
+    if (!skill) throw new Error("Skill not found");
+
+    const currentStars = skill.stars || 0;
+
+    if (existingLike) {
+      await ctx.db.delete(existingLike._id);
+      await ctx.db.patch(args.skillId, { stars: Math.max(0, currentStars - 1) });
+      return { hasStarred: false };
+    } else {
+      await ctx.db.insert("likes", {
+        userId: args.userId,
+        skillId: args.skillId,
+      });
+      await ctx.db.patch(args.skillId, { stars: currentStars + 1 });
+      return { hasStarred: true };
+    }
+  },
+});
+
+export const getUserLikedSkillIds = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const likes = await ctx.db
+      .query("likes")
+      .withIndex("by_userId_and_skillId", (q) => q.eq("userId", args.userId))
+      .collect();
+    
+    return likes.map(like => like.skillId);
   },
 });

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUserAction } from "@/app/actions/auth";
+import { getCurrentUserAction, updateProfileAction } from "@/app/actions/auth";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -41,43 +41,46 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess("");
     setLoading(true);
 
-    // Simulate API request delay
-    setTimeout(() => {
-      setLoading(false);
-      
-      // Save updated user session
-      const stored = localStorage.getItem("user");
-      let userObj = { role: "Member" };
-      if (stored) {
-        try {
-           userObj = JSON.parse(stored);
-        } catch (e) {}
+    try {
+      const result = await updateProfileAction(name, avatarUrl);
+      if (result?.success) {
+        // Save updated user session
+        const stored = localStorage.getItem("user");
+        let userObj = { role: "Member" };
+        if (stored) {
+          try {
+             userObj = JSON.parse(stored);
+          } catch (e) {}
+        }
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...userObj,
+            name,
+            image: avatarUrl,
+          })
+        );
+        
+        // Dispatch custom event to let other components (like Header) know
+        window.dispatchEvent(new Event("storage"));
+        
+        setSuccess("Profile updated successfully!");
+
+        setTimeout(() => {
+          setSuccess("");
+        }, 3000);
       }
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...userObj,
-          name,
-          avatarUrl,
-        })
-      );
-      
-      // Dispatch custom event to let other components (like Header) know
-      window.dispatchEvent(new Event("storage"));
-      
-      setSuccess("Profile updated successfully!");
-
-      setTimeout(() => {
-        setSuccess("");
-      }, 3000);
-
-    }, 800);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

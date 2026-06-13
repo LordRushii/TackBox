@@ -10,7 +10,7 @@ import { Id } from "@/convex/_generated/dataModel";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-function mapDbSkillToFrontend(dbSkill: any): Skill {
+function mapDbSkillToFrontend(dbSkill: any, likedSkillIds?: Set<string>): Skill {
   const author = dbSkill.author;
   return {
     id: dbSkill._id,
@@ -25,7 +25,8 @@ function mapDbSkillToFrontend(dbSkill: any): Skill {
     views: dbSkill.views || 0,
     downloads: dbSkill.downloads || 0,
     saves: 0,
-    stars: 0,
+    stars: dbSkill.stars || 0,
+    hasStarred: likedSkillIds ? likedSkillIds.has(dbSkill._id) : false,
     version: "1.0.0",
     license: "MIT",
     authorName: author?.name || "Deleted User",
@@ -40,7 +41,13 @@ function mapDbSkillToFrontend(dbSkill: any): Skill {
 export async function fetchSkills(): Promise<Skill[]> {
   try {
     const dbSkills = await convex.query(api.skills.getPublicSkills);
-    return dbSkills.map(mapDbSkillToFrontend);
+    const user = await getSessionUser();
+    let likedSkillIds = new Set<string>();
+    if (user) {
+      const likes = await convex.query(api.skills.getUserLikedSkillIds, { userId: user.id });
+      likedSkillIds = new Set(likes);
+    }
+    return dbSkills.map(s => mapDbSkillToFrontend(s, likedSkillIds));
   } catch (err) {
     console.error("Failed to fetch public skills:", err);
     return [];
@@ -53,7 +60,10 @@ export async function fetchUserSkills(): Promise<Skill[]> {
     if (!user) return [];
     
     const dbSkills = await convex.query(api.skills.getUserSkills, { userId: user.id });
-    return dbSkills.map(mapDbSkillToFrontend);
+    const likes = await convex.query(api.skills.getUserLikedSkillIds, { userId: user.id });
+    const likedSkillIds = new Set(likes);
+    
+    return dbSkills.map(s => mapDbSkillToFrontend(s, likedSkillIds));
   } catch (err) {
     console.error("Failed to fetch user skills:", err);
     return [];
@@ -64,7 +74,13 @@ export async function fetchSkillById(id: string): Promise<Skill | null> {
   try {
     const dbSkill = await convex.query(api.skills.getSkill, { id: id as Id<"skills"> });
     if (!dbSkill) return null;
-    return mapDbSkillToFrontend(dbSkill);
+    const user = await getSessionUser();
+    let likedSkillIds = new Set<string>();
+    if (user) {
+      const likes = await convex.query(api.skills.getUserLikedSkillIds, { userId: user.id });
+      likedSkillIds = new Set(likes);
+    }
+    return mapDbSkillToFrontend(dbSkill, likedSkillIds);
   } catch (err) {
     console.error(`Failed to fetch skill with ID ${id}:`, err);
     return null;
@@ -163,4 +179,20 @@ export async function incrementDownloadsAction(id: string) {
   } catch (e) {
     console.error("Failed to increment downloads:", e);
   }
+}
+
+export async function toggleStarAction(id: string) {
+  const user = await getSessionUser();
+  if (!user) {
+    throw new Error("You must be logged in to like skills.");
+  }
+
+  const result = await convex.mutation(api.skills.toggleStar, {
+    skillId: id as Id<"skills">,
+    userId: user.id,
+  });
+
+  revalidatePath("/skills");
+  revalidatePath("/my-skills");
+  return result;
 }

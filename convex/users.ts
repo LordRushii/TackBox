@@ -36,3 +36,16 @@ export const createUser = mutation({
     });
   },
 });
+
+export const updateUser = mutation({
+  args: {
+    id: v.id("users"),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    await ctx.db.patch(id, updates);
+    return true;
+  },
+});

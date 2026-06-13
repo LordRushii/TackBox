@@ -27,6 +27,7 @@ export default defineSchema({
     authorId: v.id("users"),
     views: v.number(),
     downloads: v.number(),
+    stars: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

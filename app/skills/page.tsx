@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import SkillCard from "@/components/SkillCard";
 
-import { fetchSkills } from "@/app/actions/skills";
+import { fetchSkills, toggleStarAction } from "@/app/actions/skills";
 import { Skill } from "./skills";
 
 export default function AgentSkillsShowcasePage() {
@@ -13,7 +13,7 @@ export default function AgentSkillsShowcasePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [starredSkills, setStarredSkills] = useState<Record<string, boolean>>({});
+
   const [runningSkillId, setRunningSkillId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRunningSuccess, setIsRunningSuccess] = useState(false);
@@ -45,11 +45,31 @@ export default function AgentSkillsShowcasePage() {
     loadSkills();
   }, []);
 
-  const handleStarToggle = (id: string) => {
-    setStarredSkills((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  const handleStarToggle = async (id: string) => {
+    if (!user) {
+      window.location.href = "/login?redirect=/skills";
+      return;
+    }
+
+    setSkills((prev) =>
+      prev.map((skill) => {
+        if (skill.id === id) {
+          const currentlyStarred = skill.hasStarred;
+          return {
+            ...skill,
+            hasStarred: !currentlyStarred,
+            stars: (skill.stars || 0) + (currentlyStarred ? -1 : 1),
+          };
+        }
+        return skill;
+      })
+    );
+
+    try {
+      await toggleStarAction(id);
+    } catch (err) {
+      console.error("Failed to toggle star", err);
+    }
   };
 
   const handleStartSkill = (id: string, name: string) => {
@@ -177,9 +197,6 @@ export default function AgentSkillsShowcasePage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mb-16">
           {filteredSkills.map((skill) => {
-            const hasStarred = !!starredSkills[skill.id];
-            const displayStars = (skill.stars || 0) + (hasStarred ? 1 : 0);
-
             return (
               <SkillCard
                 key={skill.id}
@@ -191,8 +208,8 @@ export default function AgentSkillsShowcasePage() {
                 authorName={skill.authorName || "Anonymous"}
                 authorRole={skill.authorRole || "Developer"}
                 authorAvatarColor={skill.authorAvatarColor}
-                starsCount={displayStars}
-                hasStarred={hasStarred}
+                starsCount={skill.stars || 0}
+                hasStarred={skill.hasStarred || false}
                 onStarToggle={handleStarToggle}
               />
             );

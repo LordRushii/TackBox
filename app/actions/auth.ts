@@ -55,3 +55,24 @@ export async function logoutAction() {
 export async function getCurrentUserAction() {
   return await getSessionUser();
 }
+
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/convex/_generated/api";
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+export async function updateProfileAction(name: string, image: string) {
+  const user = await getSessionUser();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  await convex.mutation(api.users.updateUser, {
+    id: user.id,
+    name,
+    image,
+  });
+
+  revalidatePath("/profile");
+  return { success: true };
+}

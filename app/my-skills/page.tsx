@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchUserSkills } from "@/app/actions/skills";
+import { fetchUserSkills, toggleStarAction } from "@/app/actions/skills";
 import { Skill } from "@/app/skills/skills";
 import SkillCard from "@/components/SkillCard";
 import { getCurrentUserAction } from "@/app/actions/auth";
@@ -36,6 +36,30 @@ export default function MySkillsPage() {
     }
     loadSkills();
   }, [router]);
+
+  const handleStarToggle = async (id: string) => {
+    if (!user) return;
+
+    setSkills((prev) =>
+      prev.map((skill) => {
+        if (skill.id === id) {
+          const currentlyStarred = skill.hasStarred;
+          return {
+            ...skill,
+            hasStarred: !currentlyStarred,
+            stars: (skill.stars || 0) + (currentlyStarred ? -1 : 1),
+          };
+        }
+        return skill;
+      })
+    );
+
+    try {
+      await toggleStarAction(id);
+    } catch (err) {
+      console.error("Failed to toggle star", err);
+    }
+  };
 
   if (loading || !user) {
     // Return loading skeleton matching the previous aesthetics
@@ -183,6 +207,8 @@ export default function MySkillsPage() {
               authorRole={skill.authorRole || user?.role || "Developer"}
               authorAvatarColor={skill.authorAvatarColor || "from-primary to-secondary"}
               starsCount={skill.stars || 0}
+              hasStarred={skill.hasStarred || false}
+              onStarToggle={handleStarToggle}
             />
           ))}
         </div>
