@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
+import { AlertTriangle, CheckCircle2, Mail, Lock } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -71,12 +72,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleUseDemoCredentials = () => {
-    setEmail("demo@skillhub.com");
-    setPassword("Password123");
-    setError("");
-  };
-
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 bg-gradient-to-b from-base-900 to-base-950 relative overflow-hidden">
       {/* Decorative radial gradients for aesthetic look */}
@@ -103,40 +98,14 @@ export default function LoginPage() {
             {/* Status Messages */}
             {error && (
               <div className="alert alert-error text-sm py-3 px-4 rounded-xl border border-error/20 bg-error/10 text-error-content mb-6 flex items-start gap-2 shadow-sm animate-shake">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-5 h-5 flex-shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                  />
-                </svg>
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {success && (
               <div className="alert alert-success text-sm py-3 px-4 rounded-xl border border-success/20 bg-success/10 text-success-content mb-6 flex items-start gap-2 shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-5 h-5 flex-shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                  />
-                </svg>
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
                 <span>{success}</span>
               </div>
             )}
@@ -149,20 +118,7 @@ export default function LoginPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-                      />
-                    </svg>
+                    <Mail className="w-5 h-5" />
                   </div>
                   <input
                     type="email"
@@ -186,20 +142,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0V10.5m-2.852 0a9 9 0 0 0 18.704 0m-18.704 0a3 3 0 1 1 18.704 0M7.5 10.5h9"
-                      />
-                    </svg>
+                    <Lock className="w-5 h-5" />
                   </div>
                   <input
                     type="password"
@@ -238,40 +181,6 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-
-            {/* Demo Credentials Alert Helper */}
-            <div className="mt-6 p-4 rounded-xl bg-base-300/40 border border-base-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              <div>
-                <span className="font-bold text-primary flex items-center gap-1 mb-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Demo User Account
-                </span>
-                <p className="text-base-content/60">
-                  Email: <span className="font-mono text-base-content">demo@skillhub.com</span>
-                </p>
-                <p className="text-base-content/60">
-                  Pass: <span className="font-mono text-base-content">Password123</span>
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleUseDemoCredentials}
-                className="btn btn-xs btn-outline btn-primary rounded-lg text-[10px] self-start sm:self-auto"
-              >
-                Autofill
-              </button>
-            </div>
 
             {/* Bottom Link */}
             <div className="text-center mt-8 pt-6 border-t border-base-200/40 text-sm">

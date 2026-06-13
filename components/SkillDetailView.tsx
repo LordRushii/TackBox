@@ -10,6 +10,9 @@ import SkillCard from "./SkillCard";
 import Toast from "./Toast";
 import ConfirmModal from "./ConfirmModal";
 import { parseMarkdown } from "@/lib/markdown";
+import { 
+  ArrowLeft, Pencil, Download, Trash2, X, Eye, Globe, Lock, Copy, Star, Maximize2, Bookmark, Link2, Save
+} from "lucide-react";
 
 type SkillDetailViewProps = {
   initialSkill: Skill;
@@ -259,18 +262,14 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
               onClick={handleDownloadMd}
               className="btn btn-outline border-base-200/40 hover:bg-base-200/20 btn-sm rounded-lg text-xs font-bold px-3 py-1.5 flex items-center gap-1.5"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-              </svg>
+              <Download className="w-3.5 h-3.5" />
               Download .md
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}
               className="btn btn-outline btn-error btn-sm rounded-lg text-xs font-bold px-3 py-1.5 flex items-center gap-1.5"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.72 0-.34-9m9.96-3.243a3.53 3.53 0 0 0-3-3m-9.96 0a3.53 3.53 0 0 0-3 3m15.92 0L18.74 21a2.25 2.25 0 0 1-2.25 2.25H7.512a2.25 2.25 0 0 1-2.25-2.25L5.04 6m13.88 0H5.04M12 4.5v15" />
-              </svg>
+              <Trash2 className="w-3.5 h-3.5" />
               Delete Skill
             </button>
           </div>
@@ -345,9 +344,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                       onClick={() => handleRemoveTag(tag)}
                       className="text-base-content/30 hover:text-error hover:bg-error/10 p-0.5 rounded transition-all"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                      </svg>
+                      <X className="w-3 h-3" />
                     </button>
                   </span>
                 ))}
@@ -400,9 +397,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                         : "text-base-content/60 hover:text-base-content hover:bg-base-200/40"
                     }`}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                    </svg>
+                    <Pencil className="w-3.5 h-3.5" />
                     Write
                   </button>
                   <button
@@ -414,10 +409,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                         : "text-base-content/60 hover:text-base-content hover:bg-base-200/40"
                     }`}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
+                    <Eye className="w-3.5 h-3.5" />
                     Preview
                   </button>
                 </div>
@@ -499,9 +491,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                   </>
                 ) : (
                   <>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                    </svg>
+                    <Save className="w-4 h-4" />
                     Update Skill
                   </>
                 )}
@@ -525,9 +515,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
       {/* Top Breadcrumb */}
       <div className="flex items-center gap-1.5 text-xs text-base-content/40 mb-6 font-medium z-10 relative">
         <Link href="/skills" className="hover:text-primary transition-colors flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
+          <ArrowLeft className="w-3 h-3" />
           Back to Explore
         </Link>
       </div>
@@ -553,9 +541,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
             {/* Badges Row */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <span className="badge badge-success bg-emerald-500/10 border-emerald-500/20 text-emerald-500 text-[10px] sm:text-xs font-bold px-2.5 py-2.5 rounded-lg flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l.406.34c.125.104.224.239.29.388a1.001 1.001 0 0 1 0 .849 1.011 1.011 0 0 1-.29.388l-.29.242a1.008 1.008 0 0 0-.29.388 1.001 1.001 0 0 0 0 .849c.065.15.165.284.29.388l.406.34a1.01 1.01 0 0 1 .405.865v.568m-11.75-.008v-.567c0-.335.148-.65.405-.864l.406-.34a1.01 1.01 0 0 1 .29-.388c.15-.125.284-.265.388-.417a1.002 1.002 0 0 0 .15-.843 1.004 1.004 0 0 0-.388-.417l-.29-.242a1.008 1.008 0 0 1-.29-.388 1.001 1.001 0 0 1 0-.849c.065-.15.165-.284.29-.388l.406-.34a1.01 1.01 0 0 0 .405-.865v-.568m10.5 16.5V18.75c0-.335-.148-.65-.405-.864l-.406-.34a1.01 1.01 0 0 0-.29-.388a1.002 1.002 0 0 0-.843-.15a1.004 1.004 0 0 0-.417.388l-.242.29a1.008 1.008 0 0 1-.388.29a1.001 1.001 0 0 1-.849 0a1.011 1.011 0 0 1-.388-.29l-.242-.29a1.008 1.008 0 0 0-.388-.29a1.001 1.001 0 0 0-.849 0c-.15.065-.284.165-.388.29l-.242.29a1.008 1.008 0 0 0-.29.388a1.002 1.002 0 0 0 0 .843c.065.15.165.284.29.388l.34.406c.214.257.34.57.34.905v.568M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582" />
-                </svg>
+                {visibility === "public" ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                 {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
               </span>
               <span className="badge bg-primary/10 border-primary/20 text-primary text-[10px] sm:text-xs font-bold px-2.5 py-2.5 rounded-lg">
@@ -577,9 +563,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
               onClick={() => setIsEditing(true)}
               className="btn btn-outline border-base-200/60 text-base-content/75 hover:bg-base-200/40 rounded-xl px-4 py-2 font-semibold flex items-center gap-1.5 transition-all duration-200 text-xs sm:text-sm"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-              </svg>
+              <Pencil className="w-4 h-4" />
               Edit Skill
             </button>
           )}
@@ -588,9 +572,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
             onClick={handleCopyContent}
             className="btn btn-outline border-base-200/60 text-base-content/75 hover:bg-base-200/40 rounded-xl px-4 py-2 font-semibold flex items-center gap-1.5 transition-all duration-200 text-xs sm:text-sm"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.524 3h-3.048a2.25 2.25 0 0 0-2.143 1.888L5.32 15.11a2.25 2.25 0 0 0 2.143 2.618h3.048a2.25 2.25 0 0 0 2.143-1.888l3.013-11.944ZM12 9v2m0 4h.01" />
-            </svg>
+            <Copy className="w-4 h-4" />
             Copy
           </button>
           
@@ -598,9 +580,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
             onClick={handleDownloadMd}
             className="btn btn-outline border-base-200/60 text-base-content/75 hover:bg-base-200/40 rounded-xl px-4 py-2 font-semibold flex items-center gap-1.5 transition-all duration-200 text-xs sm:text-sm"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
+            <Download className="w-4 h-4" />
             Download .md
           </button>
 
@@ -612,9 +592,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                 : "btn-outline border-base-200/60 text-base-content/75 hover:text-amber-400 hover:bg-amber-400/5"
             }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={starred ? "currentColor" : "none"} stroke="currentColor" strokeWidth={starred ? 0 : 2} className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c-.105-.347-.492-.576-.84-.576s-.735.23-.84.576L7.966 8.358H3.34c-.36 0-.68.21-.806.547a.846.846 0 0 0 .3.967l3.74 2.715-1.428 5.39a.853.853 0 0 0 .31.96c.31.22.73.22 1.04 0l4.484-3.26 4.484 3.26c.31.22.73.22 1.04 0a.853.853 0 0 0 .31-.96l-1.428-5.39 3.74-2.715a.846.846 0 0 0 .3-.967.842.842 0 0 0-.807-.547h-4.626L11.48 3.5z" />
-            </svg>
+            <Star className="w-4 h-4" fill={starred ? "currentColor" : "none"} strokeWidth={starred ? 0 : 2} />
             {starred ? "Starred" : "Star"}
             <span className="font-extrabold ml-0.5">{starsCount}</span>
           </button>
@@ -664,9 +642,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                       </select>
                     </div>
                     <button className="btn btn-ghost btn-xs rounded-lg text-base-content/40 hover:text-base-content flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9m5.25 11.25v-4.5m0 4.5h-4.5m4.5 0-5.25-5.25" />
-                      </svg>
+                      <Maximize2 className="w-3.5 h-3.5" />
                       Expand
                     </button>
                   </div>
@@ -728,28 +704,21 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
               <div>
                 <span className="text-xs text-base-content/40 font-medium block">Views</span>
                 <span className="text-lg font-black text-base-content mt-1 flex items-center justify-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-primary">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                  </svg>
+                  <Eye className="w-4 h-4 text-primary" />
                   {viewsCount >= 1000 ? `${(viewsCount / 1000).toFixed(1)}k` : viewsCount}
                 </span>
               </div>
               <div>
                 <span className="text-xs text-base-content/40 font-medium block">Downloads</span>
                 <span className="text-lg font-black text-base-content mt-1 flex items-center justify-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-secondary">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
+                  <Download className="w-4 h-4 text-secondary" />
                   {downloadsCount}
                 </span>
               </div>
               <div>
                 <span className="text-xs text-base-content/40 font-medium block">Saves</span>
                 <span className="text-lg font-black text-base-content mt-1 flex items-center justify-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-accent">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25L4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-                  </svg>
+                  <Bookmark className="w-4 h-4 text-accent" />
                   {savesCount}
                 </span>
               </div>
@@ -811,9 +780,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
               <div className="flex justify-between items-center">
                 <span className="text-base-content/40">Visibility</span>
                 <span className="font-bold text-emerald-500 flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l.406.34c.125.104.224.239.29.388a1.001 1.001 0 0 1 0 .849 1.011 1.011 0 0 1-.29.388l-.29.242a1.008 1.008 0 0 0-.29.388 1.001 1.001 0 0 0 0 .849c.065.15.165.284.29.388l.406.34a1.01 1.01 0 0 1 .405.865v.568m-11.75-.008v-.567c0-.335.148-.65.405-.864l.406-.34a1.01 1.01 0 0 1 .29-.388c.15-.125.284-.265.388-.417a1.002 1.002 0 0 0 .15-.843 1.004 1.004 0 0 0-.388-.417l-.29-.242a1.008 1.008 0 0 1-.29-.388 1.001 1.001 0 0 1 0-.849c.065-.15.165-.284.29-.388l.406-.34a1.01 1.01 0 0 0 .405-.865v-.568m10.5 16.5V18.75c0-.335-.148-.65-.405-.864l-.406-.34a1.01 1.01 0 0 0-.29-.388a1.002 1.002 0 0 0-.843-.15a1.004 1.004 0 0 0-.417.388l-.242.29a1.008 1.008 0 0 1-.388.29a1.001 1.001 0 0 1-.849 0a1.011 1.011 0 0 1-.388-.29l-.242-.29a1.008 1.008 0 0 0-.388-.29a1.001 1.001 0 0 0-.849 0c-.15.065-.284.165-.388.29l-.242.29a1.008 1.008 0 0 0-.29.388a1.002 1.002 0 0 0 0 .843c.065.15.165.284.29.388l.34.406c.214.257.34.57.34.905v.568M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582" />
-                  </svg>
+                  {visibility === "public" ? <Globe className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
                   {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
                 </span>
               </div>
@@ -861,9 +828,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                 }}
                 className="btn btn-outline border-base-200/40 hover:bg-base-200/20 flex-1 rounded-xl py-2 px-0 min-h-10 h-10 flex items-center justify-center transition-all duration-200"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-base-content/70">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                </svg>
+                <Link2 className="w-4 h-4 text-base-content/70" />
               </button>
             </div>
           </div>

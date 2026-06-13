@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { Star, ArrowRight } from "lucide-react";
 
 export type SkillCardProps = {
   id: string;
@@ -88,20 +89,15 @@ export default function SkillCard({
               }`}
               title="Star this Agent Skill"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill={hasStarred ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth={hasStarred ? 0 : 2}
+              <Star
                 className="w-4 h-4 transition-transform duration-200 active:scale-125"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c-.105-.347-.492-.576-.84-.576s-.735.23-.84.576L7.966 8.358H3.34c-.36 0-.68.21-.806.547a.846.846 0 00.3.967l3.74 2.715-1.428 5.39a.853.853 0 00.31.96c.31.22.73.22 1.04 0l4.484-3.26 4.484 3.26c.31.22.73.22 1.04 0a.853.853 0 00.31-.96l-1.428-5.39 3.74-2.715a.846.846 0 00.3-.967.842.842 0 00-.807-.547h-4.626L11.48 3.5z" />
-              </svg>
+                fill={hasStarred ? "currentColor" : "none"}
+                strokeWidth={hasStarred ? 0 : 2}
+              />
               <span className="font-semibold text-xs">{starsCount}</span>
             </button>
-            <div className="text-primary font-semibold text-[11px] sm:text-xs hover:underline flex items-center gap-0.5">
-              View <span className="hidden sm:inline">Details</span> &rarr;
+            <div className="text-primary font-semibold text-[11px] sm:text-xs hover:underline flex items-center gap-1">
+              View <span className="hidden sm:inline">Details</span> <ArrowRight className="w-3 h-3" />
             </div>
           </div>
         </div>

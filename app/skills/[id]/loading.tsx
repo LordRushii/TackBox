@@ -1,18 +1,11 @@
+import { ArrowLeft } from "lucide-react";
+
 export default function SkillDetailLoading() {
   return (
     <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-12 flex flex-col">
       {/* Back button skeleton */}
       <div className="flex items-center gap-2 mb-6 self-start text-base-content/40">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2.5}
-          stroke="currentColor"
-          className="w-4 h-4"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-        </svg>
+        <ArrowLeft className="w-4 h-4" />
         <span className="skeleton h-4 w-28 bg-base-content/10"></span>
       </div>
 

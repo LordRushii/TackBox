@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUserAction, logoutAction } from "@/app/actions/auth";
+import { User, LogOut } from "lucide-react";
 
 export default function Header() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function Header() {
     // Listen to storage changes to keep it in sync
     window.addEventListener("storage", checkUser);
 
-    // Also poll slightly or listen to custom custom events if standard storage events don't trigger on same window
+    // Also poll slightly or listen to custom custom events if storage events don't trigger on same window
     const interval = setInterval(checkUser, 1000);
 
     return () => {
@@ -127,17 +128,13 @@ export default function Header() {
                       </li>
                       <li>
                         <Link href="/profile" className="py-2 hover:bg-primary/10 hover:text-primary">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                          </svg>
+                          <User className="w-4 h-4 mr-2" />
                           Edit Profile
                         </Link>
                       </li>
                       <li>
                         <button onClick={handleLogout} className="py-2 text-error hover:bg-error/10">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-                          </svg>
+                          <LogOut className="w-4 h-4 mr-2" />
                           Logout
                         </button>
                       </li>

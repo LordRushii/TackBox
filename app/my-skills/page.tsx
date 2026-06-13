@@ -7,6 +7,7 @@ import { fetchUserSkills, toggleStarAction } from "@/app/actions/skills";
 import { Skill } from "@/app/skills/skills";
 import SkillCard from "@/components/SkillCard";
 import { getCurrentUserAction } from "@/app/actions/auth";
+import { Plus, PlusCircle } from "lucide-react";
 
 export default function MySkillsPage() {
   const router = useRouter();
@@ -152,16 +153,7 @@ export default function MySkillsPage() {
             href="/skills/create"
             className="btn btn-primary gap-2 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="currentColor"
-              className="w-4 h-4"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
+            <Plus className="w-4 h-4" />
             Create Agent Skill
           </Link>
         </div>
@@ -171,20 +163,7 @@ export default function MySkillsPage() {
       {skills.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-dashed border-base-200/60 rounded-2xl bg-base-200/10 max-w-lg mx-auto">
           <div className="p-4 rounded-full bg-base-200/40 text-base-content/40 mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-10 h-10"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-              />
-            </svg>
+            <PlusCircle className="w-10 h-10" />
           </div>
           <h3 className="text-xl font-bold text-base-content/90">No agent skills in catalog</h3>
           <p className="text-base-content/50 mt-2 max-w-xs text-sm">

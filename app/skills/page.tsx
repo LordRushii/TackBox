@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import SkillCard from "@/components/SkillCard";
+import { Search, Loader2, CheckCircle2 } from "lucide-react";
 
 import { fetchSkills, toggleStarAction } from "@/app/actions/skills";
 import { Skill } from "./skills";
@@ -125,16 +126,7 @@ export default function AgentSkillsShowcasePage() {
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/40">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.8}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m21-21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
-            </svg>
+            <Search className="w-5 h-5" />
           </div>
           <input
             type="text"
@@ -222,27 +214,9 @@ export default function AgentSkillsShowcasePage() {
         <div className="fixed bottom-5 right-5 z-50 p-2 max-w-sm animate-bounce">
           <div className={`alert border shadow-2xl rounded-2xl flex items-center gap-3 p-4 bg-base-300 border-base-200`}>
             {!isRunningSuccess ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-                className="w-5 h-5 text-primary animate-spin shrink-0"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-              </svg>
+              <Loader2 className="w-5 h-5 text-primary animate-spin shrink-0" />
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-                className="w-5 h-5 text-emerald-500 shrink-0"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
             )}
             <span className="font-bold text-xs sm:text-sm text-base-content/90">{toastMessage}</span>
           </div>
