@@ -11,6 +11,7 @@ export type SkillCardProps = {
   authorName: string;
   authorRole: string;
   authorAvatarColor?: string;
+  authorAvatarUrl?: string;
   starsCount: number;
   hasStarred?: boolean;
   onStarToggle?: (id: string, e: React.MouseEvent) => void;
@@ -25,6 +26,7 @@ export default function SkillCard({
   authorName,
   authorRole,
   authorAvatarColor = "from-primary to-secondary",
+  authorAvatarUrl,
   starsCount,
   hasStarred = false,
   onStarToggle,
@@ -62,9 +64,17 @@ export default function SkillCard({
         {/* Footer info: Who made it + likes */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-2 mt-5 sm:mt-6 pt-4 border-t border-base-200/40">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gradient-to-br ${authorAvatarColor} text-white font-bold text-xs sm:text-sm shadow shrink-0`}>
-              {initials}
-            </div>
+            {authorAvatarUrl ? (
+              <img
+                src={authorAvatarUrl}
+                alt={authorName}
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg object-cover shadow shrink-0"
+              />
+            ) : (
+              <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gradient-to-br ${authorAvatarColor} text-white font-bold text-xs sm:text-sm shadow shrink-0`}>
+                {initials}
+              </div>
+            )}
             <div className="flex flex-col flex-1 min-w-0">
               <span className="text-xs font-bold text-base-content/85 truncate">
                 {authorName}

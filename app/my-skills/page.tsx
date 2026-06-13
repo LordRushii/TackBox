@@ -185,6 +185,7 @@ export default function MySkillsPage() {
               authorName={skill.authorName || user?.name || "Anonymous"}
               authorRole={skill.authorRole || user?.role || "Developer"}
               authorAvatarColor={skill.authorAvatarColor || "from-primary to-secondary"}
+              authorAvatarUrl={skill.authorAvatarUrl || user?.image}
               starsCount={skill.stars || 0}
               hasStarred={skill.hasStarred || false}
               onStarToggle={handleStarToggle}

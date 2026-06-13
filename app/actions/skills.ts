@@ -34,6 +34,7 @@ function mapDbSkillToFrontend(dbSkill: any, likedSkillIds?: Set<string>): Skill 
     authorRole: "Member",
     authorBio: "Developer, systems architect, and automation enthusiast.",
     authorAvatarColor: "from-pink-500 to-rose-500",
+    authorAvatarUrl: author?.image || undefined,
     authorId: dbSkill.authorId,
   } as any;
 }

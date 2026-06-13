@@ -202,6 +202,7 @@ export default function AgentSkillsShowcasePage() {
                 authorName={skill.authorName || "Anonymous"}
                 authorRole={skill.authorRole || "Developer"}
                 authorAvatarColor={skill.authorAvatarColor}
+                authorAvatarUrl={skill.authorAvatarUrl}
                 starsCount={skill.stars || 0}
                 hasStarred={skill.hasStarred || false}
                 onStarToggle={handleStarToggle}

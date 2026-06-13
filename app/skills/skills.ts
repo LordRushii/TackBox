@@ -20,6 +20,7 @@ export type Skill = {
   authorRole?: string;
   authorBio?: string;
   authorAvatarColor?: string;
+  authorAvatarUrl?: string;
   level?: string;
 }
 

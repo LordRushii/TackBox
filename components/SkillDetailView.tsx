@@ -526,9 +526,17 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
         {/* Left Column: Icon, Title, Tags, Description */}
         <div className="flex items-start gap-4 flex-1">
           {/* Avatar Icon */}
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-2xl shadow-xl shrink-0 mt-1">
-            {initialChar}
-          </div>
+          {skill.authorAvatarUrl ? (
+            <img
+              src={skill.authorAvatarUrl}
+              alt={skill.authorName}
+              className="h-16 w-16 rounded-2xl object-cover shadow-xl shrink-0 mt-1"
+            />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-2xl shadow-xl shrink-0 mt-1">
+              {initialChar}
+            </div>
+          )}
           
           <div className="space-y-2.5">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-base-content/95 tracking-tight leading-tight">
@@ -665,9 +673,17 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                 <div className="space-y-6">
                   {/* Author Pane (Matches About Author tab data) */}
                   <div className="flex items-start gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 text-white font-bold text-xl shadow-md shrink-0">
-                      {(skill.authorName || "D").split(" ").map(n => n[0]).join("")}
-                    </div>
+                    {skill.authorAvatarUrl ? (
+                      <img
+                        src={skill.authorAvatarUrl}
+                        alt={skill.authorName}
+                        className="h-16 w-16 rounded-2xl object-cover shadow-md shrink-0"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 text-white font-bold text-xl shadow-md shrink-0">
+                        {(skill.authorName || "D").split(" ").map(n => n[0]).join("")}
+                      </div>
+                    )}
                     <div>
                       <h3 className="text-xl font-extrabold text-base-content">{skill.authorName || "Ronak Shah"}</h3>
                       <p className="text-xs text-base-content/40 font-mono mt-0.5">@{skill.authorUsername || "ronakdev"}</p>
@@ -729,9 +745,17 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
           <div className="card bg-base-200/25 border border-base-200/50 backdrop-blur-md shadow-lg rounded-2xl p-5">
             <h3 className="font-bold text-sm text-base-content/85 mb-4 uppercase tracking-wider text-[11px]">About Author</h3>
             <div className="flex items-center gap-3">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${skill.authorAvatarColor || "from-blue-600 to-indigo-600"} text-white font-bold text-sm shadow shrink-0`}>
-                {(skill.authorName || "Ronak Shah").split(" ").map(n => n[0]).join("")}
-              </div>
+              {skill.authorAvatarUrl ? (
+                <img
+                  src={skill.authorAvatarUrl}
+                  alt={skill.authorName}
+                  className="h-11 w-11 rounded-xl object-cover shadow shrink-0"
+                />
+              ) : (
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${skill.authorAvatarColor || "from-blue-600 to-indigo-600"} text-white font-bold text-sm shadow shrink-0`}>
+                  {(skill.authorName || "Ronak Shah").split(" ").map(n => n[0]).join("")}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <span className="text-sm font-bold text-base-content block truncate">{skill.authorName || "Ronak Shah"}</span>
                 <span className="text-[11px] text-base-content/40 block font-mono truncate">@{skill.authorUsername || "ronakdev"}</span>
@@ -798,6 +822,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
               authorName={skill.authorName || "Ronak Shah"}
               authorRole={skill.authorRole || "Frontend Developer"}
               authorAvatarColor={skill.authorAvatarColor || "from-blue-600 to-indigo-600"}
+              authorAvatarUrl={skill.authorAvatarUrl}
               starsCount={starsCount}
               hasStarred={starred}
               onStarToggle={handleToggleStar}
