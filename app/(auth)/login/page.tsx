@@ -84,8 +84,10 @@ export default function LoginPage() {
           <div className="card-body p-8 sm:p-10">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg shadow-primary/20 mb-4">
-                <span className="text-2xl font-black">S</span>
+              <div className="flex justify-center mb-6">
+                <div className="w-48 sm:w-56 h-14 overflow-hidden flex items-center justify-center">
+                  <img src="/logo.png" alt="SkillHub Logo" className="w-full h-full object-cover object-center" />
+                </div>
               </div>
               <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent">
                 Welcome back

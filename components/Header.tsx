@@ -74,16 +74,11 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-base-200/40 bg-base-100/70 backdrop-blur-md">
       <div className="navbar max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between">
         <div className="flex-1">
-          <Link href="/" className="group flex items-center gap-2 text-xl font-bold transition-all duration-300">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-indigo-600 text-primary-content shadow-md shadow-primary/20 transition-transform group-hover:scale-105">
-              <span>S</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-base-content transition-opacity group-hover:opacity-90">
-              SkillHub
-            </span>
+          <Link href="/" className="group flex items-center justify-start w-36 sm:w-44 h-12 overflow-hidden transition-all duration-300">
+            <img src="/logo.png" alt="SkillHub Logo" className="w-full h-full object-cover object-left transition-transform group-hover:scale-105" />
           </Link>
         </div>
-        
+
         <div className="hidden md:flex flex-1 justify-center">
           <ul className="menu menu-horizontal px-1 gap-2 font-medium text-base-content/80">
             <li>
@@ -96,11 +91,7 @@ export default function Header() {
                 Categories
               </Link>
             </li>
-            <li>
-              <Link href="/docs" className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200">
-                Docs
-              </Link>
-            </li>
+
             <li>
               <Link href="/about" className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200">
                 About
@@ -109,7 +100,7 @@ export default function Header() {
           </ul>
         </div>
 
-        <div className="flex-1 justify-end">
+        <div className="flex-1 flex justify-end">
           <div className="flex items-center gap-4">
             {user ? (
               <>
