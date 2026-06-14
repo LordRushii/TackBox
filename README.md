@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SkillHub
 
-## Getting Started
+SkillHub is a platform for creating, publishing, and sharing reusable AI agent skills.
 
-First, run the development server:
+It allows developers to build a structured repository of reusable agent instructions, workflows, prompts, and capability scripts that can be shared publicly or managed privately.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+The idea is simple:
+
+**SkillHub = GitHub for AI Agent Skills**
+
+Developers repeatedly rewrite agent prompts, workflows, and capability instructions. SkillHub solves this by creating a reusable, shareable repository of agent intelligence. Instead of rewriting the same logic repeatedly, developers can publish once and reuse anywhere.
+
+---
+
+## Overview
+
+SkillHub provides a centralized platform where developers can:
+
+- Create agent skills in Markdown format
+- Publish skills publicly or keep them private
+- Browse community-created skills
+- Reuse existing agent workflows
+- Download skills as `.md` files
+- Manage their personal skill library
+- Upload existing skill files directly
+
+---
+
+## Core Features
+
+### Authentication & Security
+
+- Custom authentication system (Email/password)
+- Password hashing with bcrypt
+- Session-based authentication using secure `httpOnly` cookies
+- Protected routes and persistent login sessions
+
+### Skill Management
+
+- Create, update, and delete skills
+- Upload local skill files to auto-populate metadata
+- Visibility control (Public / Private)
+- Markdown-based skill writing with support for sub-skills
+
+### Public Marketplace
+
+- Browse public skills
+- View full skill content and metadata on detail pages
+- Download skills as Markdown
+- Like and star skills
+
+### User Dashboard
+
+- View and edit authored skills
+- Manage skill visibility and metadata
+- Track skill views, downloads, and stars
+
+---
+
+## Tech Stack
+
+**Frontend**
+- Next.js 16 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- DaisyUI
+
+**Backend**
+- Convex (Database & Serverless Functions)
+- Custom authentication system
+- Zod (Input Validation)
+
+---
+
+## Architecture
+
+```text
+skillhub/
+├── app/               # Next.js App Router pages and API routes
+├── components/        # Reusable React components
+├── convex/            # Convex backend functions and database schema
+├── lib/               # Utility functions and shared logic
+├── middleware/        # Next.js middleware for route protection
+└── public/            # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database Schema
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+SkillHub uses **Convex** for its backend. The schema consists of the following core tables:
 
-## Learn More
+- **`users`**: Stores user information (name, email, password hash, etc.).
+- **`sessions`**: Manages secure user sessions (session token, expiration, etc.).
+- **`skills`**: Stores skill metadata and content (title, description, tags, markdown content, sub-skills, visibility, metrics like views/downloads).
+- **`likes`**: Tracks which users have liked which skills.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Development
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Install dependencies using `pnpm`:
 
-## Deploy on Vercel
+```bash
+pnpm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Run the development servers:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Start the Next.js frontend
+pnpm run dev
+
+# In a separate terminal, start the Convex backend
+pnpm convex dev
+```
+
+---
+
+## Roadmap
+
+- Skill versioning
+- Skill ratings
+- Search and filtering
+- Fork existing skills
+- User profiles
+- Comments system
+- AI-based recommendations
