@@ -5,7 +5,7 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    passwordHash: v.string(),
+    passwordHash: v.optional(v.string()),
     image: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_email", ["email"]),

@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.2",
     "bcrypt": "^6.0.0",
+    "clerk": "^1.5.0",
     "convex": "^1.41.0",
     "daisyui": "^5.5.23",
     "lucide-react": "^1.18.0",

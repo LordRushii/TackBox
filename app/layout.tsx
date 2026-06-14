@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
+import ClerkSyncProvider from "@/components/ClerkSyncProvider";
+import { ClerkProvider, GoogleOneTap, Show } from '@clerk/nextjs'
 
 
 const geistSans = Geist({
@@ -25,15 +27,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      data-theme="dark"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <Header />
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        data-theme="dark"
+        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col">
+          <Show when="signed-out">
+            <GoogleOneTap />
+          </Show>
+          <ClerkSyncProvider>
+            <Header />
+            {children}
+          </ClerkSyncProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

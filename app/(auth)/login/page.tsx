@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
 import { AlertTriangle, CheckCircle2, Mail, Lock } from "lucide-react";
+import GoogleButton from "@/components/GoogleButton";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -111,6 +112,11 @@ export default function LoginPage() {
                 <span>{success}</span>
               </div>
             )}
+
+            {/* Google Auth */}
+            <GoogleButton mode="signIn" />
+
+            <div className="divider text-xs text-base-content/40 font-medium py-2">OR CONTINUE WITH EMAIL</div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">

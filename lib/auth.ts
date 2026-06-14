@@ -93,6 +93,9 @@ export async function loginUser(input: unknown) {
   }
 
   // Compare passwords
+  if (!user.passwordHash) {
+    return { success: false, error: "Please sign in with your provider" };
+  }
   const passwordMatches = await verifyPassword(password, user.passwordHash);
   if (!passwordMatches) {
     return { success: false, error: "Invalid email or password" };
