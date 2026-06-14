@@ -23,6 +23,14 @@ export default defineSchema({
     category: v.string(),
     tags: v.optional(v.array(v.string())),
     content: v.string(),
+    subSkills: v.optional(
+      v.array(
+        v.object({
+          title: v.string(),
+          content: v.string(),
+        })
+      )
+    ),
     visibility: v.union(v.literal("public"), v.literal("private")),
     authorId: v.id("users"),
     views: v.number(),

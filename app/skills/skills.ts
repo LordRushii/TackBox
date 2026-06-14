@@ -1,3 +1,8 @@
+export type SubSkill = {
+  title: string;
+  content: string;
+};
+
 export type Skill = {
   id: string;
   name: string;
@@ -6,6 +11,7 @@ export type Skill = {
   createdAt: string;
   updatedAt: string;
   content?: string;
+  subSkills?: SubSkill[];
   tags?: string[];
   visibility?: "public" | "private";
   views?: number;

@@ -7,7 +7,7 @@ import { fetchUserSkills, toggleStarAction } from "@/app/actions/skills";
 import { Skill } from "@/app/skills/skills";
 import SkillCard from "@/components/SkillCard";
 import { getCurrentUserAction } from "@/app/actions/auth";
-import { Plus, PlusCircle } from "lucide-react";
+import { Plus, PlusCircle, Upload } from "lucide-react";
 
 export default function MySkillsPage() {
   const router = useRouter();
@@ -156,6 +156,13 @@ export default function MySkillsPage() {
             <Plus className="w-4 h-4" />
             Create Agent Skill
           </Link>
+          <Link
+            href="/skills/upload"
+            className="btn btn-secondary gap-2 shadow-md shadow-secondary/20 hover:shadow-lg hover:shadow-secondary/30 transition-all duration-300"
+          >
+            <Upload className="w-4 h-4" />
+            Upload Agent Skill
+          </Link>
         </div>
       </div>
 
@@ -188,6 +195,7 @@ export default function MySkillsPage() {
               authorAvatarUrl={skill.authorAvatarUrl || user?.image}
               starsCount={skill.stars || 0}
               hasStarred={skill.hasStarred || false}
+              subSkillCount={(skill.subSkills || []).length}
               onStarToggle={handleStarToggle}
             />
           ))}

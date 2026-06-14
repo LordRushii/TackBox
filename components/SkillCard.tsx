@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, Plus } from "lucide-react";
 
 export type SkillCardProps = {
   id: string;
@@ -14,6 +14,7 @@ export type SkillCardProps = {
   authorAvatarUrl?: string;
   starsCount: number;
   hasStarred?: boolean;
+  subSkillCount?: number;
   onStarToggle?: (id: string, e: React.MouseEvent) => void;
 };
 
@@ -29,6 +30,7 @@ export default function SkillCard({
   authorAvatarUrl,
   starsCount,
   hasStarred = false,
+  subSkillCount = 0,
   onStarToggle,
 }: SkillCardProps) {
   const initials = authorName
@@ -46,11 +48,19 @@ export default function SkillCard({
           <span className="badge badge-primary badge-outline text-[11px] font-semibold px-2 py-0.5 rounded">
             {category}
           </span>
-          {level && (
-            <span className="text-[11px] text-base-content/40 font-bold uppercase tracking-wider">
-              {level}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5">
+            {subSkillCount > 0 && (
+              <span className="text-[10px] text-primary/70 font-bold bg-primary/10 border border-primary/20 rounded-md px-1.5 py-0.5 flex items-center gap-0.5">
+                <Plus className="w-2 h-2" />
+                {subSkillCount} more
+              </span>
+            )}
+            {level && (
+              <span className="text-[11px] text-base-content/40 font-bold uppercase tracking-wider">
+                {level}
+              </span>
+            )}
+          </div>
         </div>
 
         <h2 className="card-title text-lg sm:text-xl font-extrabold text-base-content/95 group-hover:text-primary transition-colors duration-200">

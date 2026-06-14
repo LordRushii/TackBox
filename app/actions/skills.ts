@@ -3,7 +3,7 @@
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { getSessionUser } from "@/lib/auth";
-import { Skill } from "../skills/skills";
+import { Skill, SubSkill } from "../skills/skills";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Id } from "@/convex/_generated/dataModel";
@@ -20,6 +20,7 @@ function mapDbSkillToFrontend(dbSkill: any, likedSkillIds?: Set<string>): Skill 
     createdAt: new Date(dbSkill.createdAt).toISOString(),
     updatedAt: new Date(dbSkill.updatedAt).toISOString(),
     content: dbSkill.content,
+    subSkills: dbSkill.subSkills || [],
     tags: dbSkill.tags || [],
     visibility: dbSkill.visibility,
     views: dbSkill.views || 0,
@@ -98,7 +99,18 @@ export async function createSkill(prevState: any, formData: FormData) {
   const description = formData.get("description") as string;
   const category = formData.get("category") as string;
   const visibility = (formData.get("visibility") as "public" | "private") || "public";
-  const content = formData.get("subSkills") as string;
+  const content = formData.get("mainContent") as string;
+
+  // Parse sub-skills from FormData (JSON encoded)
+  let subSkills: SubSkill[] = [];
+  const subSkillsJson = formData.get("subSkillsData") as string;
+  if (subSkillsJson) {
+    try {
+      subSkills = JSON.parse(subSkillsJson);
+    } catch {
+      subSkills = [];
+    }
+  }
 
   if (!name || !description || !category) {
     return { message: "Please fill in all fields" };
@@ -111,6 +123,7 @@ export async function createSkill(prevState: any, formData: FormData) {
       category,
       tags: [category],
       content: content || "",
+      subSkills,
       visibility,
       authorId: user.id,
     });
@@ -140,6 +153,7 @@ export async function updateSkillAction(id: string, skillData: Partial<Skill>) {
   if (skillData.category !== undefined) updates.category = skillData.category;
   if (skillData.tags !== undefined) updates.tags = skillData.tags;
   if (skillData.content !== undefined) updates.content = skillData.content;
+  if (skillData.subSkills !== undefined) updates.subSkills = skillData.subSkills;
   if (skillData.visibility !== undefined) updates.visibility = skillData.visibility;
   if (skillData.views !== undefined) updates.views = skillData.views;
   if (skillData.downloads !== undefined) updates.downloads = skillData.downloads;

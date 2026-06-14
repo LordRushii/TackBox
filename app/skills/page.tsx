@@ -205,6 +205,7 @@ export default function AgentSkillsShowcasePage() {
                 authorAvatarUrl={skill.authorAvatarUrl}
                 starsCount={skill.stars || 0}
                 hasStarred={skill.hasStarred || false}
+                subSkillCount={(skill.subSkills || []).length}
                 onStarToggle={handleStarToggle}
               />
             );

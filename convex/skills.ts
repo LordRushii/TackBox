@@ -54,6 +54,14 @@ export const createSkill = mutation({
     category: v.string(),
     tags: v.optional(v.array(v.string())),
     content: v.string(),
+    subSkills: v.optional(
+      v.array(
+        v.object({
+          title: v.string(),
+          content: v.string(),
+        })
+      )
+    ),
     visibility: v.union(v.literal("public"), v.literal("private")),
     authorId: v.id("users"),
   },
@@ -65,6 +73,7 @@ export const createSkill = mutation({
       category: args.category,
       tags: args.tags || [],
       content: args.content,
+      subSkills: args.subSkills || [],
       visibility: args.visibility,
       authorId: args.authorId,
       views: 0,
@@ -84,6 +93,14 @@ export const updateSkill = mutation({
     category: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
     content: v.optional(v.string()),
+    subSkills: v.optional(
+      v.array(
+        v.object({
+          title: v.string(),
+          content: v.string(),
+        })
+      )
+    ),
     visibility: v.optional(v.union(v.literal("public"), v.literal("private"))),
     views: v.optional(v.number()),
     downloads: v.optional(v.number()),
