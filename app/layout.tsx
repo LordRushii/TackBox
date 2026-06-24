@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import ClerkSyncProvider from "@/components/ClerkSyncProvider";
 import { ClerkProvider, GoogleOneTap, Show } from '@clerk/nextjs'
 
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -31,9 +32,12 @@ export default function RootLayout({
       <html
         lang="en"
         data-theme="dark"
-        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+        className={`${inter.variable} ${plexMono.variable} h-full antialiased`}
       >
-        <body className="min-h-full flex flex-col">
+        <head>
+          <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap" rel="stylesheet" />
+        </head>
+        <body className="min-h-full flex flex-col font-body">
           <Show when="signed-out">
             <GoogleOneTap />
           </Show>

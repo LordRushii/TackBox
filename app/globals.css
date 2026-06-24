@@ -4,21 +4,41 @@
 }
 
 :root {
-  --background: #0d0e12;
-  --foreground: #f3f4f6;
+  --background: #07112B;
+  --foreground: #FFFFFF;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-card-bg: rgba(255, 255, 255, 0.03);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  --color-base-100: #07112B;
+  --color-base-200: #0E1A3A;
+  --color-base-300: #07112B;
+  --color-base-content: #FFFFFF;
+  --color-primary: #FF5A6E;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #5C3AED;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #FF6B7D;
+  --color-accent-content: #FFFFFF;
+  --color-info: #EDE9FE;
+  
+  --font-sans: var(--font-inter), 'Inter', sans-serif;
+  --font-heading: 'Clash Display', var(--font-inter), sans-serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
+  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
+
+  --shadow-premium: 0 4px 20px rgba(0,0,0,0.1);
+  --shadow-premium-hover: 0 8px 30px rgba(0,0,0,0.2);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: var(--font-body);
   scroll-behavior: smooth;
 }
 
@@ -29,19 +49,79 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d0e12;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1f2937;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 ::selection {
-  background-color: #6366f1;
+  background-color: var(--color-primary);
   color: #ffffff;
+}
+
+/* Premium Styling Overrides */
+.btn {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  box-shadow: 0 4px 14px 0 rgba(255, 90, 110, 0.2);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(255, 90, 110, 0.3);
+  transform: translateY(-2px);
+}
+
+h1, h2, h3, h4, h5, h6, .font-bold, .font-black, .font-semibold {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+/* Enhancing inputs for a more premium look */
+input, .input {
+  border: 1px solid var(--color-border) !important;
+  background-color: rgba(14, 26, 58, 0.5) !important;
+  transition: all 0.3s ease;
+}
+
+input:focus, .input:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(255, 90, 110, 0.2) !important;
+  outline: none;
+}
+
+/* Enhancing border definition for elements like cards and navbar */
+.border-base-200\/40, .border-base-200\/30, .border-base-200 {
+  border-color: var(--color-border) !important;
+}
+
+/* Refined backgrounds for premium glass effects */
+.bg-base-200\/20 {
+  background-color: var(--color-card-bg) !important;
+  box-shadow: var(--shadow-premium);
+}
+
+.bg-base-200\/20:hover {
+  box-shadow: var(--shadow-premium-hover);
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.bg-base-200\/30, .bg-base-200\/40 {
+  background-color: rgba(14, 26, 58, 0.4) !important;
+}
+
+/* Navbar specific override */
+header .navbar {
+  background: transparent !important;
 }
