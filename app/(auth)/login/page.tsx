@@ -47,13 +47,10 @@ export default function LoginPage() {
 
       if (result?.success) {
         setSuccess("Login successful! Redirecting...");
-        
+
         // Save user session
-        localStorage.setItem(
-          "user",
-          JSON.stringify(result.user)
-        );
-        
+        localStorage.setItem("user", JSON.stringify(result.user));
+
         // Dispatch custom event to let other components (like Header) know
         window.dispatchEvent(new Event("storage"));
 
@@ -87,14 +84,18 @@ export default function LoginPage() {
             <div className="text-center mb-8">
               <div className="flex justify-center mb-6">
                 <div className="w-48 sm:w-56 h-14 overflow-hidden flex items-center justify-center">
-                  <img src="/logo.png" alt="SkillHub Logo" className="w-full h-full object-cover object-center" />
+                  <img
+                    src="/logo.png"
+                    alt="Tackbox Logo"
+                    className="w-full h-full object-cover object-center"
+                  />
                 </div>
               </div>
               <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent">
                 Welcome back
               </h2>
               <p className="text-base-content/60 text-sm mt-2">
-                Sign in to your Skillhub account
+                Sign in to your Tackbox account
               </p>
             </div>
 
@@ -116,13 +117,17 @@ export default function LoginPage() {
             {/* Google Auth */}
             <GoogleButton mode="signIn" />
 
-            <div className="divider text-xs text-base-content/40 font-medium py-2">OR CONTINUE WITH EMAIL</div>
+            <div className="divider text-xs text-base-content/40 font-medium py-2">
+              OR CONTINUE WITH EMAIL
+            </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">Email Address</span>
+                  <span className="label-text font-semibold text-base-content/85">
+                    Email Address
+                  </span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
@@ -142,9 +147,14 @@ export default function LoginPage() {
               <div className="form-control">
                 <div className="flex justify-between items-center py-1">
                   <label className="label p-0">
-                    <span className="label-text font-semibold text-base-content/85">Password</span>
+                    <span className="label-text font-semibold text-base-content/85">
+                      Password
+                    </span>
                   </label>
-                  <a href="#" className="text-xs text-primary hover:underline font-medium transition-colors">
+                  <a
+                    href="#"
+                    className="text-xs text-primary hover:underline font-medium transition-colors"
+                  >
                     Forgot password?
                   </a>
                 </div>
@@ -169,7 +179,10 @@ export default function LoginPage() {
                   id="remember-me"
                   className="checkbox checkbox-primary checkbox-xs rounded"
                 />
-                <label htmlFor="remember-me" className="label-text cursor-pointer select-none text-base-content/60 font-medium">
+                <label
+                  htmlFor="remember-me"
+                  className="label-text cursor-pointer select-none text-base-content/60 font-medium"
+                >
                   Remember this device
                 </label>
               </div>
@@ -192,8 +205,13 @@ export default function LoginPage() {
 
             {/* Bottom Link */}
             <div className="text-center mt-8 pt-6 border-t border-base-200/40 text-sm">
-              <span className="text-base-content/50">Don't have an account? </span>
-              <Link href="/register" className="text-primary font-semibold hover:underline">
+              <span className="text-base-content/50">
+                Don't have an account?{" "}
+              </span>
+              <Link
+                href="/register"
+                className="text-primary font-semibold hover:underline"
+              >
                 Sign up
               </Link>
             </div>

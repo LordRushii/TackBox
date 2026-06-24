@@ -78,14 +78,18 @@ export default function RegisterPage() {
             <div className="text-center mb-8">
               <div className="flex justify-center mb-6">
                 <div className="w-48 sm:w-56 h-14 overflow-hidden flex items-center justify-center">
-                  <img src="/logo.png" alt="SkillHub Logo" className="w-full h-full object-cover object-center" />
+                  <img
+                    src="/logo.png"
+                    alt="Tackbox Logo"
+                    className="w-full h-full object-cover object-center"
+                  />
                 </div>
               </div>
               <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent">
                 Create Account
               </h2>
               <p className="text-base-content/60 text-sm mt-2">
-                Join Skillhub and start cataloging your skills
+                Join Tackbox and start cataloging your skills
               </p>
             </div>
 
@@ -107,13 +111,17 @@ export default function RegisterPage() {
             {/* Google Auth */}
             <GoogleButton mode="signUp" />
 
-            <div className="divider text-xs text-base-content/40 font-medium py-2">OR CONTINUE WITH EMAIL</div>
+            <div className="divider text-xs text-base-content/40 font-medium py-2">
+              OR CONTINUE WITH EMAIL
+            </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">Full Name</span>
+                  <span className="label-text font-semibold text-base-content/85">
+                    Full Name
+                  </span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
@@ -132,7 +140,9 @@ export default function RegisterPage() {
 
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">Email Address</span>
+                  <span className="label-text font-semibold text-base-content/85">
+                    Email Address
+                  </span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
@@ -151,7 +161,9 @@ export default function RegisterPage() {
 
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">Password</span>
+                  <span className="label-text font-semibold text-base-content/85">
+                    Password
+                  </span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
@@ -170,7 +182,9 @@ export default function RegisterPage() {
 
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">Confirm Password</span>
+                  <span className="label-text font-semibold text-base-content/85">
+                    Confirm Password
+                  </span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
@@ -194,8 +208,18 @@ export default function RegisterPage() {
                   className="checkbox checkbox-primary checkbox-xs rounded mt-0.5"
                   required
                 />
-                <label htmlFor="agree-terms" className="label-text cursor-pointer select-none text-base-content/60 text-xs leading-normal">
-                  I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+                <label
+                  htmlFor="agree-terms"
+                  className="label-text cursor-pointer select-none text-base-content/60 text-xs leading-normal"
+                >
+                  I agree to the{" "}
+                  <a href="#" className="text-primary hover:underline">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className="text-primary hover:underline">
+                    Privacy Policy
+                  </a>
                 </label>
               </div>
 
@@ -217,8 +241,13 @@ export default function RegisterPage() {
 
             {/* Bottom Link */}
             <div className="text-center mt-8 pt-6 border-t border-base-200/40 text-sm">
-              <span className="text-base-content/50">Already have an account? </span>
-              <Link href="/login" className="text-primary font-semibold hover:underline">
+              <span className="text-base-content/50">
+                Already have an account?{" "}
+              </span>
+              <Link
+                href="/login"
+                className="text-primary font-semibold hover:underline"
+              >
                 Sign in
               </Link>
             </div>

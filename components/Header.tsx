@@ -11,7 +11,12 @@ export default function Header() {
   const router = useRouter();
   const { user: clerkUser, isSignedIn: isClerkSignedIn } = useUser();
   const { signOut: clerkSignOut } = useClerk();
-  const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string; image?: string } | null>(null);
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    avatarUrl?: string;
+    image?: string;
+  } | null>(null);
 
   const checkUser = () => {
     if (typeof window !== "undefined") {
@@ -94,26 +99,42 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-base-200/40 bg-base-100/70 backdrop-blur-md">
       <div className="navbar max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between">
         <div className="flex-1">
-          <Link href="/" className="group flex items-center justify-start w-36 sm:w-44 h-12 overflow-hidden transition-all duration-300">
-            <img src="/logo.png" alt="SkillHub Logo" className="w-full h-full object-cover object-left transition-transform group-hover:scale-105" />
+          <Link
+            href="/"
+            className="group flex items-center justify-start w-36 sm:w-44 h-12 overflow-hidden transition-all duration-300"
+          >
+            <img
+              src="/logo.png"
+              alt="Tackbox Logo"
+              className="w-full h-full object-cover object-left transition-transform group-hover:scale-105"
+            />
           </Link>
         </div>
 
         <div className="hidden md:flex flex-1 justify-center">
           <ul className="menu menu-horizontal px-1 gap-2 font-medium text-base-content/80">
             <li>
-              <Link href="/skills" className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200">
+              <Link
+                href="/skills"
+                className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
+              >
                 Explore
               </Link>
             </li>
             <li>
-              <Link href="/#categories" className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200">
+              <Link
+                href="/#categories"
+                className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
+              >
                 Categories
               </Link>
             </li>
 
             <li>
-              <Link href="/about" className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200">
+              <Link
+                href="/about"
+                className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
+              >
                 About
               </Link>
             </li>
@@ -131,30 +152,55 @@ export default function Header() {
                   My Skills
                 </Link>
                 <div className="dropdown dropdown-end p-0">
-                  <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar placeholder hover:bg-transparent overflow-hidden">
+                  <div
+                    tabIndex={0}
+                    role="button"
+                    className="btn btn-ghost btn-circle avatar placeholder hover:bg-transparent overflow-hidden"
+                  >
                     {displayUser.avatarUrl ? (
                       <div className="w-10 rounded-full shadow-sm transition-transform hover:scale-105">
-                        <img src={displayUser.avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                        <img
+                          src={displayUser.avatarUrl}
+                          alt="User Avatar"
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     ) : (
                       <div className="bg-primary text-primary-content rounded-full w-10 shadow-sm transition-transform hover:scale-105">
-                        <span className="font-semibold">{displayUser.name ? displayUser.name.charAt(0).toUpperCase() : 'U'}</span>
+                        <span className="font-semibold">
+                          {displayUser.name
+                            ? displayUser.name.charAt(0).toUpperCase()
+                            : "U"}
+                        </span>
                       </div>
                     )}
                   </div>
-                  <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg shadow-base-300/50 bg-base-100 rounded-box w-52 border border-base-200/50">
+                  <ul
+                    tabIndex={0}
+                    className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg shadow-base-300/50 bg-base-100 rounded-box w-52 border border-base-200/50"
+                  >
                     <li className="menu-title px-4 py-2 border-b border-base-200/50 mb-1">
-                      <span className="text-base font-bold text-base-content">{displayUser.name}</span>
-                      <span className="text-xs font-normal text-base-content/60 block mt-0.5 break-all">{displayUser.email}</span>
+                      <span className="text-base font-bold text-base-content">
+                        {displayUser.name}
+                      </span>
+                      <span className="text-xs font-normal text-base-content/60 block mt-0.5 break-all">
+                        {displayUser.email}
+                      </span>
                     </li>
                     <li>
-                      <Link href="/profile" className="py-2 hover:bg-base-200/50">
+                      <Link
+                        href="/profile"
+                        className="py-2 hover:bg-base-200/50"
+                      >
                         <User className="w-4 h-4 mr-2" />
                         Edit Profile
                       </Link>
                     </li>
                     <li>
-                      <button onClick={handleLogout} className="py-2 text-error hover:bg-error/10">
+                      <button
+                        onClick={handleLogout}
+                        className="py-2 text-error hover:bg-error/10"
+                      >
                         <LogOut className="w-4 h-4 mr-2" />
                         Logout
                       </button>

@@ -9,6 +9,7 @@ import { getCurrentUserAction } from "@/app/actions/auth";
 import SkillCard from "./SkillCard";
 import Toast from "./Toast";
 import ConfirmModal from "./ConfirmModal";
+import SkillInstall from "./SkillInstall";
 import { parseMarkdown } from "@/lib/markdown";
 import { 
   ArrowLeft, Pencil, Download, Trash2, X, Eye, Globe, Lock, Copy, Star, Maximize2, Bookmark, Link2, Save,
@@ -1085,6 +1086,20 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
               </div>
             </div>
           </div>
+
+          {/* Quick Install */}
+          {skill.visibility === "public" && (
+            <SkillInstall
+              slug={skill.name
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9\s-]/g, "")
+                .replace(/\s+/g, "-")
+                .replace(/-+/g, "-")
+                .replace(/^-|-$/g, "")}
+              skillName={skill.name}
+            />
+          )}
 
           {/* Panel 2: About Author */}
           <div className="card bg-base-200/25 border border-base-200/50 backdrop-blur-md shadow-lg rounded-2xl p-5">

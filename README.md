@@ -1,20 +1,20 @@
-# SkillHub
+# Tackbox
 
-SkillHub is a platform for creating, publishing, and sharing reusable AI agent skills.
+Tackbox is a platform for creating, publishing, and sharing reusable AI agent skills.
 
 It allows developers to build a structured repository of reusable agent instructions, workflows, prompts, and capability scripts that can be shared publicly or managed privately.
 
 The idea is simple:
 
-**SkillHub = GitHub for AI Agent Skills**
+**Tackbox = GitHub for AI Agent Skills**
 
-Developers repeatedly rewrite agent prompts, workflows, and capability instructions. SkillHub solves this by creating a reusable, shareable repository of agent intelligence. Instead of rewriting the same logic repeatedly, developers can publish once and reuse anywhere.
+Developers repeatedly rewrite agent prompts, workflows, and capability instructions. Tackbox solves this by creating a reusable, shareable repository of agent intelligence. Instead of rewriting the same logic repeatedly, developers can publish once and reuse anywhere.
 
 ---
 
 ## Overview
 
-SkillHub provides a centralized platform where developers can:
+Tackbox provides a centralized platform where developers can:
 
 - Create agent skills in Markdown format
 - Publish skills publicly or keep them private
@@ -76,7 +76,7 @@ SkillHub provides a centralized platform where developers can:
 ## Architecture
 
 ```text
-skillhub/
+tackbox/
 ├── app/               # Next.js App Router pages and API routes
 ├── components/        # Reusable React components
 ├── convex/            # Convex backend functions and database schema
@@ -89,7 +89,7 @@ skillhub/
 
 ## Database Schema
 
-SkillHub uses **Convex** for its backend. The schema consists of the following core tables:
+Tackbox uses **Convex** for its backend. The schema consists of the following core tables:
 
 - **`users`**: Stores user information (name, email, password hash, etc.).
 - **`sessions`**: Manages secure user sessions (session token, expiration, etc.).

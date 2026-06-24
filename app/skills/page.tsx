@@ -63,7 +63,7 @@ export default function AgentSkillsShowcasePage() {
           };
         }
         return skill;
-      })
+      }),
     );
 
     try {
@@ -82,7 +82,7 @@ export default function AgentSkillsShowcasePage() {
     setTimeout(() => {
       setIsRunningSuccess(true);
       setToastMessage(`Agent skill "${name}" is now running active!`);
-      
+
       setTimeout(() => {
         setRunningSkillId(null);
         setToastMessage(null);
@@ -91,7 +91,10 @@ export default function AgentSkillsShowcasePage() {
     }, 1500);
   };
 
-  const categories = ["All", ...Array.from(new Set(skills.map((s) => s.category)))];
+  const categories = [
+    "All",
+    ...Array.from(new Set(skills.map((s) => s.category))),
+  ];
 
   const filteredSkills = skills.filter((skill) => {
     const authorName = skill.authorName || "";
@@ -100,7 +103,8 @@ export default function AgentSkillsShowcasePage() {
       skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       authorName.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesCategory = selectedCategory === "All" || skill.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === "All" || skill.category === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -117,7 +121,9 @@ export default function AgentSkillsShowcasePage() {
           Agent Skills Showcase
         </h1>
         <p className="mt-3 text-base-content/60 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          Explore and run capabilities designed for autonomous AI agents. Test pre-configured tools, execute prompts, and discover skills shared by our system creators.
+          Explore and run capabilities designed for autonomous AI agents. Test
+          pre-configured tools, execute prompts, and discover skills shared by
+          our system creators.
         </p>
       </div>
 
@@ -183,9 +189,12 @@ export default function AgentSkillsShowcasePage() {
         </div>
       ) : filteredSkills.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-base-200/60 rounded-2xl bg-base-200/10 max-w-lg mx-auto relative z-10">
-          <h3 className="text-xl font-bold text-base-content/85">No matching agent skills found</h3>
+          <h3 className="text-xl font-bold text-base-content/85">
+            No matching agent skills found
+          </h3>
           <p className="text-base-content/50 mt-2 max-w-xs text-sm">
-            Try adjusting your search query or choosing a different category tab.
+            Try adjusting your search query or choosing a different category
+            tab.
           </p>
         </div>
       ) : (
@@ -216,13 +225,17 @@ export default function AgentSkillsShowcasePage() {
       {/* Floating Action/Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-5 right-5 z-50 p-2 max-w-sm animate-bounce">
-          <div className={`alert border shadow-2xl rounded-2xl flex items-center gap-3 p-4 bg-base-300 border-base-200`}>
+          <div
+            className={`alert border shadow-2xl rounded-2xl flex items-center gap-3 p-4 bg-base-300 border-base-200`}
+          >
             {!isRunningSuccess ? (
               <Loader2 className="w-5 h-5 text-primary animate-spin shrink-0" />
             ) : (
               <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
             )}
-            <span className="font-bold text-xs sm:text-sm text-base-content/90">{toastMessage}</span>
+            <span className="font-bold text-xs sm:text-sm text-base-content/90">
+              {toastMessage}
+            </span>
           </div>
         </div>
       )}
@@ -230,14 +243,15 @@ export default function AgentSkillsShowcasePage() {
       {/* Call to Action Banner */}
       <div className="relative z-10 max-w-4xl mx-auto rounded-3xl overflow-hidden border border-base-200/50 bg-gradient-to-br from-base-200/20 to-base-300/10 backdrop-blur-xl p-8 sm:p-10 shadow-2xl text-center">
         <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
-        
+
         {user ? (
           <div>
             <h3 className="text-2xl font-extrabold text-base-content/95 mb-2">
               Ready to Publish Agent Skills, {user.name}?
             </h3>
             <p className="text-sm text-base-content/60 max-w-md mx-auto mb-6">
-              You are signed in. Jump over to your private console to upload instructions and execute your agents' skills.
+              You are signed in. Jump over to your private console to upload
+              instructions and execute your agents' skills.
             </p>
             <Link
               href="/my-skills"
@@ -252,7 +266,9 @@ export default function AgentSkillsShowcasePage() {
               Upload Your Own Agent Skills
             </h3>
             <p className="text-sm text-base-content/60 max-w-md mx-auto mb-6">
-              Join Skillhub today. Create a pre-configured capability inventory to test triggers, track execution statuses, and publish agent tools.
+              Join Tackbox today. Create a pre-configured capability inventory
+              to test triggers, track execution statuses, and publish agent
+              tools.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link

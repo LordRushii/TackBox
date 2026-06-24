@@ -11,7 +11,7 @@ const SESSION_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export async function loginWithClerkAction() {
   const clerkUser = await currentUser();
-  
+
   if (!clerkUser) {
     return { success: false, error: "Not authenticated with Clerk" };
   }
@@ -21,7 +21,9 @@ export async function loginWithClerkAction() {
     return { success: false, error: "No email address found" };
   }
 
-  const name = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || email.split('@')[0];
+  const name =
+    `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() ||
+    email.split("@")[0];
   const image = clerkUser.imageUrl;
 
   try {
@@ -57,7 +59,7 @@ export async function loginWithClerkAction() {
       createdAt: Date.now(),
     });
 
-    // Set standard skillhub_session cookie
+    // Set standard tackbox_session cookie
     await setSessionCookie(sessionToken, expiresAt);
 
     return {

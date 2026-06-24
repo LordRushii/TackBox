@@ -10,7 +10,55 @@ import { Id } from "@/convex/_generated/dataModel";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-function mapDbSkillToFrontend(dbSkill: any, likedSkillIds?: Set<string>): Skill {
+/**
+ * Generate a URL-safe slug from a skill name
+ */
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
+
+/**
+ * Publish skill to GitHub in the background (non-blocking)
+ */
+async function publishToGitHub(skill: {
+  slug: string;
+  name: string;
+  description?: string;
+  content: string;
+  author?: string;
+}) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const response = await fetch(`${baseUrl}/api/skills/publish-to-github`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ skill }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("[GitHub Publish] Success:", data);
+    } else {
+      console.error("[GitHub Publish] Failed:", data);
+    }
+  } catch (error) {
+    console.error("[GitHub Publish] Error:", error);
+  }
+}
+
+function mapDbSkillToFrontend(
+  dbSkill: any,
+  likedSkillIds?: Set<string>,
+): Skill {
   const author = dbSkill.author;
   return {
     id: dbSkill._id,
@@ -46,10 +94,12 @@ export async function fetchSkills(): Promise<Skill[]> {
     const user = await getSessionUser();
     let likedSkillIds = new Set<string>();
     if (user) {
-      const likes = await convex.query(api.skills.getUserLikedSkillIds, { userId: user.id });
+      const likes = await convex.query(api.skills.getUserLikedSkillIds, {
+        userId: user.id,
+      });
       likedSkillIds = new Set(likes);
     }
-    return dbSkills.map(s => mapDbSkillToFrontend(s, likedSkillIds));
+    return dbSkills.map((s) => mapDbSkillToFrontend(s, likedSkillIds));
   } catch (err) {
     console.error("Failed to fetch public skills:", err);
     return [];
@@ -60,12 +110,16 @@ export async function fetchUserSkills(): Promise<Skill[]> {
   try {
     const user = await getSessionUser();
     if (!user) return [];
-    
-    const dbSkills = await convex.query(api.skills.getUserSkills, { userId: user.id });
-    const likes = await convex.query(api.skills.getUserLikedSkillIds, { userId: user.id });
+
+    const dbSkills = await convex.query(api.skills.getUserSkills, {
+      userId: user.id,
+    });
+    const likes = await convex.query(api.skills.getUserLikedSkillIds, {
+      userId: user.id,
+    });
     const likedSkillIds = new Set(likes);
-    
-    return dbSkills.map(s => mapDbSkillToFrontend(s, likedSkillIds));
+
+    return dbSkills.map((s) => mapDbSkillToFrontend(s, likedSkillIds));
   } catch (err) {
     console.error("Failed to fetch user skills:", err);
     return [];
@@ -74,12 +128,16 @@ export async function fetchUserSkills(): Promise<Skill[]> {
 
 export async function fetchSkillById(id: string): Promise<Skill | null> {
   try {
-    const dbSkill = await convex.query(api.skills.getSkill, { id: id as Id<"skills"> });
+    const dbSkill = await convex.query(api.skills.getSkill, {
+      id: id as Id<"skills">,
+    });
     if (!dbSkill) return null;
     const user = await getSessionUser();
     let likedSkillIds = new Set<string>();
     if (user) {
-      const likes = await convex.query(api.skills.getUserLikedSkillIds, { userId: user.id });
+      const likes = await convex.query(api.skills.getUserLikedSkillIds, {
+        userId: user.id,
+      });
       likedSkillIds = new Set(likes);
     }
     return mapDbSkillToFrontend(dbSkill, likedSkillIds);
@@ -98,7 +156,8 @@ export async function createSkill(prevState: any, formData: FormData) {
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const category = formData.get("category") as string;
-  const visibility = (formData.get("visibility") as "public" | "private") || "public";
+  const visibility =
+    (formData.get("visibility") as "public" | "private") || "public";
   const content = formData.get("mainContent") as string;
 
   // Parse sub-skills from FormData (JSON encoded)
@@ -117,6 +176,7 @@ export async function createSkill(prevState: any, formData: FormData) {
   }
 
   try {
+    // Save to database first
     await convex.mutation(api.skills.createSkill, {
       title: name,
       description,
@@ -127,6 +187,22 @@ export async function createSkill(prevState: any, formData: FormData) {
       visibility,
       authorId: user.id,
     });
+
+    // Only publish to GitHub if the skill is public
+    if (visibility === "public") {
+      // Fire-and-forget GitHub publish (non-blocking)
+      // This runs asynchronously and won't block the user flow
+      publishToGitHub({
+        slug: generateSlug(name),
+        name,
+        description,
+        content: content || "",
+        author: user.name || user.email?.split("@")[0] || "Anonymous",
+      }).catch((error) => {
+        // Silently log errors - don't affect main flow
+        console.error("[createSkill] GitHub publish error (ignored):", error);
+      });
+    }
   } catch (err: any) {
     return { message: err.message || "Failed to create skill" };
   }
@@ -149,16 +225,41 @@ export async function updateSkillAction(id: string, skillData: Partial<Skill>) {
   };
 
   if (skillData.name !== undefined) updates.title = skillData.name;
-  if (skillData.description !== undefined) updates.description = skillData.description;
+  if (skillData.description !== undefined)
+    updates.description = skillData.description;
   if (skillData.category !== undefined) updates.category = skillData.category;
   if (skillData.tags !== undefined) updates.tags = skillData.tags;
   if (skillData.content !== undefined) updates.content = skillData.content;
-  if (skillData.subSkills !== undefined) updates.subSkills = skillData.subSkills;
-  if (skillData.visibility !== undefined) updates.visibility = skillData.visibility;
+  if (skillData.subSkills !== undefined)
+    updates.subSkills = skillData.subSkills;
+  if (skillData.visibility !== undefined)
+    updates.visibility = skillData.visibility;
   if (skillData.views !== undefined) updates.views = skillData.views;
-  if (skillData.downloads !== undefined) updates.downloads = skillData.downloads;
+  if (skillData.downloads !== undefined)
+    updates.downloads = skillData.downloads;
 
+  // Update in database first
   await convex.mutation(api.skills.updateSkill, updates);
+
+  // Fetch the updated skill to get complete data for GitHub publish
+  const updatedSkill = await convex.query(api.skills.getSkill, {
+    id: id as Id<"skills">,
+  });
+
+  // Only publish to GitHub if the skill is public
+  if (updatedSkill && updatedSkill.visibility === "public") {
+    // Fire-and-forget GitHub publish (non-blocking)
+    publishToGitHub({
+      slug: generateSlug(updatedSkill.title),
+      name: updatedSkill.title,
+      description: updatedSkill.description,
+      content: updatedSkill.content || "",
+      author: user.name || user.email?.split("@")[0] || "Anonymous",
+    }).catch((error) => {
+      // Silently log errors - don't affect main flow
+      console.error("[updateSkill] GitHub publish error (ignored):", error);
+    });
+  }
 
   revalidatePath("/skills");
   revalidatePath(`/skills/${id}`);
@@ -182,7 +283,9 @@ export async function deleteSkillAction(id: string) {
 
 export async function incrementViewsAction(id: string) {
   try {
-    await convex.mutation(api.skills.incrementViews, { id: id as Id<"skills"> });
+    await convex.mutation(api.skills.incrementViews, {
+      id: id as Id<"skills">,
+    });
   } catch (e) {
     console.error("Failed to increment views:", e);
   }
@@ -190,7 +293,9 @@ export async function incrementViewsAction(id: string) {
 
 export async function incrementDownloadsAction(id: string) {
   try {
-    await convex.mutation(api.skills.incrementDownloads, { id: id as Id<"skills"> });
+    await convex.mutation(api.skills.incrementDownloads, {
+      id: id as Id<"skills">,
+    });
   } catch (e) {
     console.error("Failed to increment downloads:", e);
   }

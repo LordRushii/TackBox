@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-const COOKIE_NAME = "skillhub_session";
+const COOKIE_NAME = "tackbox_session";
 
 export async function setSessionCookie(token: string, expiresAt: number) {
   const cookieStore = await cookies();

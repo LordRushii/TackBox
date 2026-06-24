@@ -8,7 +8,7 @@ import { loginWithClerkAction } from "@/app/actions/clerk";
  * This component bridges Clerk auth with the custom Convex session system.
  * When a user signs in via Clerk (Google OAuth), it automatically:
  * 1. Creates/finds the user in Convex
- * 2. Sets the skillhub_session cookie
+ * 2. Sets the tackbox_session cookie
  * 3. Stores user data in localStorage for the Header
  */
 export default function ClerkSyncProvider({

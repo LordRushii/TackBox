@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "code-reviewer": {
+      "source": "LordRushii/TackBox",
+      "sourceType": "github",
+      "skillPath": "skills/code-reviewer/SKILL.md",
+      "computedHash": "f395107e05b51f0ba03fa79b1e2cb1b0c0f7b98ec46d1ef111a5c64daa0f227b"
+    },
     "convex": {
       "source": "get-convex/agent-skills",
       "sourceType": "github",

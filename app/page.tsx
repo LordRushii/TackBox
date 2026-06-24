@@ -2,7 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Sparkles, ArrowRight, Package, Users, CloudDownload, FileCode, Download, Compass, Upload, Code, Settings, Search, Megaphone, Pencil, Zap, Bot } from "lucide-react";
+import {
+  Sparkles,
+  ArrowRight,
+  Package,
+  Users,
+  CloudDownload,
+  FileCode,
+  Download,
+  Compass,
+  Upload,
+  Code,
+  Settings,
+  Search,
+  Megaphone,
+  Pencil,
+  Zap,
+  Bot,
+} from "lucide-react";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,27 +38,31 @@ export default function Home() {
       {/* Dynamic Background Glows */}
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[100px] pointer-events-none animate-pulse delay-700" />
-      
+
       <main className="flex flex-col items-center justify-start w-full max-w-6xl px-6 z-10 pt-20 space-y-16">
-        
         {/* Hero Section */}
         <div className="flex flex-col md:flex-row items-center gap-12 w-full">
           {/* Left Side text */}
           <div className="flex-1 flex flex-col items-start text-left space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-base-200/50 border border-base-200 backdrop-blur-md shadow-sm">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold text-base-content/70 uppercase tracking-wider">For AI Builders, By Builders</span>
+              <span className="text-xs font-bold text-base-content/70 uppercase tracking-wider">
+                For AI Builders, By Builders
+              </span>
             </div>
 
             <h1 className="text-5xl sm:text-7xl font-black tracking-tight text-base-content leading-tight">
-              Discover. Share.<br />
+              Discover. Share.
+              <br />
               <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent drop-shadow-sm">
                 Level Up.
               </span>
             </h1>
 
             <p className="max-w-xl text-lg sm:text-xl text-base-content/60 leading-relaxed font-medium">
-              SkillHub is an open marketplace for AI agent skills. Discover powerful skills, share your expertise, and build the future of AI together.
+              Tackbox is an open marketplace for AI agent skills. Discover
+              powerful skills, share your expertise, and build the future of AI
+              together.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2 w-full sm:w-auto">
@@ -51,7 +72,7 @@ export default function Home() {
               >
                 Explore Skills <ArrowRight className="w-4 h-4" />
               </Link>
-              
+
               {isLoggedIn ? (
                 <Link
                   href="/my-skills"
@@ -76,8 +97,12 @@ export default function Home() {
                   <Package className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-bold text-xl text-base-content">12K+</div>
-                  <div className="text-xs text-base-content/60">Skills Shared</div>
+                  <div className="font-bold text-xl text-base-content">
+                    12K+
+                  </div>
+                  <div className="text-xs text-base-content/60">
+                    Skills Shared
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -119,15 +144,24 @@ export default function Home() {
               </div>
               {/* Window Content */}
               <div className="p-6 text-left space-y-6">
-                <h3 className="text-xl font-bold text-base-content">Web Search Agent</h3>
-                
+                <h3 className="text-xl font-bold text-base-content">
+                  Web Search Agent
+                </h3>
+
                 <div>
-                  <div className="text-sm font-semibold text-primary mb-1">Description</div>
-                  <p className="text-sm text-base-content/80">Perform accurate web searches and summarize results for any query.</p>
+                  <div className="text-sm font-semibold text-primary mb-1">
+                    Description
+                  </div>
+                  <p className="text-sm text-base-content/80">
+                    Perform accurate web searches and summarize results for any
+                    query.
+                  </p>
                 </div>
 
                 <div>
-                  <div className="text-sm font-semibold text-primary mb-1">Instructions</div>
+                  <div className="text-sm font-semibold text-primary mb-1">
+                    Instructions
+                  </div>
                   <ul className="text-sm text-base-content/80 space-y-1">
                     <li>- Understand the user query</li>
                     <li>- Search the web for relevant information</li>
@@ -138,8 +172,12 @@ export default function Home() {
 
                 <div className="flex items-center justify-between pt-2">
                   <div>
-                    <div className="text-sm font-semibold text-primary mb-2">Category</div>
-                    <span className="px-3 py-1 rounded-full bg-base-200/50 text-xs font-medium text-base-content/80">Research</span>
+                    <div className="text-sm font-semibold text-primary mb-2">
+                      Category
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-base-200/50 text-xs font-medium text-base-content/80">
+                      Research
+                    </span>
                   </div>
                   <button className="btn btn-outline btn-sm rounded-lg border-base-200 hover:bg-base-200/50 text-xs mt-6 flex items-center gap-2">
                     <Download className="w-3 h-3" /> Download
@@ -149,7 +187,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        
+
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full opacity-90 mt-12">
           <div className="flex flex-col items-start text-left space-y-4 p-8 rounded-3xl bg-base-200/20 border border-base-200/30 backdrop-blur-sm">
@@ -157,18 +195,27 @@ export default function Home() {
               <Compass className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-base-content mb-2">Discover</h3>
-              <p className="text-sm text-base-content/60 leading-relaxed">Explore thousands of high-quality AI agent skills across categories.</p>
+              <h3 className="font-bold text-lg text-base-content mb-2">
+                Discover
+              </h3>
+              <p className="text-sm text-base-content/60 leading-relaxed">
+                Explore thousands of high-quality AI agent skills across
+                categories.
+              </p>
             </div>
           </div>
-          
+
           <div className="flex flex-col items-start text-left space-y-4 p-8 rounded-3xl bg-base-200/20 border border-base-200/30 backdrop-blur-sm">
             <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
               <Upload className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-base-content mb-2">Share</h3>
-              <p className="text-sm text-base-content/60 leading-relaxed">Publish your skills and help others in the community.</p>
+              <h3 className="font-bold text-lg text-base-content mb-2">
+                Share
+              </h3>
+              <p className="text-sm text-base-content/60 leading-relaxed">
+                Publish your skills and help others in the community.
+              </p>
             </div>
           </div>
 
@@ -177,8 +224,12 @@ export default function Home() {
               <Download className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-base-content mb-2">Reuse</h3>
-              <p className="text-sm text-base-content/60 leading-relaxed">Download skills as markdown and use them in your projects.</p>
+              <h3 className="font-bold text-lg text-base-content mb-2">
+                Reuse
+              </h3>
+              <p className="text-sm text-base-content/60 leading-relaxed">
+                Download skills as markdown and use them in your projects.
+              </p>
             </div>
           </div>
         </div>
@@ -188,8 +239,10 @@ export default function Home() {
           <div className="text-xs font-bold text-base-content/50 tracking-widest uppercase px-4 py-1 rounded-full bg-base-200/30">
             Popular Categories
           </div>
-          <h2 className="text-3xl font-bold text-base-content">Browse by Category</h2>
-          
+          <h2 className="text-3xl font-bold text-base-content">
+            Browse by Category
+          </h2>
+
           <div className="flex flex-wrap justify-center gap-3 pt-4">
             {[
               { icon: Code, label: "Coding" },
@@ -200,13 +253,16 @@ export default function Home() {
               { icon: Zap, label: "Productivity" },
               { icon: Bot, label: "AI Agents" },
             ].map((cat, i) => (
-              <button key={i} className="btn btn-sm h-10 px-4 rounded-xl border border-base-200/40 bg-base-200/20 hover:bg-base-200/50 flex items-center gap-2 font-medium text-sm text-base-content/80 hover:text-base-content transition-colors">
-                <cat.icon className="w-4 h-4 text-base-content/60" /> {cat.label}
+              <button
+                key={i}
+                className="btn btn-sm h-10 px-4 rounded-xl border border-base-200/40 bg-base-200/20 hover:bg-base-200/50 flex items-center gap-2 font-medium text-sm text-base-content/80 hover:text-base-content transition-colors"
+              >
+                <cat.icon className="w-4 h-4 text-base-content/60" />{" "}
+                {cat.label}
               </button>
             ))}
           </div>
         </div>
-
       </main>
     </div>
   );
