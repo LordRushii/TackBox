@@ -65,45 +65,42 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 bg-gradient-to-b from-base-900 to-base-950 relative overflow-hidden">
-      {/* Decorative radial gradients for aesthetic look */}
-      <div className="absolute top-1/4 left-1/3 w-[450px] h-[450px] bg-primary/10 rounded-full blur-[110px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-background relative overflow-hidden">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-grid-pattern pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black,transparent)]" />
 
       <div className="w-full max-w-md z-10">
         {/* Card Container */}
-        <div className="card bg-base-200/40 backdrop-blur-xl border border-base-200/60 shadow-2xl rounded-2xl overflow-hidden transition-all duration-300">
-          <div className="card-body p-8 sm:p-10">
+        <div className="bg-white/[0.02] border border-white/10 shadow-2xl shadow-black rounded-lg overflow-hidden">
+          <div className="p-8 sm:p-10">
             {/* Header */}
-            <div className="text-center mb-8">
-              <div className="flex justify-center mb-6">
-                <div className="w-48 sm:w-56 h-14 overflow-hidden flex items-center justify-center">
-                  <img
-                    src="/logo.png"
-                    alt="Tackbox Logo"
-                    className="w-full h-full object-cover object-center"
-                  />
-                </div>
+            <div className="text-center mb-8 flex flex-col items-center">
+              <div className="w-32 h-8 overflow-hidden flex items-center justify-center mb-6">
+                <img
+                  src="/logo.png"
+                  alt="Tackbox Logo"
+                  className="w-full h-full object-contain object-center"
+                />
               </div>
-              <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent">
+              <h2 className="text-3xl font-heading font-semibold tracking-tight text-foreground">
                 Create Account
               </h2>
-              <p className="text-base-content/60 text-sm mt-2">
+              <p className="text-foreground/60 text-sm mt-2">
                 Join Tackbox and start cataloging your skills
               </p>
             </div>
 
             {/* Status Messages */}
             {error && (
-              <div className="alert alert-error text-sm py-3 px-4 rounded-xl border border-error/20 bg-error/10 text-error-content mb-6 flex items-start gap-2 shadow-sm animate-shake">
-                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <div className="text-sm py-3 px-4 rounded-md border border-red-500/20 bg-red-500/10 text-red-500 mb-6 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="alert alert-success text-sm py-3 px-4 rounded-xl border border-success/20 bg-success/10 text-success-content mb-6 flex items-start gap-2 shadow-sm">
-                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+              <div className="text-sm py-3 px-4 rounded-md border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 mb-6 flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>{success}</span>
               </div>
             )}
@@ -111,113 +108,110 @@ export default function RegisterPage() {
             {/* Google Auth */}
             <GoogleButton mode="signUp" />
 
-            <div className="divider text-xs text-base-content/40 font-medium py-2">
-              OR CONTINUE WITH EMAIL
+            <div className="relative py-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-medium">
+                <span className="bg-[#0A0A0A] px-2 text-foreground/40">OR CONTINUE WITH EMAIL</span>
+              </div>
             </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">
-                    Full Name
-                  </span>
+              <div className="flex flex-col gap-2">
+                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                  Full Name
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
-                    <User className="w-5 h-5" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
+                    <User className="w-4 h-4" />
                   </div>
                   <input
                     type="text"
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="input input-bordered w-full pl-11 bg-base-300/30 border-base-300 hover:border-primary/50 focus:border-primary focus:outline-none rounded-xl transition-all duration-200"
+                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
                     required
                   />
                 </div>
               </div>
 
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">
-                    Email Address
-                  </span>
+              <div className="flex flex-col gap-2">
+                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                  Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
-                    <Mail className="w-5 h-5" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
+                    <Mail className="w-4 h-4" />
                   </div>
                   <input
                     type="email"
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="input input-bordered w-full pl-11 bg-base-300/30 border-base-300 hover:border-primary/50 focus:border-primary focus:outline-none rounded-xl transition-all duration-200"
+                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
                     required
                   />
                 </div>
               </div>
 
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">
-                    Password
-                  </span>
+              <div className="flex flex-col gap-2">
+                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                  Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
-                    <Lock className="w-5 h-5" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
+                    <Lock className="w-4 h-4" />
                   </div>
                   <input
                     type="password"
                     placeholder="•••••••• (Min. 8 chars)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="input input-bordered w-full pl-11 bg-base-300/30 border-base-300 hover:border-primary/50 focus:border-primary focus:outline-none rounded-xl transition-all duration-200"
+                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
                     required
                   />
                 </div>
               </div>
 
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text font-semibold text-base-content/85">
-                    Confirm Password
-                  </span>
+              <div className="flex flex-col gap-2">
+                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                  Confirm Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40">
-                    <Lock className="w-5 h-5" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
+                    <Lock className="w-4 h-4" />
                   </div>
                   <input
                     type="password"
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="input input-bordered w-full pl-11 bg-base-300/30 border-base-300 hover:border-primary/50 focus:border-primary focus:outline-none rounded-xl transition-all duration-200"
+                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
                     required
                   />
                 </div>
               </div>
 
-              <div className="form-control flex flex-row items-start gap-2 mt-3">
+              <div className="flex items-start gap-2 mt-4">
                 <input
                   type="checkbox"
                   id="agree-terms"
-                  className="checkbox checkbox-primary checkbox-xs rounded mt-0.5"
+                  className="rounded bg-[#0A0A0A] border-white/10 text-amber-500 focus:ring-amber-500 focus:ring-offset-[#0A0A0A] mt-0.5"
                   required
                 />
                 <label
                   htmlFor="agree-terms"
-                  className="label-text cursor-pointer select-none text-base-content/60 text-xs leading-normal"
+                  className="cursor-pointer select-none text-foreground/60 text-xs leading-relaxed"
                 >
                   I agree to the{" "}
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="#" className="text-amber-500 hover:text-amber-400 transition-colors">
                     Terms of Service
                   </a>{" "}
                   and{" "}
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="#" className="text-amber-500 hover:text-amber-400 transition-colors">
                     Privacy Policy
                   </a>
                 </label>
@@ -226,11 +220,11 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary w-full mt-4 rounded-xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-600/95 text-primary-content shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300"
+                className="w-full h-11 mt-6 flex items-center justify-center rounded-md bg-white text-[#0A0A0A] hover:bg-white/90 text-sm font-medium transition-all gap-2"
               >
                 {loading ? (
                   <>
-                    <span className="loading loading-spinner loading-xs"></span>
+                    <span className="loading loading-spinner loading-xs border-current border-t-transparent"></span>
                     Creating Account...
                   </>
                 ) : (
@@ -240,13 +234,13 @@ export default function RegisterPage() {
             </form>
 
             {/* Bottom Link */}
-            <div className="text-center mt-8 pt-6 border-t border-base-200/40 text-sm">
-              <span className="text-base-content/50">
+            <div className="text-center mt-8 pt-6 border-t border-white/10 text-sm">
+              <span className="text-foreground/50">
                 Already have an account?{" "}
               </span>
               <Link
                 href="/login"
-                className="text-primary font-semibold hover:underline"
+                className="text-amber-500 font-medium hover:text-amber-400 transition-colors"
               >
                 Sign in
               </Link>

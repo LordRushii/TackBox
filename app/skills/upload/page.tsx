@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getCurrentUserAction } from "@/app/actions/auth";
 import {
-  Globe, Lock, ChevronDown, Eye, ExternalLink,
-  AlertTriangle, Send, FileUp, Upload, CheckCircle2
+  Globe, Lock, ChevronDown,
+  AlertTriangle, FileUp, Upload, CheckCircle2
 } from "lucide-react";
 
 type UploadedFile = {
@@ -86,46 +86,46 @@ export default function UploadSkillPage() {
   };
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12 flex flex-col justify-center">
+    <main className="flex-1 w-full max-w-[1000px] mx-auto px-6 py-12 flex flex-col justify-center">
       {/* Title block */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-heading font-semibold text-foreground">
           Upload Agent Skill
         </h1>
-        <p className="mt-2.5 text-sm md:text-base text-base-content/60 max-w-xl mx-auto leading-relaxed">
+        <p className="mt-3 text-sm md:text-base text-foreground/60 max-w-xl mx-auto leading-relaxed">
           Upload an agent capability from your local device. Define execution details, category tags, and accessibility.
         </p>
       </div>
 
       {/* Form Card */}
-      <div className="card bg-base-200/30 border border-base-200/50 backdrop-blur-md shadow-xl rounded-2xl overflow-hidden">
-        <form action={handleFormAction} className="card-body p-6 sm:p-8 md:p-10 gap-6">
+      <div className="bg-white/[0.02] border border-white/10 shadow-2xl shadow-black rounded-lg overflow-hidden">
+        <form action={handleFormAction} className="p-6 sm:p-8 md:p-10 flex flex-col gap-8">
 
           {/* Row 1: Skill Name, Category, Visibility */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-bold text-base-content/80 text-xs uppercase tracking-wider">Agent Skill Name</span>
+            <div className="flex flex-col gap-2 w-full">
+              <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                Agent Skill Name
               </label>
               <input
                 name="name"
                 type="text"
                 placeholder="e.g. Next.js Performance Optimization"
-                className="input input-bordered w-full focus:input-primary transition-all duration-200 bg-base-100/40 placeholder:text-base-content/30"
+                className="h-10 px-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none transition-all"
                 required
                 disabled={pending}
                 suppressHydrationWarning={true}
               />
             </div>
 
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-bold text-base-content/80 text-xs uppercase tracking-wider">Category</span>
+            <div className="flex flex-col gap-2 w-full">
+              <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                Category
               </label>
               <select
                 name="category"
-                className="select select-bordered w-full focus:select-primary transition-all duration-200 bg-base-100/40 text-base-content/80"
+                className="h-10 px-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground/80 focus:outline-none transition-all"
                 required
                 defaultValue=""
                 disabled={pending}
@@ -141,55 +141,50 @@ export default function UploadSkillPage() {
               </select>
             </div>
 
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-bold text-base-content/80 text-xs uppercase tracking-wider">Visibility</span>
+            <div className="flex flex-col gap-2 w-full">
+              <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                Visibility
               </label>
               <div className="dropdown w-full dropdown-bottom dropdown-end" suppressHydrationWarning={true}>
                 <div
                   tabIndex={0}
                   role="button"
-                  className="btn btn-outline border-base-200/50 hover:bg-base-200/20 w-full flex items-center justify-between px-4 py-2.5 h-auto font-normal text-left min-h-12 bg-base-100/30 hover:border-primary/20"
+                  className="h-10 px-3 rounded-md bg-[#0A0A0A] border border-white/10 hover:border-white/20 w-full flex items-center justify-between text-left transition-all"
                   suppressHydrationWarning={true}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     {visibility === "public" ? (
-                      <Globe className="w-5 h-5 text-primary shrink-0" />
+                      <Globe className="w-4 h-4 text-amber-500 shrink-0" />
                     ) : (
-                      <Lock className="w-5 h-5 text-primary shrink-0" />
+                      <Lock className="w-4 h-4 text-amber-500 shrink-0" />
                     )}
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-bold text-sm text-base-content/95 leading-none">
-                        {visibility === "public" ? "Public" : "Private"}
-                      </span>
-                      <span className="text-[10px] text-base-content/50 leading-none">
-                        {visibility === "public" ? "Anyone can view this skill" : "Only you can view this skill"}
-                      </span>
-                    </div>
+                    <span className="font-medium text-sm text-foreground">
+                      {visibility === "public" ? "Public" : "Private"}
+                    </span>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-base-content/40 shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-foreground/40 shrink-0" />
                 </div>
                 <ul
                   tabIndex={0}
-                  className="dropdown-content menu bg-base-300 rounded-xl z-50 w-full p-1.5 shadow-xl border border-base-200/50 mt-1"
+                  className="dropdown-content menu bg-[#0A0A0A] rounded-lg z-50 w-full p-1.5 shadow-2xl border border-white/10 mt-1"
                 >
                   <li>
                     <button type="button" onClick={() => setVisibility("public")}
-                      className={`flex items-center gap-3 p-2.5 rounded-lg text-left ${visibility === "public" ? "active bg-primary/20" : "hover:bg-base-200/60"}`}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${visibility === "public" ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"}`}
                       suppressHydrationWarning={true}>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-bold text-sm text-base-content/90">Public</span>
-                        <span className="text-xs text-base-content/50">Anyone can view this skill</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm text-foreground">Public</span>
+                        <span className="text-[10px] text-foreground/50 mt-0.5">Anyone can view this skill</span>
                       </div>
                     </button>
                   </li>
                   <li>
                     <button type="button" onClick={() => setVisibility("private")}
-                      className={`flex items-center gap-3 p-2.5 rounded-lg text-left ${visibility === "private" ? "active bg-primary/20" : "hover:bg-base-200/60"}`}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${visibility === "private" ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"}`}
                       suppressHydrationWarning={true}>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-bold text-sm text-base-content/90">Private</span>
-                        <span className="text-xs text-base-content/50">Only you can view this skill</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm text-foreground">Private</span>
+                        <span className="text-[10px] text-foreground/50 mt-0.5">Only you can view this skill</span>
                       </div>
                     </button>
                   </li>
@@ -200,18 +195,18 @@ export default function UploadSkillPage() {
           </div>
 
           {/* Description */}
-          <div className="form-control w-full relative">
+          <div className="flex flex-col gap-2 w-full relative">
             <div className="flex justify-between items-baseline mb-1">
-              <label className="label p-0">
-                <span className="label-text font-bold text-base-content/80 text-xs uppercase tracking-wider">Description</span>
+              <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
+                Description
               </label>
-              <span className="text-xs text-base-content/40 tracking-wider">{descLength}/200</span>
+              <span className="text-[11px] text-foreground/40">{descLength}/200</span>
             </div>
             <textarea
               name="description"
               rows={3}
               placeholder="Briefly describe what this skill helps with, its purpose, and who it's for..."
-              className="textarea textarea-bordered w-full focus:textarea-primary transition-all duration-200 bg-base-100/40 placeholder:text-base-content/30 h-20 resize-y"
+              className="w-full p-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none transition-all resize-y"
               required
               maxLength={200}
               onChange={(e) => setDescLength(e.target.value.length)}
@@ -221,19 +216,17 @@ export default function UploadSkillPage() {
           </div>
 
           {/* File Upload Section */}
-          <div className="form-control w-full">
-            <label className="label py-1 p-0 mb-1">
-              <span className="label-text font-bold text-base-content/80 text-xs uppercase tracking-wider">
-                Skill File
-              </span>
+          <div className="flex flex-col gap-2 w-full">
+            <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider mb-1">
+              Skill File
             </label>
             
             <div 
               onClick={triggerFileInput}
-              className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${
+              className={`border border-dashed rounded-lg p-12 flex flex-col items-center justify-center cursor-pointer transition-all ${
                 files.length > 0 
-                  ? "border-success/50 bg-success/5" 
-                  : "border-base-200/60 hover:border-primary/50 hover:bg-base-200/30"
+                  ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50" 
+                  : "border-white/20 hover:border-white/40 hover:bg-white/[0.02]"
               }`}
             >
               <input 
@@ -248,21 +241,21 @@ export default function UploadSkillPage() {
               
               {files.length > 0 ? (
                 <>
-                  <CheckCircle2 className="w-12 h-12 text-success mb-3" />
-                  <p className="font-bold text-base-content/90">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-4" />
+                  <p className="font-medium text-foreground">
                     {files.length === 1 ? files[0].name : `${files.length} files selected`}
                   </p>
-                  <div className="flex flex-col gap-1 items-center mt-2 max-h-32 overflow-y-auto w-full max-w-sm">
+                  <div className="flex flex-col gap-2 items-center mt-4 max-h-32 overflow-y-auto w-full max-w-sm">
                     {files.map((f, i) => (
-                      <p key={i} className="text-xs text-base-content/60 bg-base-100/50 px-3 py-1.5 rounded-md w-full text-center flex justify-between">
-                        <span className="truncate max-w-[150px]" title={f.name}>{f.name}</span>
-                        <span>{(f.size / 1024).toFixed(1)} KB • {f.content.split('\n').length} lines</span>
-                      </p>
+                      <div key={i} className="flex justify-between items-center w-full px-3 py-2 rounded border border-white/10 bg-[#0A0A0A] text-xs text-foreground/60">
+                        <span className="truncate max-w-[150px] font-medium text-foreground" title={f.name}>{f.name}</span>
+                        <span className="font-mono">{(f.size / 1024).toFixed(1)} KB</span>
+                      </div>
                     ))}
                   </div>
                   <button 
                     type="button" 
-                    className="btn btn-sm btn-outline btn-success mt-4 rounded-lg px-6"
+                    className="mt-6 text-sm font-medium text-foreground/50 hover:text-foreground transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       triggerFileInput();
@@ -273,12 +266,12 @@ export default function UploadSkillPage() {
                 </>
               ) : (
                 <>
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <FileUp className="w-8 h-8 text-primary" />
+                  <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center mb-4">
+                    <FileUp className="w-6 h-6 text-foreground/50" />
                   </div>
-                  <p className="font-bold text-base-content/90 mb-1">Click to select files</p>
-                  <p className="text-sm text-base-content/50 text-center max-w-sm">
-                    Upload your markdown or text files containing the agent skill implementation. You can select multiple files!
+                  <p className="font-medium text-foreground mb-2">Click to select files</p>
+                  <p className="text-sm text-foreground/40 text-center max-w-sm leading-relaxed">
+                    Upload your markdown or text files containing the agent skill implementation. You can select multiple files.
                   </p>
                 </>
               )}
@@ -286,23 +279,18 @@ export default function UploadSkillPage() {
           </div>
 
           {/* Error feedback */}
-          {(files.length === 0 && pending === false && state?.message) ? (
-            <div className="alert alert-error text-sm py-2.5 px-3.5 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 flex items-center gap-2 animate-fadeIn">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span>{state.message}</span>
-            </div>
-          ) : state?.message ? (
-             <div className="alert alert-error text-sm py-2.5 px-3.5 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 flex items-center gap-2 animate-fadeIn">
+          {(files.length === 0 && pending === false && state?.message) || state?.message ? (
+            <div className="p-3 rounded-md border border-red-500/20 bg-red-500/10 text-red-400 text-sm flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{state.message}</span>
             </div>
           ) : null}
 
           {/* Action Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-base-200/30">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-white/10">
             <Link
               href="/my-skills"
-              className="btn btn-outline border-base-200/50 hover:bg-base-200/20 px-6 font-semibold transition-all duration-200 order-2 sm:order-1"
+              className="h-11 px-6 flex items-center justify-center rounded-md bg-transparent hover:bg-white/[0.04] border border-transparent hover:border-white/10 text-sm font-medium text-foreground transition-all order-2 sm:order-1"
             >
               Cancel &amp; Return
             </Link>
@@ -310,22 +298,22 @@ export default function UploadSkillPage() {
             <button
               type="submit"
               disabled={pending || files.length === 0}
-              className={`btn px-8 font-semibold transition-all duration-300 flex items-center gap-1.5 order-1 sm:order-2 ${
+              className={`h-11 px-8 flex items-center justify-center rounded-md text-sm font-medium transition-all gap-2 order-1 sm:order-2 ${
                 files.length > 0 
-                  ? "btn-primary bg-gradient-to-r from-primary to-secondary text-primary-content hover:shadow-lg hover:shadow-primary/20 hover:opacity-95 border-0" 
-                  : "btn-disabled bg-base-200 text-base-content/40 border-0"
+                  ? "bg-white text-[#0A0A0A] hover:bg-white/90" 
+                  : "bg-white/5 text-foreground/30 cursor-not-allowed"
               }`}
               suppressHydrationWarning={true}
             >
               {pending ? (
                 <>
-                  <span className="loading loading-spinner loading-xs"></span>
+                  <span className="loading loading-spinner loading-xs border-current border-t-transparent"></span>
                   Uploading...
                 </>
               ) : (
                 <>
                   Upload Agent Skill
-                  <Upload className="w-3.5 h-3.5" />
+                  <Upload className="w-4 h-4" />
                 </>
               )}
             </button>

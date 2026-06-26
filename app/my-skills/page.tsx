@@ -63,34 +63,29 @@ export default function MySkillsPage() {
   };
 
   if (loading || !user) {
-    // Return loading skeleton matching the previous aesthetics
     return (
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-1 w-full max-w-[1200px] mx-auto px-6 py-12">
         {/* Header Panel Skeleton */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10 pb-8 border-b border-base-200/40">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 pb-8 border-b border-white/10">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent animate-pulse">
+            <h1 className="text-4xl font-heading font-semibold tracking-tight text-foreground/50 animate-pulse">
               My Agent Skills
             </h1>
-            <p className="mt-2 text-base-content/60 text-sm md:text-base max-w-xl">
-              Explore, catalog, and manage your agent skills capability database. Filter by category, track progression, and add new capabilities.
-            </p>
+            <div className="mt-4 h-4 w-3/4 max-w-md bg-white/5 rounded"></div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            {/* Quick Stats Skeleton */}
-            <div className="stats shadow bg-base-200/30 border border-base-200/40 hidden sm:flex">
-              <div className="stat py-2 px-6">
-                <div className="stat-title text-xs text-base-content/50">Total Skills</div>
-                <div className="skeleton h-7 w-8 mt-1 bg-base-content/10"></div>
+            <div className="hidden sm:flex items-center bg-white/[0.02] border border-white/10 rounded-lg">
+              <div className="py-2 px-6 border-r border-white/10">
+                <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium">Total Skills</div>
+                <div className="h-6 w-8 mt-1 bg-white/5 rounded"></div>
               </div>
-              <div className="stat py-2 px-6">
-                <div className="stat-title text-xs text-base-content/50">Categories</div>
-                <div className="skeleton h-7 w-8 mt-1 bg-base-content/10"></div>
+              <div className="py-2 px-6">
+                <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium">Categories</div>
+                <div className="h-6 w-8 mt-1 bg-white/5 rounded"></div>
               </div>
             </div>
-
-            <div className="skeleton h-12 w-36 rounded-lg bg-base-content/10"></div>
+            <div className="h-10 w-40 rounded-lg bg-white/5"></div>
           </div>
         </div>
 
@@ -99,20 +94,20 @@ export default function MySkillsPage() {
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="card bg-base-200/20 border border-base-200/40 p-6 flex flex-col justify-between h-[250px] rounded-2xl animate-pulse"
+              className="bg-white/[0.02] border border-white/10 p-6 flex flex-col justify-between h-[250px] rounded-lg animate-pulse"
             >
               <div>
-                <div className="skeleton h-5 w-20 rounded-md mb-4 bg-base-content/10"></div>
-                <div className="skeleton h-7 w-3/4 rounded-md mb-5 bg-base-content/10"></div>
+                <div className="h-5 w-20 rounded bg-white/5 mb-4"></div>
+                <div className="h-7 w-3/4 rounded bg-white/5 mb-5"></div>
                 <div className="space-y-2 mt-4">
-                  <div className="skeleton h-3.5 w-full rounded bg-base-content/5"></div>
-                  <div className="skeleton h-3.5 w-5/6 rounded bg-base-content/5"></div>
-                  <div className="skeleton h-3.5 w-4/6 rounded bg-base-content/5"></div>
+                  <div className="h-3 w-full rounded bg-white/5"></div>
+                  <div className="h-3 w-5/6 rounded bg-white/5"></div>
+                  <div className="h-3 w-4/6 rounded bg-white/5"></div>
                 </div>
               </div>
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-base-200/40">
-                <div className="skeleton h-4 w-28 rounded bg-base-content/5"></div>
-                <div className="skeleton h-4 w-16 rounded bg-base-content/10"></div>
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/5">
+                <div className="h-4 w-28 rounded bg-white/5"></div>
+                <div className="h-4 w-16 rounded bg-white/5"></div>
               </div>
             </div>
           ))}
@@ -124,59 +119,61 @@ export default function MySkillsPage() {
   const categoriesCount = new Set(skills.map((s) => s.category)).size;
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main className="flex-1 w-full max-w-[1200px] mx-auto px-6 py-12">
       {/* Header Panel */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10 pb-8 border-b border-base-200/40">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 pb-8 border-b border-white/10">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-heading font-semibold tracking-tight text-foreground">
             My Agent Skills
           </h1>
-          <p className="mt-2 text-base-content/60 text-sm md:text-base max-w-xl">
+          <p className="mt-3 text-foreground/60 text-sm md:text-base max-w-xl">
             Explore, catalog, and manage your agent skills capability database. Filter by category, track progression, and add new capabilities.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
           {/* Quick Stats */}
-          <div className="stats shadow bg-base-200/30 border border-base-200/40 hidden sm:flex">
-            <div className="stat py-2 px-4">
-              <div className="stat-title text-xs text-base-content/50">Total Skills</div>
-              <div className="stat-value text-xl text-primary">{skills.length}</div>
+          <div className="hidden sm:flex items-center bg-white/[0.02] border border-white/10 rounded-lg">
+            <div className="py-2.5 px-5 border-r border-white/10">
+              <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium mb-0.5">Total Skills</div>
+              <div className="text-xl font-heading font-semibold text-foreground">{skills.length}</div>
             </div>
-            <div className="stat py-2 px-4">
-              <div className="stat-title text-xs text-base-content/50">Categories</div>
-              <div className="stat-value text-xl text-secondary">{categoriesCount}</div>
+            <div className="py-2.5 px-5">
+              <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium mb-0.5">Categories</div>
+              <div className="text-xl font-heading font-semibold text-foreground">{categoriesCount}</div>
             </div>
           </div>
 
-          <Link
-            href="/skills/create"
-            className="btn btn-primary gap-2 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300"
-          >
-            <Plus className="w-4 h-4" />
-            Create Agent Skill
-          </Link>
-          <Link
-            href="/skills/upload"
-            className="btn btn-secondary gap-2 shadow-md shadow-secondary/20 hover:shadow-lg hover:shadow-secondary/30 transition-all duration-300"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Agent Skill
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/skills/upload"
+              className="h-10 px-4 flex items-center justify-center gap-2 rounded-lg bg-white/[0.02] border border-white/10 hover:bg-white/[0.06] text-sm font-medium text-foreground transition-all"
+            >
+              <Upload className="w-4 h-4 opacity-70" />
+              Upload
+            </Link>
+            <Link
+              href="/skills/create"
+              className="h-10 px-5 flex items-center justify-center gap-2 rounded-lg bg-white text-[#0A0A0A] hover:bg-white/90 text-sm font-medium transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Create Skill
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Skills Grid */}
       {skills.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-dashed border-base-200/60 rounded-2xl bg-base-200/10 max-w-lg mx-auto">
-          <div className="p-4 rounded-full bg-base-200/40 text-base-content/40 mb-4">
-            <PlusCircle className="w-10 h-10" />
+        <div className="flex flex-col items-center justify-center py-24 px-4 text-center border border-dashed border-white/10 rounded-lg bg-white/[0.01] max-w-lg mx-auto">
+          <div className="text-foreground/20 mb-6">
+            <PlusCircle className="w-12 h-12" />
           </div>
-          <h3 className="text-xl font-bold text-base-content/90">No agent skills in catalog</h3>
-          <p className="text-base-content/50 mt-2 max-w-xs text-sm">
+          <h3 className="text-xl font-heading font-semibold text-foreground">No agent skills in catalog</h3>
+          <p className="text-foreground/50 mt-3 max-w-xs text-sm leading-relaxed">
             Get started by adding your first agent skill with execution instructions, descriptions, and category tags.
           </p>
-          <Link href="/skills/create" className="btn btn-primary mt-6 btn-sm">
+          <Link href="/skills/create" className="h-10 px-6 mt-8 flex items-center justify-center rounded-md bg-white text-[#0A0A0A] text-sm font-medium hover:bg-white/90 transition-colors">
             Create First Agent Skill
           </Link>
         </div>
@@ -191,7 +188,7 @@ export default function MySkillsPage() {
               description={skill.description || "No description provided."}
               authorName={skill.authorName || user?.name || "Anonymous"}
               authorRole={skill.authorRole || user?.role || "Developer"}
-              authorAvatarColor={skill.authorAvatarColor || "from-primary to-secondary"}
+              authorAvatarColor={skill.authorAvatarColor || ""}
               authorAvatarUrl={skill.authorAvatarUrl || user?.image}
               starsCount={skill.stars || 0}
               hasStarred={skill.hasStarred || false}

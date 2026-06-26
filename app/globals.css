@@ -4,35 +4,38 @@
 }
 
 :root {
-  --background: #07112B;
-  --foreground: #FFFFFF;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-card-bg: rgba(255, 255, 255, 0.03);
+  --background: #0A0A0A;
+  --foreground: #EDEDED;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-card-bg: rgba(255, 255, 255, 0.02);
+  --color-card-bg-hover: rgba(255, 255, 255, 0.05);
+  --color-accent: #F59E0B;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   
-  --color-base-100: #07112B;
-  --color-base-200: #0E1A3A;
-  --color-base-300: #07112B;
-  --color-base-content: #FFFFFF;
-  --color-primary: #FF5A6E;
-  --color-primary-content: #FFFFFF;
-  --color-secondary: #5C3AED;
+  --color-base-100: var(--background);
+  --color-base-200: var(--color-card-bg);
+  --color-base-300: #000000;
+  --color-base-content: var(--foreground);
+  --color-primary: var(--color-accent);
+  --color-primary-content: #000000;
+  --color-secondary: #3B82F6; /* Fallback if used */
   --color-secondary-content: #FFFFFF;
-  --color-accent: #FF6B7D;
-  --color-accent-content: #FFFFFF;
-  --color-info: #EDE9FE;
+  --color-accent: var(--color-accent);
+  --color-accent-content: #000000;
+  --color-info: #E5E7EB;
   
   --font-sans: var(--font-inter), 'Inter', sans-serif;
-  --font-heading: 'Clash Display', var(--font-inter), sans-serif;
+  --font-heading: var(--font-inter-tight), 'Inter Tight', sans-serif;
   --font-body: var(--font-inter), 'Inter', sans-serif;
   --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
 
-  --shadow-premium: 0 4px 20px rgba(0,0,0,0.1);
-  --shadow-premium-hover: 0 8px 30px rgba(0,0,0,0.2);
+  /* Flattened shadows */
+  --shadow-premium: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-premium-hover: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 body {
@@ -40,6 +43,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-body);
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom Scrollbar */
@@ -62,42 +67,47 @@ body {
 }
 
 ::selection {
-  background-color: var(--color-primary);
+  background-color: rgba(245, 158, 11, 0.3); /* Amber selection */
   color: #ffffff;
+}
+
+/* Base Headings */
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
 
 /* Premium Styling Overrides */
 .btn {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 500;
   border-radius: 0.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
 }
 
 .btn-primary {
-  box-shadow: 0 4px 14px 0 rgba(255, 90, 110, 0.2);
+  background-color: var(--color-primary);
+  color: #0A0A0A;
+  border: 1px solid var(--color-primary);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 6px 20px rgba(255, 90, 110, 0.3);
-  transform: translateY(-2px);
-}
-
-h1, h2, h3, h4, h5, h6, .font-bold, .font-black, .font-semibold {
-  font-family: var(--font-heading);
-  letter-spacing: -0.02em;
+  background-color: #D97706; /* Amber 600 */
+  border-color: #D97706;
+  transform: none;
 }
 
 /* Enhancing inputs for a more premium look */
 input, .input {
   border: 1px solid var(--color-border) !important;
-  background-color: rgba(14, 26, 58, 0.5) !important;
-  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  transition: all 0.2s ease;
 }
 
 input:focus, .input:focus {
   border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 2px rgba(255, 90, 110, 0.2) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) !important;
   outline: none;
 }
 
@@ -109,19 +119,28 @@ input:focus, .input:focus {
 /* Refined backgrounds for premium glass effects */
 .bg-base-200\/20 {
   background-color: var(--color-card-bg) !important;
-  box-shadow: var(--shadow-premium);
+  border: 1px solid var(--color-border);
 }
 
 .bg-base-200\/20:hover {
-  box-shadow: var(--shadow-premium-hover);
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: var(--color-card-bg-hover) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .bg-base-200\/30, .bg-base-200\/40 {
-  background-color: rgba(14, 26, 58, 0.4) !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
 /* Navbar specific override */
 header .navbar {
   background: transparent !important;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Subtle Grid Background Utility */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

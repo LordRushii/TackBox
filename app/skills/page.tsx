@@ -73,24 +73,6 @@ export default function AgentSkillsShowcasePage() {
     }
   };
 
-  const handleStartSkill = (id: string, name: string) => {
-    if (runningSkillId) return; // Prevent double starting
-    setRunningSkillId(id);
-    setIsRunningSuccess(false);
-    setToastMessage(`Initializing agent skill: "${name}"...`);
-
-    setTimeout(() => {
-      setIsRunningSuccess(true);
-      setToastMessage(`Agent skill "${name}" is now running active!`);
-
-      setTimeout(() => {
-        setRunningSkillId(null);
-        setToastMessage(null);
-        setIsRunningSuccess(false);
-      }, 3000);
-    }, 1500);
-  };
-
   const categories = [
     "All",
     ...Array.from(new Set(skills.map((s) => s.category))),
@@ -110,17 +92,16 @@ export default function AgentSkillsShowcasePage() {
   });
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
-      {/* Background Glows */}
-      <div className="absolute top-10 left-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-20 right-1/4 w-[350px] h-[350px] bg-secondary/5 rounded-full blur-[90px] pointer-events-none" />
+    <main className="flex-1 w-full max-w-[1200px] mx-auto px-6 py-16 relative">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-grid-pattern pointer-events-none [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 
       {/* Hero Section */}
-      <div className="text-center mb-12 relative z-10">
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-indigo-400 to-secondary bg-clip-text text-transparent mb-4">
+      <div className="text-center mb-16 relative z-10">
+        <h1 className="text-4xl sm:text-5xl font-heading font-semibold tracking-tight text-foreground mb-4">
           Agent Skills Showcase
         </h1>
-        <p className="mt-3 text-base-content/60 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-3 text-foreground/60 text-base max-w-2xl mx-auto leading-relaxed">
           Explore and run capabilities designed for autonomous AI agents. Test
           pre-configured tools, execute prompts, and discover skills shared by
           our system creators.
@@ -128,32 +109,32 @@ export default function AgentSkillsShowcasePage() {
       </div>
 
       {/* Filters Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 bg-base-200/20 border border-base-200/50 p-4 rounded-2xl backdrop-blur-md relative z-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 bg-white/[0.02] border border-white/10 p-4 rounded-lg relative z-10">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/40">
-            <Search className="w-5 h-5" />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
+            <Search className="w-4 h-4" />
           </div>
           <input
             type="text"
             placeholder="Search agent skills, topics, or agents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input input-bordered w-full pl-10 bg-base-100/40 border-base-200 focus:input-primary transition-all duration-200 placeholder:text-base-content/30"
+            className="w-full h-10 pl-10 pr-4 bg-[#0A0A0A] border border-white/10 rounded-md text-sm text-foreground placeholder:text-foreground/30 focus:border-white/20 focus:outline-none transition-all"
             suppressHydrationWarning={true}
           />
         </div>
 
         {/* Categories Pills */}
-        <div className="flex flex-wrap gap-1.5 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`btn btn-xs sm:btn-sm rounded-lg transition-all duration-300 font-semibold border-0 ${
+              className={`h-8 px-3 rounded-md text-[13px] font-medium transition-all ${
                 selectedCategory === category
-                  ? "bg-primary text-primary-content shadow-md shadow-primary/20"
-                  : "bg-base-200/50 hover:bg-base-200 text-base-content/70"
+                  ? "bg-white/10 text-foreground border border-white/10"
+                  : "bg-transparent text-foreground/60 border border-transparent hover:bg-white/[0.04] hover:border-white/10"
               }`}
               suppressHydrationWarning={true}
             >
@@ -165,40 +146,40 @@ export default function AgentSkillsShowcasePage() {
 
       {/* Showcase Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mb-20">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="card bg-base-200/20 border border-base-200/40 p-6 flex flex-col justify-between h-[250px] rounded-2xl animate-pulse"
+              className="bg-white/[0.02] border border-white/10 p-6 flex flex-col justify-between h-[250px] rounded-lg animate-pulse"
             >
               <div>
-                <div className="skeleton h-5 w-20 rounded-md mb-4 bg-base-content/10"></div>
-                <div className="skeleton h-7 w-3/4 rounded-md mb-5 bg-base-content/10"></div>
+                <div className="h-5 w-20 rounded bg-white/5 mb-4"></div>
+                <div className="h-7 w-3/4 rounded bg-white/5 mb-5"></div>
                 <div className="space-y-2 mt-4">
-                  <div className="skeleton h-3.5 w-full rounded bg-base-content/5"></div>
-                  <div className="skeleton h-3.5 w-5/6 rounded bg-base-content/5"></div>
-                  <div className="skeleton h-3.5 w-4/6 rounded bg-base-content/5"></div>
+                  <div className="h-3 w-full rounded bg-white/5"></div>
+                  <div className="h-3 w-5/6 rounded bg-white/5"></div>
+                  <div className="h-3 w-4/6 rounded bg-white/5"></div>
                 </div>
               </div>
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-base-200/40">
-                <div className="skeleton h-4 w-28 rounded bg-base-content/5"></div>
-                <div className="skeleton h-4 w-16 rounded bg-base-content/10"></div>
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/5">
+                <div className="h-4 w-28 rounded bg-white/5"></div>
+                <div className="h-4 w-16 rounded bg-white/5"></div>
               </div>
             </div>
           ))}
         </div>
       ) : filteredSkills.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-base-200/60 rounded-2xl bg-base-200/10 max-w-lg mx-auto relative z-10">
-          <h3 className="text-xl font-bold text-base-content/85">
+        <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-white/10 rounded-lg bg-white/[0.02] max-w-xl mx-auto relative z-10 mb-20">
+          <h3 className="text-lg font-semibold text-foreground/80">
             No matching agent skills found
           </h3>
-          <p className="text-base-content/50 mt-2 max-w-xs text-sm">
+          <p className="text-foreground/50 mt-2 max-w-sm text-sm">
             Try adjusting your search query or choosing a different category
             tab.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mb-20">
           {filteredSkills.map((skill) => {
             return (
               <SkillCard
@@ -224,16 +205,16 @@ export default function AgentSkillsShowcasePage() {
 
       {/* Floating Action/Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 p-2 max-w-sm animate-bounce">
+        <div className="fixed bottom-6 right-6 z-50 p-2 max-w-sm animate-in slide-in-from-bottom-5">
           <div
-            className={`alert border shadow-2xl rounded-2xl flex items-center gap-3 p-4 bg-base-300 border-base-200`}
+            className={`border shadow-2xl shadow-black rounded-lg flex items-center gap-3 p-4 bg-[#0A0A0A] border-white/10`}
           >
             {!isRunningSuccess ? (
-              <Loader2 className="w-5 h-5 text-primary animate-spin shrink-0" />
+              <Loader2 className="w-4 h-4 text-amber-500 animate-spin shrink-0" />
             ) : (
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
             )}
-            <span className="font-bold text-xs sm:text-sm text-base-content/90">
+            <span className="font-medium text-sm text-foreground">
               {toastMessage}
             </span>
           </div>
@@ -241,45 +222,43 @@ export default function AgentSkillsShowcasePage() {
       )}
 
       {/* Call to Action Banner */}
-      <div className="relative z-10 max-w-4xl mx-auto rounded-3xl overflow-hidden border border-base-200/50 bg-gradient-to-br from-base-200/20 to-base-300/10 backdrop-blur-xl p-8 sm:p-10 shadow-2xl text-center">
-        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
-
+      <div className="relative z-10 max-w-4xl mx-auto rounded-lg overflow-hidden border border-white/10 bg-white/[0.02] p-10 sm:p-12 text-center">
         {user ? (
           <div>
-            <h3 className="text-2xl font-extrabold text-base-content/95 mb-2">
+            <h3 className="text-2xl font-heading font-semibold text-foreground mb-3">
               Ready to Publish Agent Skills, {user.name}?
             </h3>
-            <p className="text-sm text-base-content/60 max-w-md mx-auto mb-6">
+            <p className="text-sm text-foreground/60 max-w-md mx-auto mb-8 leading-relaxed">
               You are signed in. Jump over to your private console to upload
               instructions and execute your agents' skills.
             </p>
             <Link
               href="/my-skills"
-              className="btn btn-primary bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-600/95 border-0 rounded-xl px-8 font-semibold shadow-md shadow-primary/20 hover:shadow-lg transition-all duration-300"
+              className="inline-flex items-center justify-center h-11 px-8 rounded-md bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] hover:border-white/20 text-foreground font-medium transition-colors"
             >
               Go to My Agent Skills
             </Link>
           </div>
         ) : (
           <div>
-            <h3 className="text-2xl font-extrabold text-base-content/95 mb-2">
+            <h3 className="text-2xl font-heading font-semibold text-foreground mb-3">
               Upload Your Own Agent Skills
             </h3>
-            <p className="text-sm text-base-content/60 max-w-md mx-auto mb-6">
+            <p className="text-sm text-foreground/60 max-w-md mx-auto mb-8 leading-relaxed">
               Join Tackbox today. Create a pre-configured capability inventory
               to test triggers, track execution statuses, and publish agent
               tools.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/login?redirect=/my-skills"
-                className="btn btn-primary bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-600/95 border-0 rounded-xl px-8 w-full sm:w-auto font-semibold shadow-md shadow-primary/20 hover:shadow-lg transition-all duration-300"
+                className="inline-flex items-center justify-center h-11 px-8 rounded-md bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] hover:border-white/20 text-foreground font-medium transition-colors w-full sm:w-auto"
               >
                 Sign In Now
               </Link>
               <Link
                 href="/register"
-                className="btn btn-outline border-base-200/80 hover:bg-base-200/40 rounded-xl px-8 w-full sm:w-auto font-semibold transition-all duration-300"
+                className="inline-flex items-center justify-center h-11 px-8 rounded-md bg-white/[0.02] border border-white/10 hover:bg-white/[0.04] text-foreground font-medium transition-colors w-full sm:w-auto"
               >
                 Create Free Account
               </Link>

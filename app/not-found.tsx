@@ -9,38 +9,42 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <main className="flex-1 w-full max-w-xl mx-auto px-4 py-20 flex flex-col items-center justify-center text-center">
-      {/* Visual glowing 404 badge */}
-      <div className="relative group mb-8">
-        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary via-indigo-500 to-secondary opacity-75 blur-lg group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
-        <div className="relative flex h-36 w-36 items-center justify-center rounded-full bg-zinc-950 border border-base-200/40 text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-          404
+    <main className="flex-1 w-full max-w-xl mx-auto px-6 py-24 flex flex-col items-center justify-center text-center bg-background">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-grid-pattern pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black,transparent)]" />
+
+      <div className="z-10 flex flex-col items-center">
+        {/* Visual flat 404 badge */}
+        <div className="mb-10">
+          <div className="flex h-32 w-32 items-center justify-center rounded-lg bg-white/[0.02] border border-white/10 text-6xl font-heading font-semibold text-foreground shadow-sm">
+            404
+          </div>
         </div>
-      </div>
 
-      {/* Message Info */}
-      <h1 className="text-3xl font-extrabold tracking-tight text-base-content mb-3">
-        Page Not Found
-      </h1>
-      <p className="text-base-content/60 max-w-sm mb-10 text-sm sm:text-base leading-relaxed">
-        We couldn&apos;t find the capability, skill, or resource you were looking for. It might have been moved, deleted, or never existed in the catalog.
-      </p>
+        {/* Message Info */}
+        <h1 className="text-3xl font-heading font-semibold tracking-tight text-foreground mb-4">
+          Page Not Found
+        </h1>
+        <p className="text-foreground/60 max-w-sm mb-12 text-sm sm:text-base leading-relaxed">
+          We couldn&apos;t find the capability, skill, or resource you were looking for. It might have been moved, deleted, or never existed in the catalog.
+        </p>
 
-      {/* Navigation Options */}
-      <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-        <Link
-          href="/skills"
-          className="btn btn-primary gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 px-6"
-        >
-          <ClipboardList className="w-4 h-4" />
-          Skills Inventory
-        </Link>
-        <Link
-          href="/"
-          className="btn btn-outline border-base-200/60 hover:bg-base-200/40 hover:border-transparent transition-all duration-200 px-6"
-        >
-          Return Home
-        </Link>
+        {/* Navigation Options */}
+        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+          <Link
+            href="/skills"
+            className="h-11 px-8 flex items-center justify-center rounded-md bg-white text-[#0A0A0A] hover:bg-white/90 text-sm font-medium transition-all gap-2"
+          >
+            <ClipboardList className="w-4 h-4" />
+            Skills Inventory
+          </Link>
+          <Link
+            href="/"
+            className="h-11 px-8 flex items-center justify-center rounded-md bg-white/[0.04] border border-white/10 hover:border-white/20 text-sm font-medium text-foreground transition-all"
+          >
+            Return Home
+          </Link>
+        </div>
       </div>
     </main>
   );

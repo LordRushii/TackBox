@@ -96,27 +96,27 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-base-200/40 bg-base-100/70 backdrop-blur-md">
-      <div className="navbar max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between">
-        <div className="flex-1">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0A0A0A]/80 backdrop-blur-md">
+      <div className="navbar max-w-[1200px] mx-auto px-6 flex justify-between h-16">
+        <div className="flex-1 flex items-center">
           <Link
             href="/"
-            className="group flex items-center justify-start w-36 sm:w-44 h-12 overflow-hidden transition-all duration-300"
+            className="group flex items-center justify-start w-32 h-10 overflow-hidden transition-opacity hover:opacity-80"
           >
             <img
               src="/logo.png"
               alt="Tackbox Logo"
-              className="w-full h-full object-cover object-left transition-transform group-hover:scale-105"
+              className="w-full h-full object-contain object-left"
             />
           </Link>
         </div>
 
         <div className="hidden md:flex flex-1 justify-center">
-          <ul className="menu menu-horizontal px-1 gap-2 font-medium text-base-content/80">
+          <ul className="flex items-center gap-6 font-medium text-sm text-foreground/70">
             <li>
               <Link
                 href="/skills"
-                className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
+                className="hover:text-foreground transition-colors"
               >
                 Explore
               </Link>
@@ -124,7 +124,7 @@ export default function Header() {
             <li>
               <Link
                 href="/#categories"
-                className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
+                className="hover:text-foreground transition-colors"
               >
                 Categories
               </Link>
@@ -133,7 +133,7 @@ export default function Header() {
             <li>
               <Link
                 href="/about"
-                className="rounded-lg hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
+                className="hover:text-foreground transition-colors"
               >
                 About
               </Link>
@@ -147,7 +147,7 @@ export default function Header() {
               <>
                 <Link
                   href="/my-skills"
-                  className="hidden sm:flex text-sm font-medium text-base-content/80 hover:text-base-content transition-all duration-200"
+                  className="hidden sm:flex text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
                 >
                   My Skills
                 </Link>
@@ -155,53 +155,49 @@ export default function Header() {
                   <div
                     tabIndex={0}
                     role="button"
-                    className="btn btn-ghost btn-circle avatar placeholder hover:bg-transparent overflow-hidden"
+                    className="btn btn-ghost btn-circle avatar hover:bg-transparent overflow-hidden border border-white/10 w-9 h-9 flex items-center justify-center bg-white/[0.02]"
                   >
                     {displayUser.avatarUrl ? (
-                      <div className="w-10 rounded-full shadow-sm transition-transform hover:scale-105">
-                        <img
-                          src={displayUser.avatarUrl}
-                          alt="User Avatar"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                      <img
+                        src={displayUser.avatarUrl}
+                        alt="User Avatar"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
-                      <div className="bg-primary text-primary-content rounded-full w-10 shadow-sm transition-transform hover:scale-105">
-                        <span className="font-semibold">
-                          {displayUser.name
-                            ? displayUser.name.charAt(0).toUpperCase()
-                            : "U"}
-                        </span>
-                      </div>
+                      <span className="font-medium text-sm text-foreground/80">
+                        {displayUser.name
+                          ? displayUser.name.charAt(0).toUpperCase()
+                          : "U"}
+                      </span>
                     )}
                   </div>
                   <ul
                     tabIndex={0}
-                    className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg shadow-base-300/50 bg-base-100 rounded-box w-52 border border-base-200/50"
+                    className="menu menu-sm dropdown-content mt-3 z-[1] p-1.5 shadow-2xl shadow-black bg-[#0A0A0A] rounded-lg w-56 border border-white/10"
                   >
-                    <li className="menu-title px-4 py-2 border-b border-base-200/50 mb-1">
-                      <span className="text-base font-bold text-base-content">
+                    <li className="px-3 py-2 border-b border-white/10 mb-1 pointer-events-none">
+                      <span className="text-sm font-medium text-foreground block">
                         {displayUser.name}
                       </span>
-                      <span className="text-xs font-normal text-base-content/60 block mt-0.5 break-all">
+                      <span className="text-xs font-normal text-foreground/50 block mt-0.5 truncate">
                         {displayUser.email}
                       </span>
                     </li>
                     <li>
                       <Link
                         href="/profile"
-                        className="py-2 hover:bg-base-200/50"
+                        className="px-3 py-2 rounded-md hover:bg-white/[0.04] text-foreground/80 hover:text-foreground transition-colors"
                       >
-                        <User className="w-4 h-4 mr-2" />
+                        <User className="w-4 h-4 mr-2 opacity-70" />
                         Edit Profile
                       </Link>
                     </li>
                     <li>
                       <button
                         onClick={handleLogout}
-                        className="py-2 text-error hover:bg-error/10"
+                        className="px-3 py-2 rounded-md hover:bg-red-500/10 text-red-500/80 hover:text-red-500 transition-colors"
                       >
-                        <LogOut className="w-4 h-4 mr-2" />
+                        <LogOut className="w-4 h-4 mr-2 opacity-70" />
                         Logout
                       </button>
                     </li>
@@ -212,13 +208,13 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-base-content/80 hover:text-base-content transition-all duration-200"
+                  className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
-                  className="btn btn-primary bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-600/90 border-0 btn-sm h-10 px-6 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg transition-all duration-200 text-sm font-semibold"
+                  className="h-9 px-4 rounded-lg flex items-center justify-center text-sm font-medium text-foreground bg-white/[0.02] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all"
                 >
                   Get Started
                 </Link>

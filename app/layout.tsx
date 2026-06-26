@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import ClerkSyncProvider from "@/components/ClerkSyncProvider";
@@ -8,6 +8,11 @@ import { ClerkProvider, GoogleOneTap, Show } from '@clerk/nextjs'
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
   subsets: ["latin"],
 });
 
@@ -32,11 +37,8 @@ export default function RootLayout({
       <html
         lang="en"
         data-theme="dark"
-        className={`${inter.variable} ${plexMono.variable} h-full antialiased`}
+        className={`${inter.variable} ${interTight.variable} ${plexMono.variable} h-full antialiased`}
       >
-        <head>
-          <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap" rel="stylesheet" />
-        </head>
         <body className="min-h-full flex flex-col font-body">
           <Show when="signed-out">
             <GoogleOneTap />
