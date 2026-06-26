@@ -155,19 +155,16 @@ export default function AboutPage() {
 
         {/* CTA Banner */}
         <section className="w-full">
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary/80 via-indigo-600/80 to-secondary/80 p-10 md:p-14 flex flex-col md:flex-row items-center justify-between text-left shadow-xl shadow-primary/20">
-            {/* Background elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-
+          <div className="relative rounded-3xl overflow-hidden bg-base-200 border border-white/[0.06] p-10 md:p-14 flex flex-col md:flex-row items-center justify-between text-left shadow-xl">
             <div className="flex items-center gap-6 z-10 mb-8 md:mb-0">
-              <div className="hidden md:flex w-16 h-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md shadow-lg">
+              <div className="hidden md:flex w-16 h-16 items-center justify-center rounded-2xl bg-base-100 border border-white/[0.06] text-primary shadow-md">
                 <Rocket className="w-8 h-8" />
               </div>
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2">
                   Ready to share your skills?
                 </h2>
-                <p className="text-white/80 font-medium max-w-md">
+                <p className="text-white/60 font-medium max-w-md">
                   Join other builders and start contributing to the future of
                   AI.
                 </p>
@@ -177,7 +174,7 @@ export default function AboutPage() {
             <div className="z-10 w-full md:w-auto">
               <Link
                 href="/my-skills"
-                className="btn bg-white text-indigo-900 hover:bg-base-200 border-0 rounded-xl px-8 h-14 font-bold shadow-lg w-full md:w-auto text-base flex items-center gap-2"
+                className="btn bg-white text-base-100 hover:bg-white/90 border-0 rounded-xl px-8 h-14 font-bold shadow-md w-full md:w-auto text-base flex items-center gap-2"
               >
                 Create Your First Skill <ArrowRight className="w-4 h-4" />
               </Link>
