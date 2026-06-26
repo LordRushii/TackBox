@@ -67,7 +67,7 @@ export default function SkillInstall({ slug, skillName }: SkillInstallProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-base-200/40">
         <div className="flex items-center gap-2">
           <span className="text-xl font-extrabold tracking-tight text-base-content/95">
-            🚀 Quick Install
+            Quick Install
           </span>
           {skillName && (
             <span className="badge badge-sm badge-neutral font-semibold text-xs tracking-wide">
