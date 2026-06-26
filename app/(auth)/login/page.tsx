@@ -81,7 +81,7 @@ export default function LoginPage() {
           <div className="p-8 sm:p-10">
             {/* Header */}
             <div className="text-center mb-8 flex flex-col items-center">
-              <div className="w-32 h-8 overflow-hidden flex items-center justify-center mb-6">
+              <div className="w-36 h-8 overflow-hidden flex items-center justify-center mb-6">
                 <img
                   src="/logo.png"
                   alt="Tackbox Logo"

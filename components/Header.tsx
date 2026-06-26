@@ -101,7 +101,7 @@ export default function Header() {
         <div className="flex-1 flex items-center">
           <Link
             href="/"
-            className="group flex items-center justify-start w-32 h-10 overflow-hidden transition-opacity hover:opacity-80"
+            className="group flex items-center justify-start w-40 h-10 overflow-hidden transition-opacity hover:opacity-80"
           >
             <img
               src="/logo.png"
