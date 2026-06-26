@@ -47,22 +47,20 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-base-200/50 border border-base-200 backdrop-blur-md shadow-sm">
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content/70 uppercase tracking-wider">
-                For AI Builders, By Builders
+                GitHub for AI Agent Skills
               </span>
             </div>
 
             <h1 className="text-5xl sm:text-7xl font-black tracking-tight text-base-content leading-tight">
-              Discover. Share.
+              Stop rewriting the
               <br />
               <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent drop-shadow-sm">
-                Level Up.
+                same agent prompt.
               </span>
             </h1>
 
             <p className="max-w-xl text-lg sm:text-xl text-base-content/60 leading-relaxed font-medium">
-              Tackbox is an open marketplace for AI agent skills. Discover
-              powerful skills, share your expertise, and build the future of AI
-              together.
+              Find a skill.md that does what you need. Fork it, ship it, move on. Tackbox is a public registry for Markdown-based AI agent skills.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2 w-full sm:w-auto">
@@ -70,7 +68,7 @@ export default function Home() {
                 href="/skills"
                 className="btn btn-primary bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-600/90 border-0 rounded-xl px-6 h-12 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto text-base flex items-center gap-2"
               >
-                Explore Skills <ArrowRight className="w-4 h-4" />
+                Browse Skills <ArrowRight className="w-4 h-4" />
               </Link>
 
               {isLoggedIn ? (
@@ -78,14 +76,14 @@ export default function Home() {
                   href="/my-skills"
                   className="btn btn-outline border-base-200/60 hover:bg-base-200/40 rounded-xl px-6 h-12 font-bold shadow-sm hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto text-base bg-base-200/20 backdrop-blur-md"
                 >
-                  Publish Skill
+                  Publish a Skill
                 </Link>
               ) : (
                 <Link
                   href="/login"
                   className="btn btn-outline border-base-200/60 hover:bg-base-200/40 rounded-xl px-6 h-12 font-bold shadow-sm hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto text-base bg-base-200/20 backdrop-blur-md"
                 >
-                  Publish Skill
+                  Publish a Skill
                 </Link>
               )}
             </div>
@@ -98,10 +96,10 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="font-bold text-xl text-base-content">
-                    12K+
+                    2,400+
                   </div>
                   <div className="text-xs text-base-content/60">
-                    Skills Shared
+                    Skills published
                   </div>
                 </div>
               </div>
@@ -110,7 +108,7 @@ export default function Home() {
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-bold text-xl text-base-content">5K+</div>
+                  <div className="font-bold text-xl text-base-content">8,900+</div>
                   <div className="text-xs text-base-content/60">Developers</div>
                 </div>
               </div>
@@ -119,8 +117,8 @@ export default function Home() {
                   <CloudDownload className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-bold text-xl text-base-content">2M+</div>
-                  <div className="text-xs text-base-content/60">Downloads</div>
+                  <div className="font-bold text-xl text-base-content">41,000+</div>
+                  <div className="text-xs text-base-content/60">Skill files downloaded</div>
                 </div>
               </div>
             </div>
@@ -199,8 +197,7 @@ export default function Home() {
                 Discover
               </h3>
               <p className="text-sm text-base-content/60 leading-relaxed">
-                Explore thousands of high-quality AI agent skills across
-                categories.
+                Search skills by category, model, or use case. Every skill includes a description, sample output, and the raw .md file. No signup required to browse.
               </p>
             </div>
           </div>
@@ -214,7 +211,7 @@ export default function Home() {
                 Share
               </h3>
               <p className="text-sm text-base-content/60 leading-relaxed">
-                Publish your skills and help others in the community.
+                Publish a skill.md file you&apos;ve already built. Add a README, tag your use case, and it&apos;s live. Other developers can find it, fork it, or build on top of it.
               </p>
             </div>
           </div>
@@ -228,7 +225,7 @@ export default function Home() {
                 Reuse
               </h3>
               <p className="text-sm text-base-content/60 leading-relaxed">
-                Download skills as markdown and use them in your projects.
+                Download a skill file directly into your project. Drop it into your agent&apos;s context. No adapters, no wrappers — just a Markdown file that works.
               </p>
             </div>
           </div>
@@ -240,7 +237,7 @@ export default function Home() {
             Popular Categories
           </div>
           <h2 className="text-3xl font-bold text-base-content">
-            Browse by Category
+            Browse by what your agent actually does.
           </h2>
 
           <div className="flex flex-wrap justify-center gap-3 pt-4">
