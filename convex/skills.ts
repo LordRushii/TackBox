@@ -214,3 +214,25 @@ export const getUserLikedSkillIds = query({
     return likes.map(like => like.skillId);
   },
 });
+
+export const getStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const publicSkills = await ctx.db
+      .query("skills")
+      .withIndex("by_visibility", (q) => q.eq("visibility", "public"))
+      .collect();
+
+    const totalSkills = publicSkills.length;
+    const totalDownloads = publicSkills.reduce(
+      (sum, s) => sum + (s.downloads || 0),
+      0
+    );
+
+    const allUsers = await ctx.db.query("users").collect();
+    const totalUsers = allUsers.length;
+
+    return { totalSkills, totalUsers, totalDownloads };
+  },
+});
+

@@ -9,7 +9,7 @@
   --color-border: rgba(255, 255, 255, 0.1);
   --color-card-bg: rgba(255, 255, 255, 0.02);
   --color-card-bg-hover: rgba(255, 255, 255, 0.05);
-  --color-accent: #F59E0B;
+  --color-accent: #7C3AED;
 }
 
 @theme inline {
@@ -21,7 +21,7 @@
   --color-base-300: #000000;
   --color-base-content: var(--foreground);
   --color-primary: var(--color-accent);
-  --color-primary-content: #000000;
+  --color-primary-content: #FFFFFF;
   --color-secondary: #3B82F6; /* Fallback if used */
   --color-secondary-content: #FFFFFF;
   --color-accent: var(--color-accent);
@@ -67,7 +67,7 @@ body {
 }
 
 ::selection {
-  background-color: rgba(245, 158, 11, 0.3); /* Amber selection */
+  background-color: rgba(124, 58, 237, 0.35); /* Violet selection */
   color: #ffffff;
 }
 
@@ -88,13 +88,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .btn-primary {
   background-color: var(--color-primary);
-  color: #0A0A0A;
+  color: #FFFFFF;
   border: 1px solid var(--color-primary);
 }
 
 .btn-primary:hover {
-  background-color: #D97706; /* Amber 600 */
-  border-color: #D97706;
+  background-color: #6D28D9; /* Violet 700 */
+  border-color: #6D28D9;
   transform: none;
 }
 

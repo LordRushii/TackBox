@@ -316,3 +316,17 @@ export async function toggleStarAction(id: string) {
   revalidatePath("/my-skills");
   return result;
 }
+
+export async function fetchStatsAction(): Promise<{
+  totalSkills: number;
+  totalUsers: number;
+  totalDownloads: number;
+}> {
+  try {
+    return await convex.query(api.skills.getStats);
+  } catch (err) {
+    console.error("Failed to fetch stats:", err);
+    return { totalSkills: 0, totalUsers: 0, totalDownloads: 0 };
+  }
+}
+

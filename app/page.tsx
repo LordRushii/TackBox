@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { fetchStatsAction } from "@/app/actions/skills";
 import {
   Sparkles,
   ArrowRight,
@@ -22,6 +23,11 @@ import {
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [stats, setStats] = useState({
+    totalSkills: 0,
+    totalUsers: 0,
+    totalDownloads: 0,
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -30,6 +36,7 @@ export default function Home() {
         setIsLoggedIn(true);
       }
     }
+    fetchStatsAction().then(setStats);
   }, []);
 
   return (
@@ -43,7 +50,7 @@ export default function Home() {
           {/* Left Side text */}
           <div className="flex-1 flex flex-col items-start text-left space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <Sparkles className="w-3.5 h-3.5 text-foreground/50" />
               <span className="text-[11px] font-medium text-foreground/70 uppercase tracking-widest">
                 GitHub for AI Agent Skills
               </span>
@@ -92,7 +99,7 @@ export default function Home() {
                   <span className="text-[10px] font-medium uppercase tracking-widest">Skills</span>
                 </div>
                 <div className="font-heading font-semibold text-2xl text-foreground">
-                  2,400+
+                  {stats.totalSkills.toLocaleString()}+
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -101,7 +108,7 @@ export default function Home() {
                   <span className="text-[10px] font-medium uppercase tracking-widest">Devs</span>
                 </div>
                 <div className="font-heading font-semibold text-2xl text-foreground">
-                  8,900+
+                  {stats.totalUsers.toLocaleString()}+
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -110,7 +117,7 @@ export default function Home() {
                   <span className="text-[10px] font-medium uppercase tracking-widest">Downloads</span>
                 </div>
                 <div className="font-heading font-semibold text-2xl text-foreground">
-                  41,000+
+                  {stats.totalDownloads.toLocaleString()}+
                 </div>
               </div>
             </div>
