@@ -30,9 +30,9 @@ export default function Home() {
   });
 
   // Base offsets make the platform look established while still growing with real data
-  const BASE_SKILLS = 2400;
-  const BASE_DEVS = 8900;
-  const BASE_DOWNLOADS = 41000;
+  const BASE_SKILLS = 5;
+  const BASE_DEVS = 2;
+  const BASE_DOWNLOADS = 76;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -143,7 +143,7 @@ export default function Home() {
                 </div>
                 <div className="w-12"></div> {/* Spacer for symmetry */}
               </div>
-              
+
               {/* Window Content */}
               <div className="p-6 text-left font-mono text-[13px] leading-[1.6] overflow-x-auto bg-[#0A0A0A]">
                 <div className="flex group">
