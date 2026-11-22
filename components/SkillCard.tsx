@@ -1,15 +1,18 @@
 import Link from "next/link";
 import React from "react";
-import { Star, ArrowRight, Plus } from "lucide-react";
+import { Star } from "lucide-react";
 
 export type SkillCardProps = {
   id: string;
   name: string;
   category: string;
+  /** Only shown when a skill actually sets one */
   level?: string;
   description: string;
   authorName: string;
-  authorRole: string;
+  /** Kept for API compatibility; not shown */
+  authorRole?: string;
+  /** Kept for API compatibility; not shown */
   authorAvatarColor?: string;
   authorAvatarUrl?: string;
   starsCount: number;
@@ -22,11 +25,9 @@ export default function SkillCard({
   id,
   name,
   category,
-  level = "Intermediate",
+  level,
   description,
   authorName,
-  authorRole,
-  authorAvatarColor, // Kept for API compat, but unused in flat design
   authorAvatarUrl,
   starsCount,
   hasStarred = false,
@@ -36,90 +37,76 @@ export default function SkillCard({
   const initials = authorName
     .split(" ")
     .map((n) => n[0])
-    .join("");
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const meta = [category, level, subSkillCount > 0 ? `+${subSkillCount} ${subSkillCount === 1 ? "skill" : "skills"}` : null].filter(Boolean);
 
   return (
     <Link
       href={`/skills/${id}`}
-      className="bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 hover:border-white/20 transition-colors rounded-lg flex flex-col justify-between block text-left group p-5 sm:p-6"
+      className="group flex flex-col rounded-2xl border border-line bg-card p-5 transition-colors duration-150 ease-out hover:border-line-strong hover:bg-raised"
     >
-      <div className="flex justify-between items-start mb-4">
-        <span className="text-[10px] font-medium uppercase tracking-widest text-foreground/60 px-2 py-1 rounded border border-white/10 bg-white/[0.02]">
-          {category}
-        </span>
-        <div className="flex items-center gap-2">
-          {subSkillCount > 0 && (
-            <span className="text-[10px] text-foreground/60 font-medium border border-white/10 bg-white/[0.02] rounded px-1.5 py-0.5 flex items-center gap-0.5">
-              <Plus className="w-2.5 h-2.5 opacity-70" />
-              {subSkillCount} more
-            </span>
-          )}
-          {level && (
-            <span className="text-[10px] text-foreground/40 font-medium uppercase tracking-wider">
-              {level}
-            </span>
-          )}
-        </div>
-      </div>
+      <p className="font-mono text-xs text-muted">{meta.join(" · ")}</p>
 
-      <h2 className="text-lg sm:text-xl font-heading font-semibold text-foreground group-hover:text-amber-500 transition-colors duration-200">
-        {name}
-      </h2>
+      <h2 className="mt-3 break-words font-heading text-lg font-medium leading-6 text-foreground">{name}</h2>
 
-      <p className="text-foreground/60 text-xs sm:text-sm mt-2 sm:mt-3 leading-relaxed min-h-[4rem] sm:min-h-[4.5rem] line-clamp-3">
-        {description}
-      </p>
+      <p className="mt-2 line-clamp-3 min-h-[66px] text-sm leading-[22px] text-subtle">{description}</p>
 
-      {/* Footer info: Who made it + likes */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-2 mt-5 sm:mt-6 pt-4 border-t border-white/10">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-4">
+        <span className="flex min-w-0 items-center gap-2">
           {authorAvatarUrl ? (
-            <img
-              src={authorAvatarUrl}
-              alt={authorName}
-              className="h-8 w-8 rounded-md object-cover border border-white/10 shrink-0"
-            />
+            <img src={authorAvatarUrl} alt="" className="size-6 shrink-0 rounded-md border border-line object-cover" />
           ) : (
-            <div className={`flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-foreground font-medium text-xs shadow-sm shrink-0`}>
+            <span className="grid size-6 shrink-0 place-items-center rounded-md border border-line bg-raised text-[10px] font-medium text-subtle">
               {initials}
-            </div>
+            </span>
           )}
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-xs font-medium text-foreground truncate">
-              {authorName}
-            </span>
-            <span className="text-[10px] text-foreground/40 truncate">
-              {authorRole}
-            </span>
-          </div>
-        </div>
+          <span className="truncate text-[13px] text-subtle">{authorName}</span>
+        </span>
 
-        <div className="flex items-center gap-3 sm:gap-4 shrink-0 justify-end">
-          <button
-            onClick={(e) => {
-              if (onStarToggle) {
-                e.preventDefault();
-                e.stopPropagation();
-                onStarToggle(id, e);
-              }
-            }}
-            className={`h-7 px-2 rounded flex items-center gap-1.5 transition-colors duration-200 ${
-              hasStarred ? "text-amber-500 bg-amber-500/10 hover:bg-amber-500/20" : "text-foreground/40 hover:text-amber-500 hover:bg-amber-500/10"
-            }`}
-            title="Star this Agent Skill"
-          >
-            <Star
-              className="w-3.5 h-3.5"
-              fill={hasStarred ? "currentColor" : "none"}
-              strokeWidth={hasStarred ? 0 : 2}
-            />
-            <span className="font-medium text-xs">{starsCount}</span>
-          </button>
-          <div className="text-foreground/50 group-hover:text-amber-500 transition-colors font-medium text-[11px] sm:text-xs flex items-center gap-1">
-            View <span className="hidden sm:inline">Details</span> <ArrowRight className="w-3 h-3" />
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            if (onStarToggle) {
+              e.preventDefault();
+              e.stopPropagation();
+              onStarToggle(id, e);
+            }
+          }}
+          aria-pressed={hasStarred}
+          aria-label={hasStarred ? `Unstar ${name}` : `Star ${name}`}
+          className={`-mr-2 flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2 font-mono text-xs tabular-nums transition-colors duration-150 ease-out hover:bg-raised-strong ${
+            hasStarred ? "text-foreground" : "text-muted hover:text-foreground"
+          }`}
+        >
+          <Star
+            className={`size-4 ${hasStarred ? "text-amber" : ""}`}
+            fill={hasStarred ? "currentColor" : "none"}
+            strokeWidth={1.5}
+          />
+          {starsCount}
+        </button>
       </div>
     </Link>
+  );
+}
+
+/** Same shape as a card, no shimmer: it holds the space until the list arrives. */
+export function SkillCardSkeleton() {
+  return (
+    <div aria-hidden className="flex flex-col rounded-2xl border border-line bg-card p-5">
+      <span className="h-4 w-24 rounded bg-raised" />
+      <span className="mt-3 h-6 w-3/4 rounded bg-raised" />
+      <span className="mt-2 flex min-h-[66px] flex-col gap-2 pt-1">
+        <span className="h-3 w-full rounded bg-raised" />
+        <span className="h-3 w-5/6 rounded bg-raised" />
+        <span className="h-3 w-2/3 rounded bg-raised" />
+      </span>
+      <span className="mt-5 flex items-center gap-2 border-t border-line pt-4">
+        <span className="size-6 rounded-md bg-raised" />
+        <span className="h-3 w-24 rounded bg-raised" />
+      </span>
+    </div>
   );
 }

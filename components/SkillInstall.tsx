@@ -1,163 +1,82 @@
 "use client";
 
-import React, { useState } from "react";
-import { Check, Copy, Terminal, Download, Info } from "lucide-react";
+import { useState } from "react";
+import { getSkillsRepo } from "@/lib/github";
+import { CopyButton } from "./SkillFile";
 
 interface SkillInstallProps {
   slug: string;
+  /** Kept for API compatibility; the page already shows the name */
   skillName?: string;
 }
 
-export default function SkillInstall({ slug, skillName }: SkillInstallProps) {
-  const [activeTab, setActiveTab] = useState<"cli" | "degit">("cli");
-  const [copied, setCopied] = useState(false);
+const TABS = [
+  { id: "cli", label: "npx skills", caption: "Run it from the root of your agent workspace." },
+  { id: "degit", label: "degit", caption: "Copies the skill folder from GitHub without the git history." },
+] as const;
 
-  // Extract owner and repo from public environment variables
-  const envOwner = process.env.NEXT_PUBLIC_GITHUB_OWNER || "LordRushii";
-  const envRepo = process.env.NEXT_PUBLIC_GITHUB_REPO || "TackBox";
+export default function SkillInstall({ slug }: SkillInstallProps) {
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]["id"]>("cli");
+  const { owner, repo } = getSkillsRepo();
 
-  let owner = envOwner;
-  let repo = envRepo;
-
-  if (envRepo.includes("/")) {
-    try {
-      const cleanRepo = envRepo.replace(/\/$/, "").replace(/\.git$/, "");
-      if (cleanRepo.startsWith("http://") || cleanRepo.startsWith("https://")) {
-        const url = new URL(cleanRepo);
-        const parts = url.pathname.split("/").filter(Boolean);
-        if (parts.length >= 2) {
-          owner = parts[0];
-          repo = parts[1];
-        } else if (parts.length === 1) {
-          repo = parts[0];
-        }
-      } else {
-        const parts = cleanRepo.split("/");
-        owner = parts[0];
-        repo = parts[1];
-      }
-    } catch (e) {
-      console.warn("Error parsing NEXT_PUBLIC_GITHUB_REPO URL:", e);
-    }
-  }
-
-  // Construct commands
-  const primaryCommand = `npx skills add ${owner}/${repo}/skills/${slug}`;
-  const degitCommand = `npx degit ${owner}/${repo}/skills/${slug} ${slug}`;
-
-  const currentCommand = activeTab === "cli" ? primaryCommand : degitCommand;
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(currentCommand);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy command:", err);
-    }
+  const commands = {
+    cli: `npx skills add ${owner}/${repo}/skills/${slug}`,
+    degit: `npx degit ${owner}/${repo}/skills/${slug} ${slug}`,
   };
+  const command = commands[activeTab];
+  const caption = TABS.find((t) => t.id === activeTab)!.caption;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-base-200 bg-base-200/25 p-5 sm:p-6 shadow-xl backdrop-blur-md transition-all duration-300 hover:shadow-primary/5 hover:border-primary/20">
-      {/* Glow decorative background elements */}
-      <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
+    <section aria-labelledby="install-title" className="rounded-2xl border border-line bg-card p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="install-title" className="font-heading text-[15px] font-medium text-foreground">
+          Install
+        </h2>
+        <div role="tablist" aria-label="Install method" className="flex rounded-lg border border-line bg-deep p-0.5">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`h-7 rounded-md px-3 font-mono text-xs transition-colors duration-150 ease-out ${
+                activeTab === t.id ? "bg-raised text-foreground" : "text-muted hover:text-foreground"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-base-200/40">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-extrabold tracking-tight text-base-content/95">
-            Quick Install
-          </span>
-          {skillName && (
-            <span className="badge badge-sm badge-neutral font-semibold text-xs tracking-wide">
-              {skillName}
+      <div className="mt-4 flex items-start gap-2 rounded-lg border border-line bg-deep py-2 pl-4 pr-2">
+        <p className="min-w-0 flex-1 break-words py-1.5 font-mono text-xs leading-5 text-subtle">
+          <span className="select-none text-amber">$ </span>
+          {/* Long paths wrap after a slash, never inside a name */}
+          {command.split("/").map((part, i, parts) => (
+            <span key={i}>
+              {i > 0 && (
+                <>
+                  /<wbr />
+                </>
+              )}
+              {i < parts.length - 1 ? (
+                part
+              ) : (
+                // The last word keeps the block cursor, the amber tile from the logo, on its line
+                <span className="whitespace-nowrap">
+                  {part}
+                  <span aria-hidden className="ml-1 inline-block h-3.5 w-[7px] translate-y-0.5 bg-amber" />
+                </span>
+              )}
             </span>
-          )}
-        </div>
-
-        {/* Tab Selector */}
-        <div className="flex bg-base-300/80 rounded-xl p-1 border border-base-200/40 self-start sm:self-auto">
-          <button
-            onClick={() => {
-              setActiveTab("cli");
-              setCopied(false);
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-              activeTab === "cli"
-                ? "bg-primary text-primary-content shadow-sm"
-                : "text-base-content/60 hover:text-base-content hover:bg-base-200/50"
-            }`}
-          >
-            <Terminal className="w-3.5 h-3.5" />
-            Tackbox CLI
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("degit");
-              setCopied(false);
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-              activeTab === "degit"
-                ? "bg-primary text-primary-content shadow-sm"
-                : "text-base-content/60 hover:text-base-content hover:bg-base-200/50"
-            }`}
-          >
-            <Download className="w-3.5 h-3.5" />
-            degit
-          </button>
-        </div>
+          ))}
+        </p>
+        <CopyButton text={command} label="Copy install command" />
       </div>
 
-      {/* Command Display Block */}
-      <div className="mt-5">
-        <div className="relative flex items-center justify-between gap-3 bg-black/40 rounded-xl p-4 border border-base-300/60 font-mono text-sm group transition-all duration-300 hover:border-primary/20 hover:bg-black/50">
-          <div className="flex items-center min-w-0 flex-1">
-            <span className="text-primary/70 select-none mr-2 font-bold">$</span>
-            <div className="overflow-x-auto whitespace-nowrap scrollbar-none text-neutral-100 flex-1 py-0.5 selection:bg-primary/30 selection:text-white">
-              {currentCommand}
-            </div>
-          </div>
-
-          <button
-            onClick={handleCopy}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all duration-200 active:scale-95 shrink-0 ${
-              copied
-                ? "bg-success/10 border-success/30 text-success"
-                : "bg-base-100/50 border-base-300 text-base-content/80 hover:bg-primary hover:border-primary hover:text-primary-content shadow-sm"
-            }`}
-            title="Copy command to clipboard"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 animate-bounce-short" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                Copy
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Description / Instructions */}
-      <div className="mt-4 flex items-start gap-2.5 text-xs text-base-content/60 leading-relaxed bg-base-300/10 rounded-lg p-3 border border-base-200/20">
-        <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-        <div>
-          {activeTab === "cli" ? (
-            <p>
-              Installs this skill template directly into your project's local directory using the Tackbox CLI. Run this in the root of your agent workspace.
-            </p>
-          ) : (
-            <p>
-              Uses <code className="text-primary font-mono bg-primary/10 px-1 rounded">degit</code> to download the raw skill directory from GitHub without cloning git history. Perfect for custom integration!
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
+      <p className="mt-3 text-[13px] leading-5 text-muted">{caption}</p>
+    </section>
   );
 }

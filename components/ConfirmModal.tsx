@@ -1,5 +1,6 @@
-import React from "react";
-import { AlertTriangle } from "lucide-react";
+"use client";
+
+import React, { useEffect } from "react";
 
 export type ConfirmModalProps = {
   isOpen: boolean;
@@ -22,32 +23,38 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  // Escape closes, unless the action is already running
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isProcessing) onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, isProcessing, onCancel]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box bg-base-200 border border-base-200/60 rounded-2xl shadow-2xl">
-        <h3 className="font-extrabold text-xl text-error flex items-center gap-2">
-          <AlertTriangle className="w-6 h-6" />
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-6" onClick={isProcessing ? undefined : onCancel}>
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        className="toast-in w-full max-w-md rounded-2xl border border-line-strong bg-card p-6 shadow-float"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id="confirm-title" className="font-heading text-lg font-medium text-foreground">
           {title}
-        </h3>
-        <p className="py-4 text-sm text-base-content/70">
-          {message}
-        </p>
-        <div className="modal-action">
-          <button 
-            onClick={onCancel} 
-            className="btn btn-outline border-base-200/50 hover:bg-base-200/20"
-            disabled={isProcessing}
-          >
+        </h2>
+        <div className="mt-2 text-sm leading-[22px] text-subtle">{message}</div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" onClick={onCancel} disabled={isProcessing} className="btn btn-secondary h-9 px-3 text-sm">
             {cancelText}
           </button>
-          <button 
-            onClick={onConfirm} 
-            className="btn btn-error"
-            disabled={isProcessing}
-          >
-            {isProcessing ? <span className="loading loading-spinner loading-xs"></span> : confirmText}
+          <button type="button" onClick={onConfirm} disabled={isProcessing} className="btn btn-danger-solid h-9 gap-2 px-3 text-sm">
+            {isProcessing && <span className="loading loading-spinner loading-xs" />}
+            {confirmText}
           </button>
         </div>
       </div>

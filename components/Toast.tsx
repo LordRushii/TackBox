@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle, Check, Info } from "lucide-react";
 
 export type ToastProps = {
   show: boolean;
@@ -8,23 +8,23 @@ export type ToastProps = {
   onClose?: () => void;
 };
 
+const ICONS = { success: Check, error: AlertTriangle, info: Info };
+const ICON_COLOR = { success: "text-positive", error: "text-negative", info: "text-muted" };
+
 export default function Toast({ show, message, type = "success", onClose }: ToastProps) {
   if (!show) return null;
+  const Icon = ICONS[type];
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 p-2 max-w-sm animate-bounce" onClick={onClose}>
-      <div className="alert border shadow-2xl rounded-2xl flex items-center gap-3 p-4 bg-base-300 border-base-200 cursor-pointer">
-        {type === "success" && (
-          <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-        )}
-        {type === "error" && (
-          <AlertTriangle className="w-5 h-5 text-error shrink-0" />
-        )}
-        {type === "info" && (
-          <Info className="w-5 h-5 text-primary shrink-0" />
-        )}
-        <span className="font-bold text-xs sm:text-sm text-base-content/95">{message}</span>
-      </div>
+    <div role="status" aria-live="polite" className="toast-in fixed bottom-6 right-6 z-50 max-w-sm">
+      <button
+        type="button"
+        onClick={onClose}
+        className="flex items-center gap-3 rounded-xl border border-line-strong bg-card px-4 py-3 text-left shadow-float"
+      >
+        <Icon className={`size-4 shrink-0 ${ICON_COLOR[type]}`} strokeWidth={1.5} />
+        <span className="text-sm text-foreground">{message}</span>
+      </button>
     </div>
   );
 }
