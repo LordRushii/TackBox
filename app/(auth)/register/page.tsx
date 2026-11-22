@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { registerAction } from "@/app/actions/auth";
-import { CheckCircle2, AlertTriangle, User, Mail, Lock } from "lucide-react";
+import { AlertTriangle, Check } from "lucide-react";
 import GoogleButton from "@/components/GoogleButton";
 
 export default function RegisterPage() {
@@ -23,17 +23,15 @@ export default function RegisterPage() {
     setSuccess("");
 
     if (!name || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields.");
+      setError("Fill in every field");
       return;
     }
-
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("The passwords don't match");
       return;
     }
-
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+      setError("Use at least 8 characters for the password");
       return;
     }
 
@@ -49,205 +47,101 @@ export default function RegisterPage() {
       const result = await registerAction(null, formData);
 
       if (result?.success) {
-        setSuccess("Registration successful! Redirecting to login...");
-        setTimeout(() => {
-          router.push(`/login?email=${encodeURIComponent(email)}`);
-        }, 1500);
+        setSuccess("Account created, taking you to sign in");
+        setTimeout(() => router.push(`/login?email=${encodeURIComponent(email)}`), 1500);
       } else {
-        setError(result?.message || "Registration failed. Please try again.");
+        setError(result?.message || "Couldn't create the account. Try again.");
       }
     } catch (err) {
       console.error(err);
-      setError("An unexpected error occurred. Please try again.");
+      setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const fields = [
+    { id: "register-name", label: "Name", type: "text", value: name, set: setName, autoComplete: "name", placeholder: "" },
+    { id: "register-email", label: "Email", type: "email", value: email, set: setEmail, autoComplete: "email", placeholder: "you@example.com" },
+    { id: "register-password", label: "Password", type: "password", value: password, set: setPassword, autoComplete: "new-password", placeholder: "At least 8 characters" },
+    { id: "register-confirm", label: "Confirm password", type: "password", value: confirmPassword, set: setConfirmPassword, autoComplete: "new-password", placeholder: "" },
+  ];
+
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-background relative overflow-hidden">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-grid-pattern pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black,transparent)]" />
+    <main className="flex flex-1 items-center justify-center px-6 py-16">
+      <div className="w-full max-w-[400px] rounded-2xl border border-line bg-card p-8">
+        <h1 className="font-heading text-2xl font-medium text-foreground">Create your account</h1>
+        <p className="mt-2 text-sm text-subtle">Publish skills under your own name</p>
 
-      <div className="w-full max-w-md z-10">
-        {/* Card Container */}
-        <div className="bg-white/[0.02] border border-white/10 shadow-2xl shadow-black rounded-lg overflow-hidden">
-          <div className="p-8 sm:p-10">
-            {/* Header */}
-            <div className="text-center mb-8 flex flex-col items-center">
-              <div className="w-36 h-8 overflow-hidden flex items-center justify-center mb-6">
-                <img
-                  src="/logo.png"
-                  alt="Tackbox Logo"
-                  className="w-full h-full object-contain object-center"
-                />
-              </div>
-              <h2 className="text-3xl font-heading font-semibold tracking-tight text-foreground">
-                Create Account
-              </h2>
-              <p className="text-foreground/60 text-sm mt-2">
-                Join Tackbox and start cataloging your skills
-              </p>
-            </div>
-
-            {/* Status Messages */}
-            {error && (
-              <div className="text-sm py-3 px-4 rounded-md border border-red-500/20 bg-red-500/10 text-red-500 mb-6 flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {success && (
-              <div className="text-sm py-3 px-4 rounded-md border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 mb-6 flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>{success}</span>
-              </div>
-            )}
-
-            {/* Google Auth */}
-            <GoogleButton mode="signUp" />
-
-            <div className="relative py-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10"></div>
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-medium">
-                <span className="bg-[#0A0A0A] px-2 text-foreground/40">OR CONTINUE WITH EMAIL</span>
-              </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="password"
-                    placeholder="•••••••• (Min. 8 chars)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="font-medium text-foreground/80 text-[11px] uppercase tracking-wider">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full h-10 pl-10 pr-3 rounded-md bg-[#0A0A0A] border border-white/10 focus:border-white/20 text-sm text-foreground focus:outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2 mt-4">
-                <input
-                  type="checkbox"
-                  id="agree-terms"
-                  className="rounded bg-[#0A0A0A] border-white/10 text-amber-500 focus:ring-amber-500 focus:ring-offset-[#0A0A0A] mt-0.5"
-                  required
-                />
-                <label
-                  htmlFor="agree-terms"
-                  className="cursor-pointer select-none text-foreground/60 text-xs leading-relaxed"
-                >
-                  I agree to the{" "}
-                  <a href="#" className="text-amber-500 hover:text-amber-400 transition-colors">
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a href="#" className="text-amber-500 hover:text-amber-400 transition-colors">
-                    Privacy Policy
-                  </a>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-11 mt-6 flex items-center justify-center rounded-md bg-white text-[#0A0A0A] hover:bg-white/90 text-sm font-medium transition-all gap-2"
-              >
-                {loading ? (
-                  <>
-                    <span className="loading loading-spinner loading-xs border-current border-t-transparent"></span>
-                    Creating Account...
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </button>
-            </form>
-
-            {/* Bottom Link */}
-            <div className="text-center mt-8 pt-6 border-t border-white/10 text-sm">
-              <span className="text-foreground/50">
-                Already have an account?{" "}
-              </span>
-              <Link
-                href="/login"
-                className="text-amber-500 font-medium hover:text-amber-400 transition-colors"
-              >
-                Sign in
-              </Link>
-            </div>
+        {error && (
+          <div role="alert" className="mt-6 flex items-start gap-2 rounded-[10px] border border-negative/20 bg-negative/10 px-3 py-2.5 text-[13px] leading-5 text-negative">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" strokeWidth={1.5} />
+            <span>{error}</span>
           </div>
+        )}
+        {success && (
+          <div role="status" className="mt-6 flex items-start gap-2 rounded-[10px] border border-positive/20 bg-positive/10 px-3 py-2.5 text-[13px] leading-5 text-positive">
+            <Check className="mt-0.5 size-4 shrink-0" strokeWidth={1.5} />
+            <span>{success}</span>
+          </div>
+        )}
+
+        <div className="mt-6">
+          <GoogleButton mode="signUp" />
         </div>
+
+        <div className="my-6 flex items-center gap-3 text-xs text-muted">
+          <span className="h-px flex-1 bg-line" />
+          or
+          <span className="h-px flex-1 bg-line" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {fields.map((f) => (
+            <div key={f.id} className="flex flex-col gap-2">
+              <label htmlFor={f.id} className="field-label">
+                {f.label}
+              </label>
+              <input
+                id={f.id}
+                type={f.type}
+                autoComplete={f.autoComplete}
+                placeholder={f.placeholder || undefined}
+                value={f.value}
+                onChange={(e) => f.set(e.target.value)}
+                className="field h-10 px-3"
+                required
+              />
+            </div>
+          ))}
+
+          <label className="flex cursor-pointer select-none items-start gap-2 text-[13px] leading-5 text-subtle">
+            <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-amber" required />
+            <span>
+              I agree to the{" "}
+              <a href="#" className="text-foreground underline-offset-4 hover:underline">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-foreground underline-offset-4 hover:underline">
+                Privacy Policy
+              </a>
+            </span>
+          </label>
+
+          <button type="submit" disabled={loading} className="btn btn-primary mt-2 h-10 w-full gap-2 text-sm">
+            {loading && <span className="loading loading-spinner loading-xs" />}
+            {loading ? "Creating account" : "Create account"}
+          </button>
+        </form>
+
+        <p className="mt-6 border-t border-line pt-6 text-center text-sm text-muted">
+          Already have an account?{" "}
+          <Link href="/login" className="text-foreground underline-offset-4 hover:underline">
+            Sign in
+          </Link>
+        </p>
       </div>
-    </div>
+    </main>
   );
 }

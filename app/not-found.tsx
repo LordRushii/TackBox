@@ -1,50 +1,30 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ClipboardList } from "lucide-react";
+import PixelC from "@/components/pixel/PixelC";
 
 export const metadata: Metadata = {
-  title: "404 - Page Not Found",
-  description: "The page or skill you are looking for cannot be found in our inventory.",
+  title: "Page not found · Tackbox",
+  description: "There's no page at this address.",
 };
 
 export default function NotFound() {
   return (
-    <main className="flex-1 w-full max-w-xl mx-auto px-6 py-24 flex flex-col items-center justify-center text-center bg-background">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-grid-pattern pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black,transparent)]" />
-
-      <div className="z-10 flex flex-col items-center">
-        {/* Visual flat 404 badge */}
-        <div className="mb-10">
-          <div className="flex h-32 w-32 items-center justify-center rounded-lg bg-white/[0.02] border border-white/10 text-6xl font-heading font-semibold text-foreground shadow-sm">
-            404
-          </div>
-        </div>
-
-        {/* Message Info */}
-        <h1 className="text-3xl font-heading font-semibold tracking-tight text-foreground mb-4">
-          Page Not Found
-        </h1>
-        <p className="text-foreground/60 max-w-sm mb-12 text-sm sm:text-base leading-relaxed">
-          We couldn&apos;t find the capability, skill, or resource you were looking for. It might have been moved, deleted, or never existed in the catalog.
-        </p>
-
-        {/* Navigation Options */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-          <Link
-            href="/skills"
-            className="h-11 px-8 flex items-center justify-center rounded-md bg-white text-[#0A0A0A] hover:bg-white/90 text-sm font-medium transition-all gap-2"
-          >
-            <ClipboardList className="w-4 h-4" />
-            Skills Inventory
-          </Link>
-          <Link
-            href="/"
-            className="h-11 px-8 flex items-center justify-center rounded-md bg-white/[0.04] border border-white/10 hover:border-white/20 text-sm font-medium text-foreground transition-all"
-          >
-            Return Home
-          </Link>
-        </div>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-6 py-24 text-center">
+      <PixelC tile={10} gap={3} />
+      <p className="mt-10 font-mono text-xs text-muted">404</p>
+      <h1 className="mt-3 font-heading text-[32px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground">
+        Nothing at this address
+      </h1>
+      <p className="mt-3 max-w-sm text-[15px] leading-6 text-subtle">
+        The link may be wrong, or the skill was deleted or made private.
+      </p>
+      <div className="mt-8 flex gap-2">
+        <Link href="/skills" className="btn btn-primary h-10 px-4 text-sm">
+          Browse skills
+        </Link>
+        <Link href="/" className="btn btn-secondary h-10 px-4 text-sm">
+          Home
+        </Link>
       </div>
     </main>
   );
