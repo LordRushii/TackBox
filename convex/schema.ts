@@ -15,7 +15,9 @@ export default defineSchema({
     sessionToken: v.string(),
     expiresAt: v.number(),
     createdAt: v.number(),
-  }).index("by_sessionToken", ["sessionToken"]),
+  })
+    .index("by_sessionToken", ["sessionToken"])
+    .index("by_userId", ["userId"]),
 
   skills: defineTable({
     title: v.string(),
@@ -41,6 +43,17 @@ export default defineSchema({
   })
     .index("by_authorId", ["authorId"])
     .index("by_visibility", ["visibility"]),
+
+  // Fixed-window counters for login, signup and view/download dedupe.
+  // Keys are hashed by the Next.js server, so no raw IPs or emails are stored.
+  rateLimits: defineTable({
+    key: v.string(),
+    count: v.number(),
+    windowStart: v.number(),
+    expiresAt: v.number(),
+  })
+    .index("by_key", ["key"])
+    .index("by_expiresAt", ["expiresAt"]),
 
   likes: defineTable({
     userId: v.id("users"),
