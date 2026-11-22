@@ -1,14 +1,17 @@
 "use server";
 
-import { ConvexHttpClient } from "convex/browser";
+import { z } from "zod";
+import { after } from "next/server";
 import { api } from "@/convex/_generated/api";
-import { getSessionUser } from "@/lib/auth";
-import { Skill, SubSkill } from "../skills/skills";
+import { Id } from "@/convex/_generated/dataModel";
+import { convex, serverSecret } from "@/lib/convex";
+import { viewerKey } from "@/lib/rate-keys";
+import { getSessionCookie } from "@/lib/cookies";
+import { getSessionUser, requireSessionToken } from "@/lib/auth";
+import { publishSkillToGitHub } from "@/lib/github-publish";
+import { Skill } from "../skills/skills";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { Id } from "@/convex/_generated/dataModel";
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /**
  * Generate a URL-safe slug from a skill name
@@ -23,42 +26,44 @@ function generateSlug(name: string): string {
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
 
-/**
- * Publish skill to GitHub in the background (non-blocking)
- */
-async function publishToGitHub(skill: {
-  slug: string;
-  name: string;
-  description?: string;
+/** Publishes after the response is sent, so a slow GitHub call never blocks the user. */
+function publishInBackground(skill: {
+  _id: string;
+  title: string;
+  description: string;
   content: string;
-  author?: string;
-}) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const response = await fetch(`${baseUrl}/api/skills/publish-to-github`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ skill }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      console.log("[GitHub Publish] Success:", data);
-    } else {
-      console.error("[GitHub Publish] Failed:", data);
-    }
-  } catch (error) {
-    console.error("[GitHub Publish] Error:", error);
-  }
+}, author: string) {
+  after(() =>
+    publishSkillToGitHub({
+      id: skill._id,
+      slug: generateSlug(skill.title),
+      name: skill.title,
+      description: skill.description,
+      content: skill.content || "",
+      author,
+    }).catch((error) => console.error("[GitHub Publish] Error:", error)),
+  );
 }
 
-function mapDbSkillToFrontend(
-  dbSkill: any,
-  likedSkillIds?: Set<string>,
-): Skill {
+type DbSkill = {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  createdAt: number;
+  updatedAt: number;
+  content: string;
+  subSkills?: { title: string; content: string }[];
+  tags?: string[];
+  visibility: "public" | "private";
+  views: number;
+  downloads: number;
+  stars: number;
+  authorId: string;
+  author: { _id: string; name: string; image?: string; username: string } | null;
+};
+
+function mapDbSkillToFrontend(dbSkill: DbSkill, likedSkillIds?: Set<string>): Skill {
   const author = dbSkill.author;
   return {
     id: dbSkill._id,
@@ -73,33 +78,43 @@ function mapDbSkillToFrontend(
     visibility: dbSkill.visibility,
     views: dbSkill.views || 0,
     downloads: dbSkill.downloads || 0,
-    saves: 0,
     stars: dbSkill.stars || 0,
     hasStarred: likedSkillIds ? likedSkillIds.has(dbSkill._id) : false,
-    version: "1.0.0",
-    license: "MIT",
-    authorName: author?.name || "Deleted User",
-    authorUsername: author ? author.email.split("@")[0] : "deleted",
-    authorRole: "Member",
-    authorBio: "Developer, systems architect, and automation enthusiast.",
-    authorAvatarColor: "from-pink-500 to-rose-500",
+    // Version, license, role and bio aren't stored, so they're left out rather than invented
+    authorName: author?.name || "Deleted user",
+    authorUsername: author?.username,
     authorAvatarUrl: author?.image || undefined,
     authorId: dbSkill.authorId,
-  } as any;
+  } as Skill;
 }
+
+async function likedIds(sessionToken: string | undefined) {
+  if (!sessionToken) return new Set<string>();
+  const likes = await convex.query(api.skills.getMyLikedSkillIds, { sessionToken });
+  return new Set<string>(likes);
+}
+
+const subSkillsSchema = z
+  .array(z.object({ title: z.string(), content: z.string() }).strict())
+  .max(20);
+
+const skillUpdateSchema = z
+  .object({
+    name: z.string(),
+    description: z.string(),
+    category: z.string(),
+    tags: z.array(z.string()),
+    content: z.string(),
+    subSkills: subSkillsSchema,
+    visibility: z.enum(["public", "private"]),
+  })
+  .partial();
 
 export async function fetchSkills(): Promise<Skill[]> {
   try {
     const dbSkills = await convex.query(api.skills.getPublicSkills);
-    const user = await getSessionUser();
-    let likedSkillIds = new Set<string>();
-    if (user) {
-      const likes = await convex.query(api.skills.getUserLikedSkillIds, {
-        userId: user.id,
-      });
-      likedSkillIds = new Set(likes);
-    }
-    return dbSkills.map((s) => mapDbSkillToFrontend(s, likedSkillIds));
+    const liked = await likedIds(await getSessionCookie());
+    return dbSkills.map((s) => mapDbSkillToFrontend(s, liked));
   } catch (err) {
     console.error("Failed to fetch public skills:", err);
     return [];
@@ -108,18 +123,11 @@ export async function fetchSkills(): Promise<Skill[]> {
 
 export async function fetchUserSkills(): Promise<Skill[]> {
   try {
-    const user = await getSessionUser();
-    if (!user) return [];
-
-    const dbSkills = await convex.query(api.skills.getUserSkills, {
-      userId: user.id,
-    });
-    const likes = await convex.query(api.skills.getUserLikedSkillIds, {
-      userId: user.id,
-    });
-    const likedSkillIds = new Set(likes);
-
-    return dbSkills.map((s) => mapDbSkillToFrontend(s, likedSkillIds));
+    const sessionToken = await getSessionCookie();
+    if (!sessionToken) return [];
+    const dbSkills = await convex.query(api.skills.getMySkills, { sessionToken });
+    const liked = await likedIds(sessionToken);
+    return dbSkills.map((s) => mapDbSkillToFrontend(s, liked));
   } catch (err) {
     console.error("Failed to fetch user skills:", err);
     return [];
@@ -128,46 +136,41 @@ export async function fetchUserSkills(): Promise<Skill[]> {
 
 export async function fetchSkillById(id: string): Promise<Skill | null> {
   try {
+    const sessionToken = await getSessionCookie();
     const dbSkill = await convex.query(api.skills.getSkill, {
       id: id as Id<"skills">,
+      sessionToken,
     });
     if (!dbSkill) return null;
-    const user = await getSessionUser();
-    let likedSkillIds = new Set<string>();
-    if (user) {
-      const likes = await convex.query(api.skills.getUserLikedSkillIds, {
-        userId: user.id,
-      });
-      likedSkillIds = new Set(likes);
-    }
-    return mapDbSkillToFrontend(dbSkill, likedSkillIds);
+    return mapDbSkillToFrontend(dbSkill, await likedIds(sessionToken));
   } catch (err) {
     console.error(`Failed to fetch skill with ID ${id}:`, err);
     return null;
   }
 }
 
-export async function createSkill(prevState: any, formData: FormData) {
+export async function createSkill(prevState: unknown, formData: FormData) {
   const user = await getSessionUser();
-  if (!user) {
+  const sessionToken = await getSessionCookie();
+  if (!user || !sessionToken) {
     return { message: "You must be logged in to create skills." };
   }
 
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const category = formData.get("category") as string;
-  const visibility =
-    (formData.get("visibility") as "public" | "private") || "public";
-  const content = formData.get("mainContent") as string;
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "");
+  const category = String(formData.get("category") ?? "");
+  const visibility = formData.get("visibility") === "private" ? "private" : "public";
+  const content = String(formData.get("mainContent") ?? "");
 
-  // Parse sub-skills from FormData (JSON encoded)
-  let subSkills: SubSkill[] = [];
-  const subSkillsJson = formData.get("subSkillsData") as string;
-  if (subSkillsJson) {
+  let subSkills: { title: string; content: string }[] = [];
+  const subSkillsJson = formData.get("subSkillsData");
+  if (typeof subSkillsJson === "string" && subSkillsJson) {
     try {
-      subSkills = JSON.parse(subSkillsJson);
+      const parsed = subSkillsSchema.safeParse(JSON.parse(subSkillsJson));
+      if (!parsed.success) return { message: "Invalid sub-skills" };
+      subSkills = parsed.data;
     } catch {
-      subSkills = [];
+      return { message: "Invalid sub-skills" };
     }
   }
 
@@ -176,35 +179,22 @@ export async function createSkill(prevState: any, formData: FormData) {
   }
 
   try {
-    // Save to database first
-    await convex.mutation(api.skills.createSkill, {
+    const id = await convex.mutation(api.skills.createSkill, {
+      sessionToken,
       title: name,
       description,
       category,
       tags: [category],
-      content: content || "",
+      content,
       subSkills,
       visibility,
-      authorId: user.id,
     });
 
-    // Only publish to GitHub if the skill is public
     if (visibility === "public") {
-      // Fire-and-forget GitHub publish (non-blocking)
-      // This runs asynchronously and won't block the user flow
-      publishToGitHub({
-        slug: generateSlug(name),
-        name,
-        description,
-        content: content || "",
-        author: user.name || user.email?.split("@")[0] || "Anonymous",
-      }).catch((error) => {
-        // Silently log errors - don't affect main flow
-        console.error("[createSkill] GitHub publish error (ignored):", error);
-      });
+      publishInBackground({ _id: id, title: name, description, content }, user.name);
     }
-  } catch (err: any) {
-    return { message: err.message || "Failed to create skill" };
+  } catch (err) {
+    return { message: err instanceof Error ? err.message : "Failed to create skill" };
   }
 
   revalidatePath("/skills");
@@ -213,52 +203,38 @@ export async function createSkill(prevState: any, formData: FormData) {
 }
 
 export async function updateSkillAction(id: string, skillData: Partial<Skill>) {
+  const sessionToken = await requireSessionToken();
   const user = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to update skills.");
-  }
+  if (!user) throw new Error("You must be logged in to update skills.");
 
-  // Map updates (especially frontend name to DB title)
-  const updates: any = {
+  // Only editable fields pass; counters like views and downloads are ignored
+  const parsed = skillUpdateSchema.safeParse({
+    name: skillData.name,
+    description: skillData.description,
+    category: skillData.category,
+    tags: skillData.tags,
+    content: skillData.content,
+    subSkills: skillData.subSkills,
+    visibility: skillData.visibility,
+  });
+  if (!parsed.success) throw new Error("Invalid skill data");
+  const { name, ...rest } = parsed.data;
+  const updates = Object.fromEntries(
+    Object.entries({ title: name, ...rest }).filter(([, value]) => value !== undefined),
+  );
+
+  await convex.mutation(api.skills.updateSkill, {
+    sessionToken,
     id: id as Id<"skills">,
-    callerId: user.id,
-  };
-
-  if (skillData.name !== undefined) updates.title = skillData.name;
-  if (skillData.description !== undefined)
-    updates.description = skillData.description;
-  if (skillData.category !== undefined) updates.category = skillData.category;
-  if (skillData.tags !== undefined) updates.tags = skillData.tags;
-  if (skillData.content !== undefined) updates.content = skillData.content;
-  if (skillData.subSkills !== undefined)
-    updates.subSkills = skillData.subSkills;
-  if (skillData.visibility !== undefined)
-    updates.visibility = skillData.visibility;
-  if (skillData.views !== undefined) updates.views = skillData.views;
-  if (skillData.downloads !== undefined)
-    updates.downloads = skillData.downloads;
-
-  // Update in database first
-  await convex.mutation(api.skills.updateSkill, updates);
-
-  // Fetch the updated skill to get complete data for GitHub publish
-  const updatedSkill = await convex.query(api.skills.getSkill, {
-    id: id as Id<"skills">,
+    ...updates,
   });
 
-  // Only publish to GitHub if the skill is public
+  const updatedSkill = await convex.query(api.skills.getSkill, {
+    id: id as Id<"skills">,
+    sessionToken,
+  });
   if (updatedSkill && updatedSkill.visibility === "public") {
-    // Fire-and-forget GitHub publish (non-blocking)
-    publishToGitHub({
-      slug: generateSlug(updatedSkill.title),
-      name: updatedSkill.title,
-      description: updatedSkill.description,
-      content: updatedSkill.content || "",
-      author: user.name || user.email?.split("@")[0] || "Anonymous",
-    }).catch((error) => {
-      // Silently log errors - don't affect main flow
-      console.error("[updateSkill] GitHub publish error (ignored):", error);
-    });
+    publishInBackground(updatedSkill, user.name);
   }
 
   revalidatePath("/skills");
@@ -267,25 +243,29 @@ export async function updateSkillAction(id: string, skillData: Partial<Skill>) {
 }
 
 export async function deleteSkillAction(id: string) {
-  const user = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to delete skills.");
-  }
+  const sessionToken = await requireSessionToken();
 
   await convex.mutation(api.skills.deleteSkill, {
+    sessionToken,
     id: id as Id<"skills">,
-    callerId: user.id,
   });
 
   revalidatePath("/skills");
   revalidatePath("/my-skills");
 }
 
+async function counterArgs(id: string) {
+  const user = await getSessionUser();
+  return {
+    secret: serverSecret(),
+    id: id as Id<"skills">,
+    viewerKey: await viewerKey(user?.id),
+  };
+}
+
 export async function incrementViewsAction(id: string) {
   try {
-    await convex.mutation(api.skills.incrementViews, {
-      id: id as Id<"skills">,
-    });
+    await convex.mutation(api.skills.incrementViews, await counterArgs(id));
   } catch (e) {
     console.error("Failed to increment views:", e);
   }
@@ -293,23 +273,18 @@ export async function incrementViewsAction(id: string) {
 
 export async function incrementDownloadsAction(id: string) {
   try {
-    await convex.mutation(api.skills.incrementDownloads, {
-      id: id as Id<"skills">,
-    });
+    await convex.mutation(api.skills.incrementDownloads, await counterArgs(id));
   } catch (e) {
     console.error("Failed to increment downloads:", e);
   }
 }
 
 export async function toggleStarAction(id: string) {
-  const user = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to like skills.");
-  }
+  const sessionToken = await requireSessionToken();
 
   const result = await convex.mutation(api.skills.toggleStar, {
+    sessionToken,
     skillId: id as Id<"skills">,
-    userId: user.id,
   });
 
   revalidatePath("/skills");
@@ -321,12 +296,12 @@ export async function fetchStatsAction(): Promise<{
   totalSkills: number;
   totalUsers: number;
   totalDownloads: number;
-}> {
+} | null> {
   try {
     return await convex.query(api.skills.getStats);
   } catch (err) {
+    // Return null rather than zeros so the page can hide stats it doesn't have
     console.error("Failed to fetch stats:", err);
-    return { totalSkills: 0, totalUsers: 0, totalDownloads: 0 };
+    return null;
   }
 }
-

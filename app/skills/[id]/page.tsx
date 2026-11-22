@@ -22,4 +22,4 @@ export default async function SkillPage({ params }: SkillPageProps) {
 
   return <SkillDetailView initialSkill={skill} isOwner={isOwner} />;
 }
-
+
