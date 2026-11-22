@@ -1,51 +1,23 @@
-import { ArrowLeft } from "lucide-react";
-
+// Holds the shape of the skill page, without shimmer, until the skill arrives
 export default function SkillDetailLoading() {
   return (
-    <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-12 flex flex-col">
-      {/* Back button skeleton */}
-      <div className="flex items-center gap-2 mb-6 self-start text-base-content/40">
-        <ArrowLeft className="w-4 h-4" />
-        <span className="skeleton h-4 w-28 bg-base-content/10"></span>
+    <main aria-busy="true" className="mx-auto w-full max-w-[1200px] flex-1 px-6 pb-24 pt-8">
+      <span className="sr-only">Loading skill</span>
+      <span className="block h-5 w-24 rounded bg-raised" />
+
+      <div className="mt-8 border-b border-line pb-8">
+        <span className="block h-4 w-32 rounded bg-raised" />
+        <span className="mt-3 block h-10 w-2/3 max-w-xl rounded bg-raised" />
+        <span className="mt-4 block h-4 w-full max-w-2xl rounded bg-raised" />
+        <span className="mt-2 block h-4 w-1/2 max-w-md rounded bg-raised" />
       </div>
 
-      {/* Main card skeleton */}
-      <div className="card bg-base-200/20 border border-base-200/40 shadow-xl rounded-2xl">
-        <div className="card-body p-6 sm:p-10 gap-6">
-          {/* Header info skeleton */}
-          <div>
-            <div className="skeleton h-5 w-24 rounded-md mb-4 bg-base-content/10"></div>
-            <div className="skeleton h-10 w-2/3 rounded-md mb-2 bg-base-content/10"></div>
-          </div>
-
-          {/* Description Section skeleton */}
-          <div className="py-6 border-t border-b border-base-200/40">
-            <div className="skeleton h-4 w-36 rounded mb-4 bg-base-content/10"></div>
-            <div className="space-y-2.5">
-              <div className="skeleton h-4 w-full rounded bg-base-content/5"></div>
-              <div className="skeleton h-4 w-11/12 rounded bg-base-content/5"></div>
-              <div className="skeleton h-4 w-9/12 rounded bg-base-content/5"></div>
-            </div>
-          </div>
-
-          {/* Timestamps Info Grid skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-base-200/10 border border-base-200/30">
-              <div className="skeleton h-5 w-5 rounded-full bg-base-content/10 shrink-0"></div>
-              <div className="flex flex-col gap-1.5 w-full">
-                <div className="skeleton h-3 w-24 rounded bg-base-content/5"></div>
-                <div className="skeleton h-4 w-32 rounded bg-base-content/10"></div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-base-200/10 border border-base-200/30">
-              <div className="skeleton h-5 w-5 rounded-full bg-base-content/10 shrink-0"></div>
-              <div className="flex flex-col gap-1.5 w-full">
-                <div className="skeleton h-3 w-20 rounded bg-base-content/5"></div>
-                <div className="skeleton h-4 w-32 rounded bg-base-content/10"></div>
-              </div>
-            </div>
-          </div>
+      <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="h-[480px] rounded-2xl border border-line-strong bg-deep" />
+        <div className="flex flex-col gap-4">
+          <div className="h-40 rounded-2xl border border-line bg-card" />
+          <div className="h-20 rounded-2xl border border-line bg-card" />
+          <div className="h-28 rounded-2xl border border-line bg-card" />
         </div>
       </div>
     </main>
