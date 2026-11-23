@@ -20,12 +20,9 @@ export default defineSchema({
     .index("by_userId", ["userId"]),
 
   skills: defineTable({
-    // Migrating `title` → `name` and adding `slug`. Until every deployment has run
-    // skills:backfillNamesAndSlugs, `title` mirrors `name` so older callers keep working.
-    title: v.string(),
-    name: v.optional(v.string()),
+    name: v.string(),
     // Registry path skills/<slug>/SKILL.md: assigned once at creation, unique, never changed
-    slug: v.optional(v.string()),
+    slug: v.string(),
     description: v.string(),
     category: v.string(),
     tags: v.optional(v.array(v.string())),
