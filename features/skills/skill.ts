@@ -1,6 +1,5 @@
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "@/convex/_generated/api";
-import { slugCandidates } from "./slug";
 
 /** A skill row as the Convex skill queries return it, author attached. */
 export type SkillRow = NonNullable<FunctionReturnType<typeof api.skills.getSkill>>;
@@ -37,12 +36,10 @@ export type SkillEdit = Partial<
 >;
 
 export function toSkill(row: SkillRow, starredIds: ReadonlySet<string> = new Set()): Skill {
-  // Transitional: rows written before the name/slug backfill only have the legacy `title`
-  const name = row.name ?? row.title;
   return {
     id: row._id,
-    slug: row.slug ?? slugCandidates(name).next().value!,
-    name,
+    slug: row.slug,
+    name: row.name,
     description: row.description,
     category: row.category,
     tags: row.tags ?? [],

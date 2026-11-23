@@ -10,7 +10,7 @@ import {
   requireUser,
   userFromSession,
 } from "./helpers";
-import { slugCandidates, toSlug } from "../features/skills/slug";
+import { slugCandidates } from "../features/skills/slug";
 
 const subSkillValidator = v.array(
   v.object({
@@ -63,10 +63,6 @@ async function claimSlug(ctx: MutationCtx, name: string): Promise<string> {
   throw new Error("unreachable");
 }
 
-// Older Next.js deployments still send the skill's name as `title`. Accepted until the
-// title → name migration is finished everywhere.
-const legacyTitle = v.optional(v.string());
-
 /** A public skill for anyone, or a private skill for its owner only. */
 export const getSkill = query({
   args: { id: v.id("skills"), sessionToken: v.optional(v.string()) },
@@ -117,8 +113,7 @@ export const getMySkills = query({
 export const createSkill = mutation({
   args: {
     sessionToken: v.string(),
-    name: v.optional(v.string()),
-    title: legacyTitle,
+    name: v.string(),
     description: v.string(),
     category: v.string(),
     tags: v.optional(v.array(v.string())),
@@ -128,14 +123,13 @@ export const createSkill = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
-    const { sessionToken: _, title, ...fields } = args;
-    const name = (fields.name ?? title ?? "").trim();
+    const { sessionToken: _, ...fields } = args;
+    const name = fields.name.trim();
     validateSkillFields({ ...fields, name });
 
     const now = Date.now();
     return await ctx.db.insert("skills", {
       name,
-      title: name,
       slug: await claimSlug(ctx, name),
       description: fields.description,
       category: fields.category,
@@ -159,7 +153,6 @@ export const updateSkill = mutation({
     sessionToken: v.string(),
     id: v.id("skills"),
     name: v.optional(v.string()),
-    title: legacyTitle,
     description: v.optional(v.string()),
     category: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
@@ -175,14 +168,13 @@ export const updateSkill = mutation({
       throw new Error("Unauthorized: Only the owner can edit this skill");
     }
 
-    const { id, sessionToken: _, title, name: rawName, ...updates } = args;
-    const name = (rawName ?? title)?.trim();
+    const { id, sessionToken: _, name: rawName, ...updates } = args;
+    const name = rawName?.trim();
     validateSkillFields({ ...updates, name });
     await ctx.db.patch(id, {
       ...updates,
       // A rename changes only the name; the slug, and so the registry path, stays
-      ...(name !== undefined && { name, title: name }),
-      ...(skill.slug === undefined && { slug: await claimSlug(ctx, name ?? skill.name ?? skill.title) }),
+      ...(name !== undefined && { name }),
       updatedAt: Date.now(),
     });
     return true;
@@ -245,36 +237,17 @@ export const incrementDownloads = mutation({
 });
 
 /**
- * Legacy, server only: skills whose name maps to `slug` and that already existed at `before`.
- * Only older Next.js deployments call this; current code reads the stored slug instead.
- * Remove together with `title` once the migration is finished everywhere.
+ * One-off migration: clears the legacy `title` copy from every skill, so the field can be
+ * dropped from the schema. Safe to re-run. `npx convex run skills:dropLegacyTitles` (`--prod`).
  */
-export const skillsWithSlugCreatedBefore = query({
-  args: { secret: v.string(), slug: v.string(), before: v.number() },
-  handler: async (ctx, args) => {
-    assertServerSecret(args.secret);
-    const skills = await ctx.db
-      .query("skills")
-      .filter((q) => q.lte(q.field("createdAt"), args.before))
-      .collect();
-    return skills.filter((s) => toSlug(s.name ?? s.title) === args.slug).map((s) => s._id);
-  },
-});
-
-/**
- * One-off migration: copies the legacy `title` into `name` and gives every skill a slug.
- * Runs oldest first, so when two names collide the older skill keeps the plain slug.
- * Safe to re-run. `npx convex run skills:backfillNamesAndSlugs` (add `--prod` for production).
- */
-export const backfillNamesAndSlugs = internalMutation({
+export const dropLegacyTitles = internalMutation({
   args: {},
   handler: async (ctx) => {
-    const skills = await ctx.db.query("skills").order("asc").collect();
+    const skills = await ctx.db.query("skills").collect();
     let updated = 0;
     for (const skill of skills) {
-      if (skill.name !== undefined && skill.slug !== undefined) continue;
-      const name = skill.name ?? skill.title;
-      await ctx.db.patch(skill._id, { name, slug: skill.slug ?? (await claimSlug(ctx, name)) });
+      if (skill.title === undefined) continue;
+      await ctx.db.patch(skill._id, { title: undefined });
       updated++;
     }
     return { updated, total: skills.length };

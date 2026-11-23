@@ -5,7 +5,6 @@ function row(overrides: Partial<SkillRow> = {}): SkillRow {
   return {
     _id: "skill1" as SkillRow["_id"],
     _creationTime: 0,
-    title: "Code Reviewer",
     name: "Code Reviewer",
     slug: "code-reviewer",
     description: "Reviews code before merge",
@@ -49,15 +48,6 @@ test("maps a row to the skill the app shows", () => {
 
 test("not starred unless the viewer starred it", () => {
   expect(toSkill(row()).hasStarred).toBe(false);
-});
-
-test("a row written before the backfill falls back to its title and derived slug", () => {
-  const skill = toSkill(row({ name: undefined, slug: undefined, title: "Legacy Name!" }));
-  expect(skill).toMatchObject({ name: "Legacy Name!", slug: "legacy-name" });
-});
-
-test("the name wins over the legacy title", () => {
-  expect(toSkill(row({ name: "New Name", title: "Old Name" })).name).toBe("New Name");
 });
 
 test("a deleted author shows as Deleted user", () => {

@@ -56,36 +56,34 @@ describe("slugs", () => {
 
   test("a skill needs a name", async () => {
     const { t, sessionToken } = await setup();
-    await expect(t.mutation(api.skills.createSkill, { sessionToken, ...fields })).rejects.toThrow("Name is required");
+    await expect(t.mutation(api.skills.createSkill, { sessionToken, name: "   ", ...fields })).rejects.toThrow(
+      "Name is required",
+    );
   });
 });
 
-describe("callers still sending the legacy title", () => {
-  test("title works like name, and title keeps mirroring name", async () => {
-    const { t, sessionToken, read } = await setup();
-    const id = await t.mutation(api.skills.createSkill, { sessionToken, title: "Code Reviewer", ...fields });
-    await t.mutation(api.skills.updateSkill, { sessionToken, id, title: "PR Reviewer" });
-    expect(await read(id)).toMatchObject({ name: "PR Reviewer", title: "PR Reviewer", slug: "code-reviewer" });
-  });
-});
-
-describe("backfillNamesAndSlugs", () => {
-  test("gives legacy rows a name and slug, and the older skill keeps the plain slug", async () => {
+describe("dropLegacyTitles", () => {
+  test("clears the legacy title and leaves the name and slug alone", async () => {
     const { t, authorId, read } = await setup();
-    const [older, newer] = await t.run(async (ctx) => {
-      const legacy = (title: string) =>
-        ctx.db.insert("skills", { title, ...fields, authorId, views: 0, downloads: 0, stars: 0, createdAt: 1, updatedAt: 1 });
-      return [await legacy("Code Reviewer"), await legacy("Code Reviewer")];
-    });
+    const id = await t.run((ctx) =>
+      ctx.db.insert("skills", {
+        name: "Code Reviewer",
+        slug: "code-reviewer",
+        title: "Code Reviewer",
+        ...fields,
+        authorId,
+        views: 0,
+        downloads: 0,
+        stars: 0,
+        createdAt: 1,
+        updatedAt: 1,
+      }),
+    );
 
-    expect(await t.mutation(internal.skills.backfillNamesAndSlugs, {})).toEqual({ updated: 2, total: 2 });
-    expect(await read(older)).toMatchObject({ name: "Code Reviewer", slug: "code-reviewer" });
-    expect(await read(newer)).toMatchObject({ name: "Code Reviewer", slug: "code-reviewer-2" });
-  });
-
-  test("leaves migrated rows alone, so it is safe to re-run", async () => {
-    const { t, create } = await setup();
-    await create("Code Reviewer");
-    expect(await t.mutation(internal.skills.backfillNamesAndSlugs, {})).toEqual({ updated: 0, total: 1 });
+    expect(await t.mutation(internal.skills.dropLegacyTitles, {})).toEqual({ updated: 1, total: 1 });
+    const skill = await read(id);
+    expect(skill).toMatchObject({ name: "Code Reviewer", slug: "code-reviewer" });
+    expect(skill?.title).toBeUndefined();
+    expect(await t.mutation(internal.skills.dropLegacyTitles, {})).toEqual({ updated: 0, total: 1 });
   });
 });
