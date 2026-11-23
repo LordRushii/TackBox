@@ -1,18 +1,18 @@
 import "server-only";
 import { Octokit } from "@octokit/rest";
-import { api } from "@/convex/_generated/api";
-import { convex, serverSecret } from "./convex";
+import { SLUG_PATTERN } from "@/features/skills/slug";
 
 export type PublishableSkill = {
   id: string;
+  /** The skill's stored slug, unique across all skills */
   slug: string;
   name: string;
   description?: string;
   content: string;
   author?: string;
+  /** Epoch ms */
+  createdAt: number;
 };
-
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** A YAML scalar that can't break out of its line: JSON strings are valid YAML. */
 function yamlString(value: string) {
@@ -53,14 +53,15 @@ function repoFromEnv() {
 }
 
 /**
- * Files published before they carried a tackbox-id have no recorded owner. A skill may
- * adopt one only if it is the single skill with this slug that already existed when the
- * file was first committed. A file committed by hand (like code-reviewer) or by an older
- * skill predates any copycat, so a same-named skill created later can never take it over.
+ * Files published before they carried a tackbox-id have no recorded owner. Slugs are unique,
+ * so the skill holding this slug may adopt the file only if it already existed when the file
+ * was first committed. A file committed by hand (like code-reviewer) predates any copycat, so
+ * a skill created later that happens to get the same slug can never take it over.
  */
 async function canClaimLegacyFile(
   octokit: Octokit,
-  file: { owner: string; repo: string; path: string; slug: string; skillId: string },
+  file: { owner: string; repo: string; path: string },
+  skillCreatedAt: number,
 ) {
   const commits = await octokit.paginate(octokit.repos.listCommits, {
     owner: file.owner,
@@ -70,13 +71,7 @@ async function canClaimLegacyFile(
   });
   const firstDate = commits.at(-1)?.commit.committer?.date ?? commits.at(-1)?.commit.author?.date;
   if (!firstDate) return false;
-
-  const candidates = await convex.query(api.skills.skillsWithSlugCreatedBefore, {
-    secret: serverSecret(),
-    slug: file.slug,
-    before: new Date(firstDate).getTime(),
-  });
-  return candidates.length === 1 && candidates[0] === file.skillId;
+  return skillCreatedAt <= new Date(firstDate).getTime();
 }
 
 /**
@@ -84,7 +79,7 @@ async function canClaimLegacyFile(
  * after the caller's ownership of the skill has been checked.
  */
 export async function publishSkillToGitHub(skill: PublishableSkill) {
-  if (!SLUG.test(skill.slug)) {
+  if (!SLUG_PATTERN.test(skill.slug)) {
     console.warn(`[GitHub Publish] Skipped: "${skill.name}" has no usable slug`);
     return;
   }
@@ -109,7 +104,7 @@ export async function publishSkillToGitHub(skill: PublishableSkill) {
     const fileSkillId = existing.match(/^tackbox-id:\s*(\S+)\s*$/m)?.[1];
     const mayWrite = fileSkillId
       ? fileSkillId === skill.id
-      : await canClaimLegacyFile(octokit, { owner, repo, path, slug: skill.slug, skillId: skill.id });
+      : await canClaimLegacyFile(octokit, { owner, repo, path }, skill.createdAt);
     if (!mayWrite) {
       console.warn(`[GitHub Publish] Skipped: ${path} belongs to another skill`);
       return;

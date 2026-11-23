@@ -9,83 +9,24 @@ import { viewerKey } from "@/lib/rate-keys";
 import { getSessionCookie } from "@/lib/cookies";
 import { getSessionUser, requireSessionToken } from "@/lib/auth";
 import { publishSkillToGitHub } from "@/lib/github-publish";
-import { Skill } from "../skills/skills";
+import { Skill, SkillEdit, SkillRow, toSkill } from "./skill";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-/**
- * Generate a URL-safe slug from a skill name
- */
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
-    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
-}
-
 /** Publishes after the response is sent, so a slow GitHub call never blocks the user. */
-function publishInBackground(skill: {
-  _id: string;
-  title: string;
-  description: string;
-  content: string;
-}, author: string) {
+function publishInBackground(row: SkillRow, author: string) {
+  const skill = toSkill(row);
   after(() =>
     publishSkillToGitHub({
-      id: skill._id,
-      slug: generateSlug(skill.title),
-      name: skill.title,
+      id: skill.id,
+      slug: skill.slug,
+      name: skill.name,
       description: skill.description,
-      content: skill.content || "",
+      content: skill.content,
       author,
+      createdAt: row.createdAt,
     }).catch((error) => console.error("[GitHub Publish] Error:", error)),
   );
-}
-
-type DbSkill = {
-  _id: string;
-  title: string;
-  description: string;
-  category: string;
-  createdAt: number;
-  updatedAt: number;
-  content: string;
-  subSkills?: { title: string; content: string }[];
-  tags?: string[];
-  visibility: "public" | "private";
-  views: number;
-  downloads: number;
-  stars: number;
-  authorId: string;
-  author: { _id: string; name: string; image?: string; username: string } | null;
-};
-
-function mapDbSkillToFrontend(dbSkill: DbSkill, likedSkillIds?: Set<string>): Skill {
-  const author = dbSkill.author;
-  return {
-    id: dbSkill._id,
-    name: dbSkill.title, // DB title maps to frontend name
-    description: dbSkill.description,
-    category: dbSkill.category,
-    createdAt: new Date(dbSkill.createdAt).toISOString(),
-    updatedAt: new Date(dbSkill.updatedAt).toISOString(),
-    content: dbSkill.content,
-    subSkills: dbSkill.subSkills || [],
-    tags: dbSkill.tags || [],
-    visibility: dbSkill.visibility,
-    views: dbSkill.views || 0,
-    downloads: dbSkill.downloads || 0,
-    stars: dbSkill.stars || 0,
-    hasStarred: likedSkillIds ? likedSkillIds.has(dbSkill._id) : false,
-    // Version, license, role and bio aren't stored, so they're left out rather than invented
-    authorName: author?.name || "Deleted user",
-    authorUsername: author?.username,
-    authorAvatarUrl: author?.image || undefined,
-    authorId: dbSkill.authorId,
-  } as Skill;
 }
 
 async function likedIds(sessionToken: string | undefined) {
@@ -114,7 +55,7 @@ export async function fetchSkills(): Promise<Skill[]> {
   try {
     const dbSkills = await convex.query(api.skills.getPublicSkills);
     const liked = await likedIds(await getSessionCookie());
-    return dbSkills.map((s) => mapDbSkillToFrontend(s, liked));
+    return dbSkills.map((s) => toSkill(s, liked));
   } catch (err) {
     console.error("Failed to fetch public skills:", err);
     return [];
@@ -127,7 +68,7 @@ export async function fetchUserSkills(): Promise<Skill[]> {
     if (!sessionToken) return [];
     const dbSkills = await convex.query(api.skills.getMySkills, { sessionToken });
     const liked = await likedIds(sessionToken);
-    return dbSkills.map((s) => mapDbSkillToFrontend(s, liked));
+    return dbSkills.map((s) => toSkill(s, liked));
   } catch (err) {
     console.error("Failed to fetch user skills:", err);
     return [];
@@ -142,7 +83,7 @@ export async function fetchSkillById(id: string): Promise<Skill | null> {
       sessionToken,
     });
     if (!dbSkill) return null;
-    return mapDbSkillToFrontend(dbSkill, await likedIds(sessionToken));
+    return toSkill(dbSkill, await likedIds(sessionToken));
   } catch (err) {
     console.error(`Failed to fetch skill with ID ${id}:`, err);
     return null;
@@ -181,7 +122,7 @@ export async function createSkill(prevState: unknown, formData: FormData) {
   try {
     const id = await convex.mutation(api.skills.createSkill, {
       sessionToken,
-      title: name,
+      name,
       description,
       category,
       tags: [category],
@@ -191,7 +132,9 @@ export async function createSkill(prevState: unknown, formData: FormData) {
     });
 
     if (visibility === "public") {
-      publishInBackground({ _id: id, title: name, description, content }, user.name);
+      // Read it back for the slug Convex assigned
+      const created = await convex.query(api.skills.getSkill, { id, sessionToken });
+      if (created) publishInBackground(created, user.name);
     }
   } catch (err) {
     return { message: err instanceof Error ? err.message : "Failed to create skill" };
@@ -202,25 +145,16 @@ export async function createSkill(prevState: unknown, formData: FormData) {
   redirect("/my-skills");
 }
 
-export async function updateSkillAction(id: string, skillData: Partial<Skill>) {
+export async function updateSkillAction(id: string, edit: SkillEdit) {
   const sessionToken = await requireSessionToken();
   const user = await getSessionUser();
   if (!user) throw new Error("You must be logged in to update skills.");
 
-  // Only editable fields pass; counters like views and downloads are ignored
-  const parsed = skillUpdateSchema.safeParse({
-    name: skillData.name,
-    description: skillData.description,
-    category: skillData.category,
-    tags: skillData.tags,
-    content: skillData.content,
-    subSkills: skillData.subSkills,
-    visibility: skillData.visibility,
-  });
+  // Only editable fields pass; counters, the slug and anything else are dropped
+  const parsed = skillUpdateSchema.safeParse(edit);
   if (!parsed.success) throw new Error("Invalid skill data");
-  const { name, ...rest } = parsed.data;
   const updates = Object.fromEntries(
-    Object.entries({ title: name, ...rest }).filter(([, value]) => value !== undefined),
+    Object.entries(parsed.data).filter(([, value]) => value !== undefined),
   );
 
   await convex.mutation(api.skills.updateSkill, {

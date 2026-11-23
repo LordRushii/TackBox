@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useEffect } from "react";
-import { createSkill } from "@/app/actions/skills";
+import { createSkill } from "@/features/skills/actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getCurrentUserAction } from "@/app/actions/auth";

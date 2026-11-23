@@ -6,14 +6,8 @@ export type SkillCardProps = {
   id: string;
   name: string;
   category: string;
-  /** Only shown when a skill actually sets one */
-  level?: string;
   description: string;
   authorName: string;
-  /** Kept for API compatibility; not shown */
-  authorRole?: string;
-  /** Kept for API compatibility; not shown */
-  authorAvatarColor?: string;
   authorAvatarUrl?: string;
   starsCount: number;
   hasStarred?: boolean;
@@ -25,7 +19,6 @@ export default function SkillCard({
   id,
   name,
   category,
-  level,
   description,
   authorName,
   authorAvatarUrl,
@@ -40,7 +33,7 @@ export default function SkillCard({
     .join("")
     .slice(0, 2)
     .toUpperCase();
-  const meta = [category, level, subSkillCount > 0 ? `+${subSkillCount} ${subSkillCount === 1 ? "skill" : "skills"}` : null].filter(Boolean);
+  const meta = [category, subSkillCount > 0 ? `+${subSkillCount} ${subSkillCount === 1 ? "skill" : "skills"}` : null].filter(Boolean);
 
   return (
     <Link

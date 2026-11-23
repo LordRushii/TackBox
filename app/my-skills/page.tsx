@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchUserSkills, toggleStarAction } from "@/app/actions/skills";
-import { Skill } from "@/app/skills/skills";
+import { fetchUserSkills, toggleStarAction } from "@/features/skills/actions";
+import type { Skill } from "@/features/skills/skill";
 import SkillCard, { SkillCardSkeleton } from "@/components/SkillCard";
 import { getCurrentUserAction } from "@/app/actions/auth";
 import { Plus, Upload } from "lucide-react";
@@ -119,7 +119,6 @@ export default function MySkillsPage() {
               id={skill.id}
               name={skill.name}
               category={skill.category}
-              level={skill.level}
               description={skill.description}
               authorName={skill.authorName || user?.name || "Unknown author"}
               authorAvatarUrl={skill.authorAvatarUrl || user?.image}

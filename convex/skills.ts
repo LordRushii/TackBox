@@ -8,9 +8,9 @@ import {
   publicAuthor,
   rateHit,
   requireUser,
-  slugify,
   userFromSession,
 } from "./helpers";
+import { slugCandidates, toSlug } from "../features/skills/slug";
 
 const subSkillValidator = v.array(
   v.object({
@@ -20,7 +20,7 @@ const subSkillValidator = v.array(
 );
 
 type SkillFields = {
-  title?: string;
+  name?: string;
   description?: string;
   category?: string;
   tags?: string[];
@@ -29,11 +29,11 @@ type SkillFields = {
 };
 
 function validateSkillFields(f: SkillFields) {
-  checkLength(f.title, LIMITS.title, "Title");
+  checkLength(f.name, LIMITS.skillName, "Name");
   checkLength(f.description, LIMITS.description, "Description");
   checkLength(f.category, LIMITS.category, "Category");
   checkLength(f.content, LIMITS.content, "Content");
-  if (f.title !== undefined && !f.title.trim()) throw new Error("Title is required");
+  if (f.name !== undefined && !f.name.trim()) throw new Error("Name is required");
   if (f.tags) {
     if (f.tags.length > LIMITS.tags) throw new Error(`At most ${LIMITS.tags} tags`);
     f.tags.forEach((t) => checkLength(t, LIMITS.tag, "Tag"));
@@ -50,6 +50,22 @@ function validateSkillFields(f: SkillFields) {
 function canRead(skill: Doc<"skills">, viewer: Doc<"users"> | null) {
   return skill.visibility === "public" || (viewer !== null && skill.authorId === viewer._id);
 }
+
+/** The first free slug for `name`: code-reviewer, then code-reviewer-2, code-reviewer-3, … */
+async function claimSlug(ctx: MutationCtx, name: string): Promise<string> {
+  for (const slug of slugCandidates(name)) {
+    const holder = await ctx.db
+      .query("skills")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .first();
+    if (!holder) return slug;
+  }
+  throw new Error("unreachable");
+}
+
+// Older Next.js deployments still send the skill's name as `title`. Accepted until the
+// title → name migration is finished everywhere.
+const legacyTitle = v.optional(v.string());
 
 /** A public skill for anyone, or a private skill for its owner only. */
 export const getSkill = query({
@@ -101,7 +117,8 @@ export const getMySkills = query({
 export const createSkill = mutation({
   args: {
     sessionToken: v.string(),
-    title: v.string(),
+    name: v.optional(v.string()),
+    title: legacyTitle,
     description: v.string(),
     category: v.string(),
     tags: v.optional(v.array(v.string())),
@@ -111,12 +128,15 @@ export const createSkill = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
-    const { sessionToken: _, ...fields } = args;
-    validateSkillFields(fields);
+    const { sessionToken: _, title, ...fields } = args;
+    const name = (fields.name ?? title ?? "").trim();
+    validateSkillFields({ ...fields, name });
 
     const now = Date.now();
     return await ctx.db.insert("skills", {
-      title: fields.title.trim(),
+      name,
+      title: name,
+      slug: await claimSlug(ctx, name),
       description: fields.description,
       category: fields.category,
       tags: fields.tags || [],
@@ -133,12 +153,13 @@ export const createSkill = mutation({
   },
 });
 
-/** Owner only. Counters (views, downloads, stars) can't be set through here. */
+/** Owner only. Counters (views, downloads, stars) and the slug can't be set through here. */
 export const updateSkill = mutation({
   args: {
     sessionToken: v.string(),
     id: v.id("skills"),
-    title: v.optional(v.string()),
+    name: v.optional(v.string()),
+    title: legacyTitle,
     description: v.optional(v.string()),
     category: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
@@ -154,9 +175,16 @@ export const updateSkill = mutation({
       throw new Error("Unauthorized: Only the owner can edit this skill");
     }
 
-    const { id, sessionToken: _, ...updates } = args;
-    validateSkillFields(updates);
-    await ctx.db.patch(id, { ...updates, updatedAt: Date.now() });
+    const { id, sessionToken: _, title, name: rawName, ...updates } = args;
+    const name = (rawName ?? title)?.trim();
+    validateSkillFields({ ...updates, name });
+    await ctx.db.patch(id, {
+      ...updates,
+      // A rename changes only the name; the slug, and so the registry path, stays
+      ...(name !== undefined && { name, title: name }),
+      ...(skill.slug === undefined && { slug: await claimSlug(ctx, name ?? skill.name ?? skill.title) }),
+      updatedAt: Date.now(),
+    });
     return true;
   },
 });
@@ -217,8 +245,9 @@ export const incrementDownloads = mutation({
 });
 
 /**
- * Server only: skills whose title maps to `slug` and that already existed at `before`.
- * Used to decide which skill may claim a GitHub file published before files carried IDs.
+ * Legacy, server only: skills whose name maps to `slug` and that already existed at `before`.
+ * Only older Next.js deployments call this; current code reads the stored slug instead.
+ * Remove together with `title` once the migration is finished everywhere.
  */
 export const skillsWithSlugCreatedBefore = query({
   args: { secret: v.string(), slug: v.string(), before: v.number() },
@@ -228,7 +257,27 @@ export const skillsWithSlugCreatedBefore = query({
       .query("skills")
       .filter((q) => q.lte(q.field("createdAt"), args.before))
       .collect();
-    return skills.filter((s) => slugify(s.title) === args.slug).map((s) => s._id);
+    return skills.filter((s) => toSlug(s.name ?? s.title) === args.slug).map((s) => s._id);
+  },
+});
+
+/**
+ * One-off migration: copies the legacy `title` into `name` and gives every skill a slug.
+ * Runs oldest first, so when two names collide the older skill keeps the plain slug.
+ * Safe to re-run. `npx convex run skills:backfillNamesAndSlugs` (add `--prod` for production).
+ */
+export const backfillNamesAndSlugs = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const skills = await ctx.db.query("skills").order("asc").collect();
+    let updated = 0;
+    for (const skill of skills) {
+      if (skill.name !== undefined && skill.slug !== undefined) continue;
+      const name = skill.name ?? skill.title;
+      await ctx.db.patch(skill._id, { name, slug: skill.slug ?? (await claimSlug(ctx, name)) });
+      updated++;
+    }
+    return { updated, total: skills.length };
   },
 });
 

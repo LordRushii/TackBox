@@ -17,7 +17,7 @@ import {
   Server,
   Terminal,
 } from "lucide-react";
-import { fetchStatsAction } from "@/app/actions/skills";
+import { fetchStatsAction } from "@/features/skills/actions";
 import { getSkillsRepo } from "@/lib/github";
 import { HOME } from "@/lib/site-copy";
 import HeroBackdrop from "@/components/landing/HeroBackdrop";

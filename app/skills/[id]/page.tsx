@@ -1,4 +1,4 @@
-import { fetchSkillById } from "@/app/actions/skills";
+import { fetchSkillById } from "@/features/skills/actions";
 import { getCurrentUserAction } from "@/app/actions/auth";
 import { notFound } from "next/navigation";
 import SkillDetailView from "@/components/SkillDetailView";
@@ -18,7 +18,7 @@ export default async function SkillPage({ params }: SkillPageProps) {
   }
 
   const user = await getCurrentUserAction();
-  const isOwner = !!(user && (skill as any).authorId === user.id);
+  const isOwner = !!(user && skill.authorId === user.id);
 
   return <SkillDetailView initialSkill={skill} isOwner={isOwner} />;
 }

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import SkillCard, { SkillCardSkeleton } from "@/components/SkillCard";
-import { fetchSkills, toggleStarAction } from "@/app/actions/skills";
-import { Skill } from "./skills";
+import { fetchSkills, toggleStarAction } from "@/features/skills/actions";
+import type { Skill } from "@/features/skills/skill";
 
 export default function BrowseSkillsPage() {
   const [user, setUser] = useState<any>(null);
@@ -168,7 +168,6 @@ export default function BrowseSkillsPage() {
               id={skill.id}
               name={skill.name}
               category={skill.category}
-              level={skill.level}
               description={skill.description}
               authorName={skill.authorName || "Unknown author"}
               authorAvatarUrl={skill.authorAvatarUrl}

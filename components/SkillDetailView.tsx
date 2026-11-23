@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Skill } from "@/app/skills/skills";
+import type { Skill, SkillEdit } from "@/features/skills/skill";
+import { toSlug } from "@/features/skills/slug";
 import {
   updateSkillAction,
   deleteSkillAction,
   incrementViewsAction,
   incrementDownloadsAction,
   toggleStarAction,
-} from "@/app/actions/skills";
+} from "@/features/skills/actions";
 import { getCurrentUserAction } from "@/app/actions/auth";
 import Toast from "./Toast";
 import ConfirmModal from "./ConfirmModal";
@@ -27,16 +28,6 @@ type SkillDetailViewProps = {
 
 type ToastState = { show: boolean; message: string; type: "success" | "error" };
 
-// Install path slug, the same rule the publisher uses for skills/<slug>/SKILL.md
-const toSlug = (s: string) =>
-  s
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-const fileSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const formatCount = (n: number) => n.toLocaleString("en-US");
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -97,7 +88,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
         if (dbUser) {
           setLoggedInUser(dbUser);
           localStorage.setItem("user", JSON.stringify(dbUser));
-          if (isOwner || dbUser.id === (skill as any).authorId) {
+          if (isOwner || dbUser.id === skill.authorId) {
             setHasEditPermission(true);
           }
         } else {
@@ -141,10 +132,11 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
   };
 
   const subSkills = skill.subSkills || [];
-  const slug = toSlug(skill.name);
+  // The registry path and every download file name use the stored slug
+  const slug = skill.slug;
 
   const handleDownloadMd = async () => {
-    const filename = `${fileSlug(name)}.md`;
+    const filename = `${slug}.md`;
     try {
       await incrementDownloadsAction(skill.id);
       downloadBlob(new Blob([content], { type: "text/markdown" }), filename);
@@ -160,13 +152,13 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
     try {
       const JSZip = (await import("jszip")).default;
       const zip = new JSZip();
-      const slugBase = fileSlug(name);
+      const slugBase = slug;
 
       if (content) {
         zip.file(`${slugBase}/README.md`, `# ${name}\n\n${content}`);
       }
       subSkills.forEach((sub, idx) => {
-        const subSlug = sub.title ? fileSlug(sub.title) : `sub-skill-${idx + 1}`;
+        const subSlug = toSlug(sub.title) || `sub-skill-${idx + 1}`;
         zip.file(
           `${slugBase}/${String(idx + 1).padStart(2, "0")}-${subSlug}.md`,
           `# ${sub.title || `Sub-Skill ${idx + 1}`}\n\n${sub.content}`
@@ -184,7 +176,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
   };
 
   const handleDownloadSubSkillMd = (subContent: string, index: number) => {
-    const filename = `${fileSlug(name)}-skill-${index + 2}.md`;
+    const filename = `${slug}-skill-${index + 2}.md`;
     try {
       downloadBlob(new Blob([subContent], { type: "text/markdown" }), filename);
       triggerToast(`Downloaded ${filename}`);
@@ -246,7 +238,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
         .filter((entry) => entry.content.trim())
         .map((entry, i) => ({ title: `Skill ${i + 2}`, content: entry.content }));
 
-      const updatedData: Partial<Skill> = {
+      const updatedData: SkillEdit = {
         name,
         category,
         visibility,
@@ -503,8 +495,6 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
     ["Category", skill.category],
     ["Created", formatDate(skill.createdAt)],
     ["Updated", formatDate(skill.updatedAt)],
-    ...(skill.version ? [["Version", skill.version] as [string, string]] : []),
-    ...(skill.license ? [["License", skill.license] as [string, string]] : []),
     ...(subSkills.length > 0 ? [["Skills in package", String(subSkills.length + 1)] as [string, string]] : []),
     ["Visibility", visibility === "public" ? "Public" : "Private"],
   ];
@@ -675,7 +665,6 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
                 )}
               </div>
             </div>
-            {skill.authorBio && <p className="mt-4 text-[13px] leading-5 text-subtle">{skill.authorBio}</p>}
           </section>
 
           <section aria-labelledby="details-title" className="rounded-2xl border border-line bg-card px-5 pb-2 pt-5">

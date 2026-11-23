@@ -1,5 +1,6 @@
 import { MutationCtx, QueryCtx } from "./_generated/server";
 import { Doc } from "./_generated/dataModel";
+import { toSlug } from "../features/skills/slug";
 
 // Every Convex function is reachable by anyone who knows the public deployment URL,
 // so nothing here may trust a user ID sent by the caller. Functions either:
@@ -90,23 +91,11 @@ export async function rateClear(ctx: Writer, key: string) {
 
 // ---- Public profile ------------------------------------------------------
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-export { slugify };
-
 // The only user fields that may leave the backend. Never the email or password hash.
 // The handle comes from the display name plus part of the ID, so it can't reveal an email.
 export function publicAuthor(user: Doc<"users"> | null) {
   if (!user) return null;
-  const base = slugify(user.name).slice(0, 24) || "user";
+  const base = toSlug(user.name).slice(0, 24) || "user";
   return {
     _id: user._id,
     name: user.name,
@@ -123,7 +112,7 @@ export const LIMITS = {
   name: 80,
   email: 254,
   imageUrl: 2048,
-  title: 120,
+  skillName: 120,
   description: 500,
   category: 50,
   tag: 50,
