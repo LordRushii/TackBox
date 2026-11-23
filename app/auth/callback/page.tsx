@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeRedirect } from "@/lib/safe-redirect";
 import { loginWithClerkAction } from "@/app/actions/clerk";
 import { AlertTriangle } from "lucide-react";
+import PixelLoader from "@/components/pixel/PixelLoader";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -21,14 +23,14 @@ export default function AuthCallback() {
           
           // Redirect
           const searchParams = new URLSearchParams(window.location.search);
-          const redirectUrl = searchParams.get("redirect") || "/my-skills";
+          const redirectUrl = safeRedirect(searchParams.get("redirect"));
           router.push(redirectUrl);
         } else {
-          setError(result.error || "Failed to sync user session.");
+          setError(result.error || "Your session couldn't be synced. Try signing in again.");
         }
       } catch (err) {
         console.error("Auth sync error:", err);
-        setError("An unexpected error occurred during authentication.");
+        setError("Something went wrong while signing in. Try again.");
       }
     }
 
@@ -37,29 +39,24 @@ export default function AuthCallback() {
 
   if (error) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <div className="alert alert-error max-w-md shadow-lg">
-          <AlertTriangle className="w-6 h-6" />
-          <div>
-            <h3 className="font-bold">Authentication Error</h3>
-            <div className="text-sm">{error}</div>
-          </div>
-          <button className="btn btn-sm" onClick={() => router.push("/login")}>
-            Back to Login
+      <main className="flex min-h-[60vh] flex-1 items-center justify-center px-6">
+        <div role="alert" className="w-full max-w-sm rounded-2xl border border-line bg-card p-6">
+          <h1 className="flex items-center gap-2 font-heading text-lg font-medium text-foreground">
+            <AlertTriangle className="size-4 text-negative" strokeWidth={1.5} />
+            Couldn&apos;t sign you in
+          </h1>
+          <p className="mt-2 text-sm leading-[22px] text-subtle">{error}</p>
+          <button type="button" className="btn btn-secondary mt-6 h-9 px-3 text-sm" onClick={() => router.push("/login")}>
+            Back to sign in
           </button>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="flex flex-col items-center gap-4">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-        <p className="text-base-content/60 font-medium animate-pulse">
-          Completing sign in...
-        </p>
-      </div>
+      <PixelLoader label="Completing sign in" />
     </div>
   );
 }

@@ -3,46 +3,95 @@
   themes: dark --default;
 }
 
+/* One warm graphite ramp and one amber accent, the terminal cursor from the skill.md editor.
+   Every surface, border and text color in the app comes from here. Don't add hex values in components. */
 :root {
-  --background: #0A0A0A;
-  --foreground: #EDEDED;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-card-bg: rgba(255, 255, 255, 0.02);
-  --color-card-bg-hover: rgba(255, 255, 255, 0.05);
-  --color-accent: #7C3AED;
+  --deep: #0e0e0d;          /* code panes, inset wells */
+  --background: #121211;    /* page */
+  --card: #181817;          /* cards, menus, modals */
+  --raised: #222220;        /* inputs, secondary buttons, active rows */
+  --raised-strong: #2a2a28; /* hover on raised */
+  --foreground: #ededeb;
+  --foreground-hover: #d9d9d6;
+  --subtle: #a3a39e;
+  --muted: #85857f;
+  --line: rgba(237, 237, 235, 0.08);
+  --line-strong: rgba(237, 237, 235, 0.14);
+  --amber: #f5a524;
+  --amber-ink: #1a1306;
+  --negative: #e5484d;
+  --positive: #4cc38a;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --color-border: var(--line);
+  --color-card-bg: rgba(237, 237, 235, 0.02);
+  --color-card-bg-hover: rgba(237, 237, 235, 0.04);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+  --color-subtle: var(--subtle);
+  --color-muted: var(--muted);
+  --color-deep: var(--deep);
+  --color-card: var(--card);
+  --color-raised: var(--raised);
+  --color-raised-strong: var(--raised-strong);
+  --color-foreground-hover: var(--foreground-hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-amber: var(--amber);
+  --color-amber-ink: var(--amber-ink);
+  --color-negative: var(--negative);
+  --color-positive: var(--positive);
+
   --color-base-100: var(--background);
-  --color-base-200: var(--color-card-bg);
-  --color-base-300: #000000;
+  --color-base-200: var(--card);
+  --color-base-300: var(--deep);
   --color-base-content: var(--foreground);
-  --color-primary: var(--color-accent);
-  --color-primary-content: #FFFFFF;
-  --color-secondary: #3B82F6; /* Fallback if used */
-  --color-secondary-content: #FFFFFF;
-  --color-accent: var(--color-accent);
-  --color-accent-content: #000000;
-  --color-info: #E5E7EB;
-  
+  --color-primary: var(--amber);
+  --color-primary-content: var(--amber-ink);
+  /* DaisyUI roles, all mapped back onto the ramp so no stray blue or white leaks in */
+  --color-secondary: var(--raised);
+  --color-secondary-content: var(--foreground);
+  --color-accent: var(--amber);
+  --color-accent-content: var(--amber-ink);
+  --color-neutral: var(--raised);
+  --color-neutral-content: var(--foreground);
+  --color-info: var(--subtle);
+  --color-success: var(--positive);
+  --color-warning: var(--amber);
+  --color-error: var(--negative);
+
   --font-sans: var(--font-inter), 'Inter', sans-serif;
   --font-heading: var(--font-inter-tight), 'Inter Tight', sans-serif;
   --font-body: var(--font-inter), 'Inter', sans-serif;
   --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
+
+  --ease-out: var(--ease);
+
+  /* The only shadow on dark: for things that float, like menus, modals and toasts */
+  --shadow-float: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+
+  --animate-marquee: marquee 48s linear infinite;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
 
   /* Flattened shadows */
   --shadow-premium: 0 1px 3px rgba(0,0,0,0.1);
   --shadow-premium-hover: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
-  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -58,89 +107,259 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--line-strong);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(237, 237, 235, 0.24);
 }
 
 ::selection {
-  background-color: rgba(124, 58, 237, 0.35); /* Violet selection */
-  color: #ffffff;
+  background-color: rgba(245, 165, 36, 0.3);
+  color: var(--foreground);
 }
 
-/* Base Headings */
-h1, h2, h3, h4, h5, h6, .font-heading {
-  font-family: var(--font-heading);
-  letter-spacing: -0.02em;
+/* Base rules live in the base layer so a utility on the element can still override them */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+
+  /* Headings: tracking only where the size is large enough to need it */
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  h1 {
+    letter-spacing: -0.01em;
+  }
 }
 
-/* Premium Styling Overrides */
+/* Buttons */
 .btn {
   font-family: var(--font-heading);
   font-weight: 500;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
+  border-radius: 10px;
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: var(--ease);
   box-shadow: none !important;
 }
 
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* On dark, the primary action is off-white with dark text; amber stays for focus and code */
 .btn-primary {
-  background-color: var(--color-primary);
-  color: #FFFFFF;
-  border: 1px solid var(--color-primary);
+  background-color: var(--foreground);
+  color: var(--background);
+  border: 1px solid var(--foreground);
 }
 
 .btn-primary:hover {
-  background-color: #6D28D9; /* Violet 700 */
-  border-color: #6D28D9;
-  transform: none;
+  background-color: var(--foreground-hover);
+  border-color: var(--foreground-hover);
 }
 
-/* Enhancing inputs for a more premium look */
-input, .input {
-  border: 1px solid var(--color-border) !important;
-  background-color: rgba(255, 255, 255, 0.02) !important;
-  transition: all 0.2s ease;
+/* Secondary: the raised surface with a hairline */
+.btn-secondary {
+  background-color: var(--raised);
+  color: var(--foreground);
+  border: 1px solid var(--line);
 }
 
-input:focus, .input:focus {
-  border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 1px var(--color-primary) !important;
-  outline: none;
+.btn-secondary:hover {
+  background-color: var(--raised-strong);
+  border-color: var(--line-strong);
 }
 
-/* Enhancing border definition for elements like cards and navbar */
+/* Quiet: plain text until hovered, for toolbars and cancel */
+.btn-quiet {
+  background-color: transparent;
+  color: var(--subtle);
+  border: 1px solid transparent;
+}
+
+.btn-quiet:hover {
+  background-color: var(--raised);
+  color: var(--foreground);
+}
+
+/* Danger stays quiet until the confirm step */
+.btn-danger {
+  background-color: transparent;
+  color: var(--negative);
+  border: 1px solid rgba(229, 72, 77, 0.3);
+}
+
+.btn-danger:hover {
+  background-color: rgba(229, 72, 77, 0.1);
+  border-color: rgba(229, 72, 77, 0.5);
+}
+
+.btn-danger-solid {
+  background-color: var(--negative);
+  color: #ffffff;
+  border: 1px solid var(--negative);
+}
+
+.btn-danger-solid:hover {
+  background-color: #d63f44;
+  border-color: #d63f44;
+}
+
+@layer components {
+  /* Form fields: the control radius of the buttons, amber focus like the cursor */
+  .field {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background-color: var(--deep);
+    color: var(--foreground);
+    font-size: 14px;
+    line-height: 20px;
+    transition-property: border-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease);
+  }
+
+  .field::placeholder {
+    color: var(--muted);
+  }
+
+  .field:hover {
+    border-color: var(--line-strong);
+  }
+
+  .field:focus,
+  .field:focus-within {
+    outline: none;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 1px var(--amber);
+  }
+
+  .field:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  select.field {
+    appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2385857f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .field-label {
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    color: var(--subtle);
+  }
+
+  /* Tags and small meta chips: quiet text in a hairline */
+  .tag {
+    display: inline-flex;
+    height: 24px;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--subtle);
+    white-space: nowrap;
+  }
+}
+
+/* Border definition for elements like cards and navbar */
 .border-base-200\/40, .border-base-200\/30, .border-base-200 {
-  border-color: var(--color-border) !important;
+  border-color: var(--line) !important;
 }
 
-/* Refined backgrounds for premium glass effects */
+/* Raised surfaces */
 .bg-base-200\/20 {
   background-color: var(--color-card-bg) !important;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--line);
 }
 
 .bg-base-200\/20:hover {
   background-color: var(--color-card-bg-hover) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: var(--line-strong) !important;
 }
 
 .bg-base-200\/30, .bg-base-200\/40 {
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: rgba(237, 237, 235, 0.03) !important;
 }
 
-/* Navbar specific override */
+/* The header carries its own hairline */
 header .navbar {
   background: transparent !important;
-  border-bottom: 1px solid var(--color-border);
 }
 
-/* Subtle Grid Background Utility */
-.bg-grid-pattern {
-  background-image: 
-    linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 40px 40px;
+/* Marquee pauses on hover and stops for reduced motion */
+.group:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+/* Pixel motif, from the tiled "c" in the logo. Steps, not easing: pixels snap */
+@keyframes pixel-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pixel-in {
+  opacity: 0;
+  animation: pixel-in 1ms steps(1, end) forwards;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1.1s steps(1, end) infinite;
+}
+
+@keyframes pixel-loader {
+  0%, 100% { background-color: var(--card); border-color: var(--line-strong); }
+  12% { background-color: var(--amber); border-color: var(--amber); }
+  30% { background-color: var(--raised); border-color: var(--line-strong); }
+}
+
+.pixel-loader {
+  animation: pixel-loader 0.96s steps(1, end) infinite;
+}
+
+/* Toasts fade and rise once; nothing loops */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.toast-in {
+  animation: toast-in 220ms var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-in { animation: none; }
+  .pixel-in { opacity: 1; animation: none; }
+  .cursor-blink { animation: none; }
+  .pixel-loader { animation-duration: 2.4s; }
 }

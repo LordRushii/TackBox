@@ -1,13 +1,9 @@
 "use server";
 
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
-import { generateSessionToken } from "@/lib/session";
-import { setSessionCookie } from "@/lib/cookies";
+import { convex, serverSecret } from "@/lib/convex";
+import { startSession } from "@/lib/auth";
 import { currentUser } from "@clerk/nextjs/server";
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-const SESSION_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export async function loginWithClerkAction() {
   const clerkUser = await currentUser();
@@ -16,62 +12,32 @@ export async function loginWithClerkAction() {
     return { success: false, error: "Not authenticated with Clerk" };
   }
 
-  const email = clerkUser.emailAddresses[0]?.emailAddress;
-  if (!email) {
-    return { success: false, error: "No email address found" };
+  // Only a verified primary email may be linked to a Tackbox account; otherwise anyone
+  // could add someone else's address in Clerk and be signed in as them
+  const primary = clerkUser.primaryEmailAddress;
+  if (!primary || primary.verification?.status !== "verified") {
+    return { success: false, error: "Your email address isn't verified" };
   }
+  const email = primary.emailAddress;
 
   const name =
     `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() ||
     email.split("@")[0];
-  const image = clerkUser.imageUrl;
+  const image = clerkUser.imageUrl || undefined;
 
   try {
-    // Find or create user in Convex
-    let user = await convex.query(api.users.getUserByEmail, { email });
-    let userId;
-
-    if (!user) {
-      userId = await convex.mutation(api.users.createUser, {
-        name,
-        email,
-        image,
-        createdAt: Date.now(),
-      });
-      // Get the newly created user for returning in the response
-      user = await convex.query(api.users.getUserById, { id: userId });
-    } else {
-      userId = user._id;
-      // Update image if needed
-      if (image && user.image !== image) {
-        await convex.mutation(api.users.updateUser, { id: userId, image });
-      }
-    }
-
-    // Create a Convex session
-    const sessionToken = generateSessionToken();
-    const expiresAt = Date.now() + SESSION_EXPIRATION_MS;
-
-    await convex.mutation(api.sessions.createSession, {
-      userId,
-      sessionToken,
-      expiresAt,
-      createdAt: Date.now(),
+    const userId = await convex.mutation(api.users.findOrCreateOAuthUser, {
+      secret: serverSecret(),
+      name: name.slice(0, 80),
+      email,
+      image,
     });
 
-    // Set standard tackbox_session cookie
-    await setSessionCookie(sessionToken, expiresAt);
+    const sessionToken = await startSession(userId);
+    const user = await convex.query(api.sessions.getSessionUser, { sessionToken });
+    if (!user) throw new Error("Session was not created");
 
-    return {
-      success: true,
-      user: {
-        id: userId,
-        name: user!.name,
-        email: user!.email,
-        image: user!.image || image,
-        role: "Member",
-      },
-    };
+    return { success: true, user };
   } catch (error) {
     console.error("Clerk sync error:", error);
     return { success: false, error: "Failed to sync user session" };

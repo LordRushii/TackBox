@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchUserSkills, toggleStarAction } from "@/app/actions/skills";
-import { Skill } from "@/app/skills/skills";
-import SkillCard from "@/components/SkillCard";
+import { fetchUserSkills, toggleStarAction } from "@/features/skills/actions";
+import type { Skill } from "@/features/skills/skill";
+import SkillCard, { SkillCardSkeleton } from "@/components/SkillCard";
 import { getCurrentUserAction } from "@/app/actions/auth";
-import { Plus, PlusCircle, Upload } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 
 export default function MySkillsPage() {
   const router = useRouter();
@@ -26,9 +26,7 @@ export default function MySkillsPage() {
         }
         setUser(dbUser);
         localStorage.setItem("user", JSON.stringify(dbUser));
-
-        const data = await fetchUserSkills();
-        setSkills(data);
+        setSkills(await fetchUserSkills());
       } catch (err) {
         console.error("Failed to load agent skills:", err);
       } finally {
@@ -42,17 +40,11 @@ export default function MySkillsPage() {
     if (!user) return;
 
     setSkills((prev) =>
-      prev.map((skill) => {
-        if (skill.id === id) {
-          const currentlyStarred = skill.hasStarred;
-          return {
-            ...skill,
-            hasStarred: !currentlyStarred,
-            stars: (skill.stars || 0) + (currentlyStarred ? -1 : 1),
-          };
-        }
-        return skill;
-      })
+      prev.map((skill) =>
+        skill.id === id
+          ? { ...skill, hasStarred: !skill.hasStarred, stars: (skill.stars || 0) + (skill.hasStarred ? -1 : 1) }
+          : skill
+      )
     );
 
     try {
@@ -62,133 +54,73 @@ export default function MySkillsPage() {
     }
   };
 
-  if (loading || !user) {
-    return (
-      <main className="flex-1 w-full max-w-[1200px] mx-auto px-6 py-12">
-        {/* Header Panel Skeleton */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 pb-8 border-b border-white/10">
-          <div>
-            <h1 className="text-4xl font-heading font-semibold tracking-tight text-foreground/50 animate-pulse">
-              My Agent Skills
-            </h1>
-            <div className="mt-4 h-4 w-3/4 max-w-md bg-white/5 rounded"></div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="hidden sm:flex items-center bg-white/[0.02] border border-white/10 rounded-lg">
-              <div className="py-2 px-6 border-r border-white/10">
-                <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium">Total Skills</div>
-                <div className="h-6 w-8 mt-1 bg-white/5 rounded"></div>
-              </div>
-              <div className="py-2 px-6">
-                <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium">Categories</div>
-                <div className="h-6 w-8 mt-1 bg-white/5 rounded"></div>
-              </div>
-            </div>
-            <div className="h-10 w-40 rounded-lg bg-white/5"></div>
-          </div>
-        </div>
-
-        {/* Grid of Skeleton Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-white/[0.02] border border-white/10 p-6 flex flex-col justify-between h-[250px] rounded-lg animate-pulse"
-            >
-              <div>
-                <div className="h-5 w-20 rounded bg-white/5 mb-4"></div>
-                <div className="h-7 w-3/4 rounded bg-white/5 mb-5"></div>
-                <div className="space-y-2 mt-4">
-                  <div className="h-3 w-full rounded bg-white/5"></div>
-                  <div className="h-3 w-5/6 rounded bg-white/5"></div>
-                  <div className="h-3 w-4/6 rounded bg-white/5"></div>
-                </div>
-              </div>
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/5">
-                <div className="h-4 w-28 rounded bg-white/5"></div>
-                <div className="h-4 w-16 rounded bg-white/5"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </main>
-    );
-  }
-
+  const ready = !loading && user;
   const categoriesCount = new Set(skills.map((s) => s.category)).size;
 
   return (
-    <main className="flex-1 w-full max-w-[1200px] mx-auto px-6 py-12">
-      {/* Header Panel */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 pb-8 border-b border-white/10">
+    <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 pb-24 pt-12">
+      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-4xl font-heading font-semibold tracking-tight text-foreground">
-            My Agent Skills
+          <h1 className="font-heading text-[32px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground sm:text-[40px]">
+            My skills
           </h1>
-          <p className="mt-3 text-foreground/60 text-sm md:text-base max-w-xl">
-            Explore, catalog, and manage your agent skills capability database. Filter by category, track progression, and add new capabilities.
+          <p className="mt-3 max-w-2xl text-pretty text-[15px] leading-6 text-subtle">
+            Everything you&apos;ve written, public and private. Open a skill to edit it.
           </p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Quick Stats */}
-          <div className="hidden sm:flex items-center bg-white/[0.02] border border-white/10 rounded-lg">
-            <div className="py-2.5 px-5 border-r border-white/10">
-              <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium mb-0.5">Total Skills</div>
-              <div className="text-xl font-heading font-semibold text-foreground">{skills.length}</div>
-            </div>
-            <div className="py-2.5 px-5">
-              <div className="text-[10px] uppercase tracking-widest text-foreground/40 font-medium mb-0.5">Categories</div>
-              <div className="text-xl font-heading font-semibold text-foreground">{categoriesCount}</div>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Link
-              href="/skills/upload"
-              className="h-10 px-4 flex items-center justify-center gap-2 rounded-lg bg-white/[0.02] border border-white/10 hover:bg-white/[0.06] text-sm font-medium text-foreground transition-all"
-            >
-              <Upload className="w-4 h-4 opacity-70" />
-              Upload
-            </Link>
-            <Link
-              href="/skills/create"
-              className="h-10 px-5 flex items-center justify-center gap-2 rounded-lg bg-white text-[#0A0A0A] hover:bg-white/90 text-sm font-medium transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              Create Skill
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Skills Grid */}
-      {skills.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 px-4 text-center border border-dashed border-white/10 rounded-lg bg-white/[0.01] max-w-lg mx-auto">
-          <div className="text-foreground/20 mb-6">
-            <PlusCircle className="w-12 h-12" />
-          </div>
-          <h3 className="text-xl font-heading font-semibold text-foreground">No agent skills in catalog</h3>
-          <p className="text-foreground/50 mt-3 max-w-xs text-sm leading-relaxed">
-            Get started by adding your first agent skill with execution instructions, descriptions, and category tags.
-          </p>
-          <Link href="/skills/create" className="h-10 px-6 mt-8 flex items-center justify-center rounded-md bg-white text-[#0A0A0A] text-sm font-medium hover:bg-white/90 transition-colors">
-            Create First Agent Skill
+        <div className="flex gap-2">
+          <Link href="/skills/upload" className="btn btn-secondary h-10 gap-2 px-4 text-sm">
+            <Upload className="size-4" strokeWidth={1.5} />
+            Upload
+          </Link>
+          <Link href="/skills/create" className="btn btn-primary h-10 gap-2 px-4 text-sm">
+            <Plus className="size-4" strokeWidth={1.5} />
+            New skill
           </Link>
         </div>
+      </header>
+
+      <p className="mt-10 h-4 font-mono text-xs tabular-nums text-muted">
+        {ready &&
+          skills.length > 0 &&
+          `${skills.length} ${skills.length === 1 ? "skill" : "skills"} · ${categoriesCount} ${
+            categoriesCount === 1 ? "category" : "categories"
+          }`}
+      </p>
+
+      {!ready ? (
+        <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <SkillCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : skills.length === 0 ? (
+        <div className="mt-3 flex flex-col items-start gap-2 rounded-2xl border border-dashed border-line-strong p-8 sm:p-12">
+          <h2 className="font-heading text-lg font-medium text-foreground">No skills yet</h2>
+          <p className="max-w-md text-sm leading-[22px] text-subtle">
+            Write one in the editor, or upload a Markdown file you already have.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <Link href="/skills/create" className="btn btn-primary h-9 gap-2 px-3 text-sm">
+              <Plus className="size-4" strokeWidth={1.5} />
+              New skill
+            </Link>
+            <Link href="/skills/upload" className="btn btn-secondary h-9 gap-2 px-3 text-sm">
+              <Upload className="size-4" strokeWidth={1.5} />
+              Upload
+            </Link>
+          </div>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {skills.map((skill) => (
             <SkillCard
               key={skill.id}
               id={skill.id}
               name={skill.name}
               category={skill.category}
-              description={skill.description || "No description provided."}
-              authorName={skill.authorName || user?.name || "Anonymous"}
-              authorRole={skill.authorRole || user?.role || "Developer"}
-              authorAvatarColor={skill.authorAvatarColor || ""}
+              description={skill.description}
+              authorName={skill.authorName || user?.name || "Unknown author"}
               authorAvatarUrl={skill.authorAvatarUrl || user?.image}
               starsCount={skill.stars || 0}
               hasStarred={skill.hasStarred || false}

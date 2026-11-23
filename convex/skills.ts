@@ -1,13 +1,82 @@
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, MutationCtx, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Doc, Id } from "./_generated/dataModel";
+import {
+  assertServerSecret,
+  checkLength,
+  LIMITS,
+  publicAuthor,
+  rateHit,
+  requireUser,
+  userFromSession,
+} from "./helpers";
+import { slugCandidates, toSlug } from "../features/skills/slug";
 
+const subSkillValidator = v.array(
+  v.object({
+    title: v.string(),
+    content: v.string(),
+  }),
+);
+
+type SkillFields = {
+  name?: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  content?: string;
+  subSkills?: { title: string; content: string }[];
+};
+
+function validateSkillFields(f: SkillFields) {
+  checkLength(f.name, LIMITS.skillName, "Name");
+  checkLength(f.description, LIMITS.description, "Description");
+  checkLength(f.category, LIMITS.category, "Category");
+  checkLength(f.content, LIMITS.content, "Content");
+  if (f.name !== undefined && !f.name.trim()) throw new Error("Name is required");
+  if (f.tags) {
+    if (f.tags.length > LIMITS.tags) throw new Error(`At most ${LIMITS.tags} tags`);
+    f.tags.forEach((t) => checkLength(t, LIMITS.tag, "Tag"));
+  }
+  if (f.subSkills) {
+    if (f.subSkills.length > LIMITS.subSkills) throw new Error(`At most ${LIMITS.subSkills} sub-skills`);
+    for (const s of f.subSkills) {
+      checkLength(s.title, LIMITS.subSkillTitle, "Sub-skill title");
+      checkLength(s.content, LIMITS.content, "Sub-skill content");
+    }
+  }
+}
+
+function canRead(skill: Doc<"skills">, viewer: Doc<"users"> | null) {
+  return skill.visibility === "public" || (viewer !== null && skill.authorId === viewer._id);
+}
+
+/** The first free slug for `name`: code-reviewer, then code-reviewer-2, code-reviewer-3, … */
+async function claimSlug(ctx: MutationCtx, name: string): Promise<string> {
+  for (const slug of slugCandidates(name)) {
+    const holder = await ctx.db
+      .query("skills")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .first();
+    if (!holder) return slug;
+  }
+  throw new Error("unreachable");
+}
+
+// Older Next.js deployments still send the skill's name as `title`. Accepted until the
+// title → name migration is finished everywhere.
+const legacyTitle = v.optional(v.string());
+
+/** A public skill for anyone, or a private skill for its owner only. */
 export const getSkill = query({
-  args: { id: v.id("skills") },
+  args: { id: v.id("skills"), sessionToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const skill = await ctx.db.get(args.id);
     if (!skill) return null;
+    const viewer = await userFromSession(ctx, args.sessionToken);
+    if (!canRead(skill, viewer)) return null;
     const author = await ctx.db.get(skill.authorId);
-    return { ...skill, author };
+    return { ...skill, author: publicAuthor(author) };
   },
 });
 
@@ -23,59 +92,58 @@ export const getPublicSkills = query({
     const skillsWithAuthors = [];
     for (const skill of skills) {
       const author = await ctx.db.get(skill.authorId);
-      skillsWithAuthors.push({ ...skill, author });
+      skillsWithAuthors.push({ ...skill, author: publicAuthor(author) });
     }
     return skillsWithAuthors;
   },
 });
 
-export const getUserSkills = query({
-  args: { userId: v.id("users") },
+/** The signed-in user's own skills, public and private. */
+export const getMySkills = query({
+  args: { sessionToken: v.string() },
   handler: async (ctx, args) => {
+    const user = await userFromSession(ctx, args.sessionToken);
+    if (!user) return [];
     const skills = await ctx.db
       .query("skills")
-      .withIndex("by_authorId", (q) => q.eq("authorId", args.userId))
+      .withIndex("by_authorId", (q) => q.eq("authorId", user._id))
       .order("desc")
       .take(100);
-
-    const skillsWithAuthors = [];
-    for (const skill of skills) {
-      const author = await ctx.db.get(skill.authorId);
-      skillsWithAuthors.push({ ...skill, author });
-    }
-    return skillsWithAuthors;
+    const author = publicAuthor(user);
+    return skills.map((skill) => ({ ...skill, author }));
   },
 });
 
 export const createSkill = mutation({
   args: {
-    title: v.string(),
+    sessionToken: v.string(),
+    name: v.optional(v.string()),
+    title: legacyTitle,
     description: v.string(),
     category: v.string(),
     tags: v.optional(v.array(v.string())),
     content: v.string(),
-    subSkills: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          content: v.string(),
-        })
-      )
-    ),
+    subSkills: v.optional(subSkillValidator),
     visibility: v.union(v.literal("public"), v.literal("private")),
-    authorId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const user = await requireUser(ctx, args.sessionToken);
+    const { sessionToken: _, title, ...fields } = args;
+    const name = (fields.name ?? title ?? "").trim();
+    validateSkillFields({ ...fields, name });
+
     const now = Date.now();
     return await ctx.db.insert("skills", {
-      title: args.title,
-      description: args.description,
-      category: args.category,
-      tags: args.tags || [],
-      content: args.content,
-      subSkills: args.subSkills || [],
-      visibility: args.visibility,
-      authorId: args.authorId,
+      name,
+      title: name,
+      slug: await claimSlug(ctx, name),
+      description: fields.description,
+      category: fields.category,
+      tags: fields.tags || [],
+      content: fields.content,
+      subSkills: fields.subSkills || [],
+      visibility: fields.visibility,
+      authorId: user._id,
       views: 0,
       downloads: 0,
       stars: 0,
@@ -85,39 +153,36 @@ export const createSkill = mutation({
   },
 });
 
+/** Owner only. Counters (views, downloads, stars) and the slug can't be set through here. */
 export const updateSkill = mutation({
   args: {
+    sessionToken: v.string(),
     id: v.id("skills"),
-    title: v.optional(v.string()),
+    name: v.optional(v.string()),
+    title: legacyTitle,
     description: v.optional(v.string()),
     category: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
     content: v.optional(v.string()),
-    subSkills: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          content: v.string(),
-        })
-      )
-    ),
+    subSkills: v.optional(subSkillValidator),
     visibility: v.optional(v.union(v.literal("public"), v.literal("private"))),
-    views: v.optional(v.number()),
-    downloads: v.optional(v.number()),
-    callerId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const user = await requireUser(ctx, args.sessionToken);
     const skill = await ctx.db.get(args.id);
-    if (!skill) {
-      throw new Error("Skill not found");
-    }
-    if (skill.authorId !== args.callerId) {
+    if (!skill) throw new Error("Skill not found");
+    if (skill.authorId !== user._id) {
       throw new Error("Unauthorized: Only the owner can edit this skill");
     }
 
-    const { id, callerId: _, ...updates } = args;
+    const { id, sessionToken: _, title, name: rawName, ...updates } = args;
+    const name = (rawName ?? title)?.trim();
+    validateSkillFields({ ...updates, name });
     await ctx.db.patch(id, {
       ...updates,
+      // A rename changes only the name; the slug, and so the registry path, stays
+      ...(name !== undefined && { name, title: name }),
+      ...(skill.slug === undefined && { slug: await claimSlug(ctx, name ?? skill.name ?? skill.title) }),
       updatedAt: Date.now(),
     });
     return true;
@@ -125,66 +190,123 @@ export const updateSkill = mutation({
 });
 
 export const deleteSkill = mutation({
-  args: {
-    id: v.id("skills"),
-    callerId: v.id("users"),
-  },
+  args: { sessionToken: v.string(), id: v.id("skills") },
   handler: async (ctx, args) => {
+    const user = await requireUser(ctx, args.sessionToken);
     const skill = await ctx.db.get(args.id);
-    if (!skill) {
-      throw new Error("Skill not found");
-    }
-    if (skill.authorId !== args.callerId) {
+    if (!skill) throw new Error("Skill not found");
+    if (skill.authorId !== user._id) {
       throw new Error("Unauthorized: Only the owner can delete this skill");
     }
+
+    const likes = await ctx.db
+      .query("likes")
+      .withIndex("by_skillId", (q) => q.eq("skillId", args.id))
+      .collect();
+    for (const like of likes) await ctx.db.delete(like._id);
+
     await ctx.db.delete(args.id);
     return true;
   },
 });
 
-export const incrementViews = mutation({
-  args: { id: v.id("skills") },
-  handler: async (ctx, args) => {
-    const skill = await ctx.db.get(args.id);
-    if (skill) {
-      await ctx.db.patch(args.id, {
-        views: (skill.views || 0) + 1,
-      });
-      return true;
-    }
+const COUNT_ONCE_PER_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Server only. A view or download counts once per viewer per skill per day, and only on
+ * public skills, so refreshing or scripting the button can't inflate the numbers.
+ * `viewerKey` is an HMAC of the signed-in user or client IP, computed by the Next.js server.
+ */
+async function countOnce(
+  ctx: MutationCtx,
+  args: { secret: string; id: Id<"skills">; viewerKey: string },
+  field: "views" | "downloads",
+) {
+  assertServerSecret(args.secret);
+  const skill = await ctx.db.get(args.id);
+  if (!skill || skill.visibility !== "public") return false;
+  if ((await rateHit(ctx, `${field}:${args.id}:${args.viewerKey}`, COUNT_ONCE_PER_MS)) > 1) {
     return false;
-  },
+  }
+  await ctx.db.patch(args.id, { [field]: (skill[field] || 0) + 1 });
+  return true;
+}
+
+const counterArgs = { secret: v.string(), id: v.id("skills"), viewerKey: v.string() };
+
+export const incrementViews = mutation({
+  args: counterArgs,
+  handler: (ctx, args) => countOnce(ctx, args, "views"),
 });
 
 export const incrementDownloads = mutation({
-  args: { id: v.id("skills") },
+  args: counterArgs,
+  handler: (ctx, args) => countOnce(ctx, args, "downloads"),
+});
+
+/**
+ * Legacy, server only: skills whose name maps to `slug` and that already existed at `before`.
+ * Only older Next.js deployments call this; current code reads the stored slug instead.
+ * Remove together with `title` once the migration is finished everywhere.
+ */
+export const skillsWithSlugCreatedBefore = query({
+  args: { secret: v.string(), slug: v.string(), before: v.number() },
   handler: async (ctx, args) => {
-    const skill = await ctx.db.get(args.id);
-    if (skill) {
-      await ctx.db.patch(args.id, {
-        downloads: (skill.downloads || 0) + 1,
-      });
-      return true;
+    assertServerSecret(args.secret);
+    const skills = await ctx.db
+      .query("skills")
+      .filter((q) => q.lte(q.field("createdAt"), args.before))
+      .collect();
+    return skills.filter((s) => toSlug(s.name ?? s.title) === args.slug).map((s) => s._id);
+  },
+});
+
+/**
+ * One-off migration: copies the legacy `title` into `name` and gives every skill a slug.
+ * Runs oldest first, so when two names collide the older skill keeps the plain slug.
+ * Safe to re-run. `npx convex run skills:backfillNamesAndSlugs` (add `--prod` for production).
+ */
+export const backfillNamesAndSlugs = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const skills = await ctx.db.query("skills").order("asc").collect();
+    let updated = 0;
+    for (const skill of skills) {
+      if (skill.name !== undefined && skill.slug !== undefined) continue;
+      const name = skill.name ?? skill.title;
+      await ctx.db.patch(skill._id, { name, slug: skill.slug ?? (await claimSlug(ctx, name)) });
+      updated++;
     }
-    return false;
+    return { updated, total: skills.length };
+  },
+});
+
+/** Deletes expired rate-limit windows. Runs hourly from crons.ts. */
+export const cleanupRateLimits = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const expired = await ctx.db
+      .query("rateLimits")
+      .withIndex("by_expiresAt", (q) => q.lt("expiresAt", Date.now()))
+      .take(1000);
+    for (const row of expired) await ctx.db.delete(row._id);
+    return expired.length;
   },
 });
 
 export const toggleStar = mutation({
-  args: {
-    skillId: v.id("skills"),
-    userId: v.id("users"),
-  },
+  args: { sessionToken: v.string(), skillId: v.id("skills") },
   handler: async (ctx, args) => {
+    const user = await requireUser(ctx, args.sessionToken);
+    const skill = await ctx.db.get(args.skillId);
+    if (!skill || !canRead(skill, user)) throw new Error("Skill not found");
+
     const existingLike = await ctx.db
       .query("likes")
       .withIndex("by_userId_and_skillId", (q) =>
-        q.eq("userId", args.userId).eq("skillId", args.skillId)
+        q.eq("userId", user._id).eq("skillId", args.skillId),
       )
       .unique();
-
-    const skill = await ctx.db.get(args.skillId);
-    if (!skill) throw new Error("Skill not found");
 
     const currentStars = skill.stars || 0;
 
@@ -192,26 +314,23 @@ export const toggleStar = mutation({
       await ctx.db.delete(existingLike._id);
       await ctx.db.patch(args.skillId, { stars: Math.max(0, currentStars - 1) });
       return { hasStarred: false };
-    } else {
-      await ctx.db.insert("likes", {
-        userId: args.userId,
-        skillId: args.skillId,
-      });
-      await ctx.db.patch(args.skillId, { stars: currentStars + 1 });
-      return { hasStarred: true };
     }
+    await ctx.db.insert("likes", { userId: user._id, skillId: args.skillId });
+    await ctx.db.patch(args.skillId, { stars: currentStars + 1 });
+    return { hasStarred: true };
   },
 });
 
-export const getUserLikedSkillIds = query({
-  args: { userId: v.id("users") },
+export const getMyLikedSkillIds = query({
+  args: { sessionToken: v.string() },
   handler: async (ctx, args) => {
+    const user = await userFromSession(ctx, args.sessionToken);
+    if (!user) return [];
     const likes = await ctx.db
       .query("likes")
-      .withIndex("by_userId_and_skillId", (q) => q.eq("userId", args.userId))
+      .withIndex("by_userId_and_skillId", (q) => q.eq("userId", user._id))
       .collect();
-    
-    return likes.map(like => like.skillId);
+    return likes.map((like) => like.skillId);
   },
 });
 
@@ -224,10 +343,7 @@ export const getStats = query({
       .collect();
 
     const totalSkills = publicSkills.length;
-    const totalDownloads = publicSkills.reduce(
-      (sum, s) => sum + (s.downloads || 0),
-      0
-    );
+    const totalDownloads = publicSkills.reduce((sum, s) => sum + (s.downloads || 0), 0);
 
     const allUsers = await ctx.db.query("users").collect();
     const totalUsers = allUsers.length;
@@ -235,4 +351,3 @@ export const getStats = query({
     return { totalSkills, totalUsers, totalDownloads };
   },
 });
-

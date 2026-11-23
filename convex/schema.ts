@@ -15,10 +15,17 @@ export default defineSchema({
     sessionToken: v.string(),
     expiresAt: v.number(),
     createdAt: v.number(),
-  }).index("by_sessionToken", ["sessionToken"]),
+  })
+    .index("by_sessionToken", ["sessionToken"])
+    .index("by_userId", ["userId"]),
 
   skills: defineTable({
+    // Migrating `title` → `name` and adding `slug`. Until every deployment has run
+    // skills:backfillNamesAndSlugs, `title` mirrors `name` so older callers keep working.
     title: v.string(),
+    name: v.optional(v.string()),
+    // Registry path skills/<slug>/SKILL.md: assigned once at creation, unique, never changed
+    slug: v.optional(v.string()),
     description: v.string(),
     category: v.string(),
     tags: v.optional(v.array(v.string())),
@@ -40,7 +47,19 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_authorId", ["authorId"])
-    .index("by_visibility", ["visibility"]),
+    .index("by_visibility", ["visibility"])
+    .index("by_slug", ["slug"]),
+
+  // Fixed-window counters for login, signup and view/download dedupe.
+  // Keys are hashed by the Next.js server, so no raw IPs or emails are stored.
+  rateLimits: defineTable({
+    key: v.string(),
+    count: v.number(),
+    windowStart: v.number(),
+    expiresAt: v.number(),
+  })
+    .index("by_key", ["key"])
+    .index("by_expiresAt", ["expiresAt"]),
 
   likes: defineTable({
     userId: v.id("users"),

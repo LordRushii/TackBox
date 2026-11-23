@@ -1,171 +1,240 @@
 import Link from "next/link";
-import {
-  Users,
-  Rocket,
-  ShieldCheck,
-  Code,
-  Beaker,
-  Bot,
-  User,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, Bot, Code, Hammer, Wrench } from "lucide-react";
+import { ABOUT } from "@/lib/site-copy";
+import { getSkillsRepo } from "@/lib/github";
+import HeroBackdrop from "@/components/landing/HeroBackdrop";
+import Reveal from "@/components/landing/Reveal";
+import PixelC from "@/components/pixel/PixelC";
+
+export const metadata = {
+  title: "About · Tackbox",
+  description: "Why Tackbox exists, what a skill file contains, and who builds it.",
+};
+
+const AUDIENCE_ICONS = [Code, Hammer, Bot, Wrench];
+
+// Three bands of a skill file, matched to the anatomy list by index
+const ANATOMY_LINES: { band: number; text: React.ReactNode }[] = [
+  { band: 0, text: <span className="text-muted">---</span> },
+  { band: 0, text: <><span className="text-amber">name:</span> <span className="text-foreground">code-reviewer</span></> },
+  { band: 0, text: <><span className="text-amber">description:</span> <span className="text-foreground">Reviews code before merge</span></> },
+  { band: 0, text: <><span className="text-amber">mode:</span> <span className="text-foreground">subagent</span></> },
+  { band: 0, text: <><span className="text-amber">temperature:</span> <span className="text-foreground">0.1</span></> },
+  { band: 0, text: <span className="text-muted">---</span> },
+  { band: 1, text: <span className="text-subtle">You are a code reviewer. Give actionable,</span> },
+  { band: 1, text: <span className="text-subtle">prioritized feedback on code changes.</span> },
+  { band: 1, text: <><span className="text-amber">## </span><span className="text-foreground">Review scope</span></> },
+  { band: 1, text: <span className="text-subtle">1. Bugs, security and auth problems</span> },
+];
+
+const sectionTitle =
+  "font-heading text-[32px] font-medium leading-tight tracking-[-0.02em] text-foreground sm:text-[40px]";
 
 export default function AboutPage() {
+  const { owner, repo } = getSkillsRepo();
+  const repoUrl = `https://github.com/${owner}/${repo}`;
+
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen relative overflow-hidden bg-background pb-24">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-grid-pattern pointer-events-none [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-
-      <main className="flex flex-col items-center justify-start w-full max-w-[1200px] px-6 z-10 pt-24 space-y-32">
-        {/* Hero Section */}
-        <section className="flex flex-col items-center text-center space-y-8">
-          <div className="text-[11px] font-medium text-foreground/40 tracking-widest uppercase px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.02]">
-            ABOUT TACKBOX
+    <div className="flex w-full flex-col items-center bg-background pb-32">
+      {/* Hero */}
+      <section className="relative isolate -mt-16 w-full overflow-hidden pt-16">
+        <div className="relative">
+          <HeroBackdrop />
+          <div className="relative mx-auto flex max-w-[1200px] items-end justify-between gap-12 px-6 pb-36 pt-24 sm:pb-44 sm:pt-32">
+            <div className="flex flex-col">
+              <Reveal>
+                <p className="flex h-8 w-fit items-center gap-2 rounded-lg border border-line bg-background/80 px-3 text-[13px] text-subtle">
+                  <span className="size-1.5 bg-amber" />
+                  {ABOUT.eyebrow}
+                </p>
+              </Reveal>
+              <Reveal delay={0.08}>
+                <h1 className="mt-7 max-w-4xl font-heading text-[40px] font-medium leading-[1.04] tracking-[-0.035em] text-foreground sm:text-[64px] lg:text-[76px]">
+                  {ABOUT.headline[0]}
+                  <span className="block text-subtle">{ABOUT.headline[1]}</span>
+                </h1>
+              </Reveal>
+            </div>
+            <PixelC tile={22} gap={5} className="mb-2 hidden lg:block" />
           </div>
+        </div>
+      </section>
 
-          <h1 className="text-4xl sm:text-6xl font-heading font-semibold tracking-tight text-foreground leading-[1.05] max-w-4xl">
-            We got tired of writing{" "}
-            <br className="hidden sm:block" />
-            the same instructions twice.
-          </h1>
-
-          <p className="max-w-3xl text-lg text-foreground/60 leading-relaxed">
-            Most developers building AI agents spend hours writing the same prompts, instructions, and workflow logic that someone else has already figured out. That work disappears into private repos, Notion docs, and chat threads. Tackbox is a public registry for agent skills — Markdown files you can browse, download, and use in any agent framework, today.
-          </p>
-        </section>
-
-        {/* Our Mission */}
-        <section className="flex flex-col items-center text-center space-y-12 w-full">
-          <div className="space-y-4 max-w-2xl">
-            <h2 className="text-3xl font-heading font-semibold text-foreground">
-              Our Mission
-            </h2>
-            <p className="text-foreground/60 leading-relaxed">
-              Build a shared registry of agent skills. Make proven prompts and workflows findable in under five minutes — so developers stop solving the same problem twice.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-            <div className="flex flex-col items-start text-left space-y-4 p-8 rounded-lg bg-white/[0.02] border border-white/10 hover:border-white/20 transition-colors">
-              <div className="text-foreground">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
-                  Make skills findable.
-                </h3>
-                <p className="text-sm text-foreground/60 leading-relaxed">
-                  If someone has already solved the prompt engineering for a use case, you should be able to find and use that work in under five minutes.
+      <main className="flex w-full max-w-[1200px] flex-col gap-32 px-6 pt-24">
+        {/* Origin story */}
+        <section className="grid grid-cols-1 gap-8 md:grid-cols-[220px_minmax(0,1fr)] md:gap-16">
+          <Reveal>
+            <p className="font-mono text-xs text-amber md:sticky md:top-28">Why it exists</p>
+          </Reveal>
+          <div className="flex max-w-[44rem] flex-col gap-6">
+            {ABOUT.intro.map((p, i) => (
+              <Reveal key={i} delay={i * 0.06}>
+                <p
+                  className={
+                    i === 0
+                      ? "font-heading text-[22px] leading-[34px] tracking-[-0.01em] text-foreground sm:text-[26px] sm:leading-[38px]"
+                      : "text-[17px] leading-[29px] text-subtle"
+                  }
+                >
+                  {p}
                 </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-start text-left space-y-4 p-8 rounded-lg bg-white/[0.02] border border-white/10 hover:border-white/20 transition-colors">
-              <div className="text-foreground">
-                <Rocket className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
-                  Give developers attribution.
-                </h3>
-                <p className="text-sm text-foreground/60 leading-relaxed">
-                  Skills on Tackbox are tied to the developer who built them. Forks show the original. Quality rises when authorship is visible.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-start text-left space-y-4 p-8 rounded-lg bg-white/[0.02] border border-white/10 hover:border-white/20 transition-colors">
-              <div className="text-foreground">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
-                  Keep the format simple.
-                </h3>
-                <p className="text-sm text-foreground/60 leading-relaxed">
-                  A skill is a .md file. No proprietary format, no vendor lock-in. It works wherever you can pass text to a model.
-                </p>
-              </div>
-            </div>
+              </Reveal>
+            ))}
           </div>
         </section>
 
-        {/* Who is Tackbox for? */}
-        <section className="flex flex-col items-center text-center space-y-12 w-full pt-8">
-          <h2 className="text-3xl font-heading font-semibold text-foreground">
-            Who is Tackbox for?
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-            <div className="flex flex-col items-center text-center space-y-4 p-6 rounded-lg bg-white/[0.01] border border-white/5">
-              <div className="text-foreground/80 mb-2">
-                <Code className="w-6 h-6" />
+        {/* Anatomy of a skill file */}
+        <section>
+          <Reveal>
+            <h2 className={sectionTitle}>{ABOUT.anatomyTitle}</h2>
+          </Reveal>
+          <div className="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
+            <Reveal className="overflow-hidden rounded-2xl border border-line bg-deep">
+              <div className="flex h-11 items-center border-b border-line px-4 font-mono text-xs text-muted">
+                skills/code-reviewer/<span className="text-foreground">SKILL.md</span>
               </div>
-              <h3 className="font-heading font-semibold text-foreground">AI Engineers</h3>
-              <p className="text-sm text-foreground/60">
-                Building agents for production and don&apos;t have time to prompt-engineer from scratch. Browse proven skills, fork them, and adapt.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center space-y-4 p-6 rounded-lg bg-white/[0.01] border border-white/5">
-              <div className="text-foreground/80 mb-2">
-                <Beaker className="w-6 h-6" />
+              <div className="py-4 font-mono text-[12.5px] leading-[22px] sm:text-[13px]">
+                {ANATOMY_LINES.map((line, i) => (
+                  <div
+                    key={i}
+                    className={`flex border-l-2 ${line.band === 0 ? "border-amber/70 bg-amber/[0.04]" : "border-line-strong bg-card"}`}
+                  >
+                    <span className="w-11 shrink-0 select-none pr-4 text-right tabular-nums text-muted/60">
+                      {i + 1}
+                    </span>
+                    <span className="whitespace-pre pr-6">{line.text}</span>
+                  </div>
+                ))}
               </div>
-              <h3 className="font-heading font-semibold text-foreground">Indie Hackers</h3>
-              <p className="text-sm text-foreground/60">
-                You&apos;ve built something that works. Publish the skill behind it. Let others use it, and let them find you through your work.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center space-y-4 p-6 rounded-lg bg-white/[0.01] border border-white/5">
-              <div className="text-foreground/80 mb-2">
-                <Bot className="w-6 h-6" />
+              <div className="flex h-12 items-center gap-3 border-l-2 border-t border-l-amber/30 border-t-line bg-card px-4 font-mono text-xs text-subtle">
+                <span className="text-amber">$</span>
+                <span className="truncate">
+                  npx skills add {owner}/{repo}/skills/code-reviewer
+                </span>
               </div>
-              <h3 className="font-heading font-semibold text-foreground">Automation Teams</h3>
-              <p className="text-sm text-foreground/60">
-                Your team writes the same instructions in five different tools. Centralize them as skills. Version them. Share the link instead of the Notion page.
-              </p>
-            </div>
+            </Reveal>
 
-            <div className="flex flex-col items-center text-center space-y-4 p-6 rounded-lg bg-white/[0.01] border border-white/5">
-              <div className="text-foreground/80 mb-2">
-                <User className="w-6 h-6" />
-              </div>
-              <h3 className="font-heading font-semibold text-foreground">AI Tooling Developers</h3>
-              <p className="text-sm text-foreground/60">
-                Building on top of models and want to give users a head start. Point them at Tackbox instead of writing a prompt library from scratch.
-              </p>
-            </div>
+            <ol className="flex flex-col">
+              {ABOUT.anatomy.map((part, i) => (
+                <li key={part.label} className="border-t border-line py-6 first:border-t-0 first:pt-0 lg:first:pt-2">
+                  <Reveal delay={i * 0.08}>
+                    <div className="flex items-baseline gap-4">
+                      <span className="font-mono text-xs text-amber">0{i + 1}</span>
+                      <div>
+                        <h3 className="font-heading text-lg font-medium text-foreground">{part.label}</h3>
+                        <p className="mt-2 text-[15px] leading-[24px] text-subtle">{part.body}</p>
+                      </div>
+                    </div>
+                  </Reveal>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
-        {/* CTA Banner */}
-        <section className="w-full">
-          <div className="relative rounded-lg overflow-hidden bg-white/[0.02] border border-white/10 p-10 md:p-14 flex flex-col md:flex-row items-center justify-between text-left shadow-2xl shadow-black">
-            <div className="flex items-center gap-6 z-10 mb-8 md:mb-0">
-              <div className="hidden md:flex w-16 h-16 items-center justify-center rounded-lg bg-[#0A0A0A] border border-white/10 text-foreground shadow-sm">
-                <Rocket className="w-6 h-6" />
-              </div>
+        {/* Principles */}
+        <section>
+          <Reveal>
+            <h2 className={sectionTitle}>{ABOUT.principlesTitle}</h2>
+          </Reveal>
+          <div className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-3">
+            {ABOUT.principles.map((p, i) => (
+              <Reveal key={p.title} delay={i * 0.08} className="bg-background p-7 sm:p-8">
+                <span className="font-heading text-[56px] font-medium leading-none tracking-[-0.04em] text-muted">
+                  {i + 1}
+                </span>
+                <h3 className="mt-8 font-heading text-xl font-medium text-foreground">{p.title}</h3>
+                <p className="mt-3 text-[15px] leading-[24px] text-subtle">{p.body}</p>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* Audiences */}
+        <section>
+          <Reveal>
+            <h2 className={sectionTitle}>{ABOUT.audienceTitle}</h2>
+          </Reveal>
+          <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {ABOUT.audiences.map((a, i) => {
+              const Icon = AUDIENCE_ICONS[i];
+              return (
+                <Reveal
+                  key={a.title}
+                  delay={(i % 2) * 0.06}
+                  className="rounded-2xl border border-line bg-card p-7 transition-colors duration-200 ease-out hover:border-line-strong"
+                >
+                  <span className="grid size-9 place-items-center rounded-lg border border-line bg-raised">
+                    <Icon className="size-4 text-amber" strokeWidth={1.5} />
+                  </span>
+                  <h3 className="mt-6 font-heading text-lg font-medium text-foreground">{a.title}</h3>
+                  <p className="mt-2 text-[15px] leading-[24px] text-subtle">{a.body}</p>
+                </Reveal>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Roadmap and builder */}
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+          <Reveal className="rounded-2xl border border-line bg-card p-7 sm:p-8">
+            <h2 className="font-heading text-2xl font-medium text-foreground">{ABOUT.roadmapTitle}</h2>
+            <p className="mt-2 text-[15px] leading-[24px] text-subtle">{ABOUT.roadmapNote}</p>
+            <ul className="mt-6 flex flex-wrap gap-2">
+              {ABOUT.roadmap.map((item) => (
+                <li
+                  key={item}
+                  className="flex h-9 items-center rounded-lg border border-dashed border-line-strong px-3.5 text-[13px] text-subtle"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          <Reveal delay={0.06} className="flex flex-col rounded-2xl border border-line bg-card p-7 sm:p-8">
+            <div className="flex items-center gap-3">
+              <span className="grid size-10 place-items-center rounded-lg bg-amber font-heading text-sm font-semibold text-amber-ink">
+                RJ
+              </span>
+              <h2 className="font-heading text-2xl font-medium text-foreground">{ABOUT.builder.title}</h2>
+            </div>
+            <p className="mt-4 text-[15px] leading-[24px] text-subtle">{ABOUT.builder.body}</p>
+            <a
+              href={repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-auto flex items-center gap-1.5 pt-6 text-sm text-foreground transition-colors duration-150 ease-out hover:text-amber"
+            >
+              {owner}/{repo} on GitHub <ArrowUpRight className="size-4" strokeWidth={1.5} />
+            </a>
+          </Reveal>
+        </section>
+
+        {/* CTA */}
+        <Reveal>
+          <section className="relative overflow-hidden rounded-[20px] border border-line bg-card px-8 py-16 sm:px-14 sm:py-20">
+            <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 className="text-2xl font-heading font-semibold text-foreground mb-2">
-                  Start with a skill someone else already built.
+                <h2 className="font-heading text-[30px] font-medium leading-tight tracking-[-0.02em] text-foreground sm:text-[40px]">
+                  {ABOUT.cta.title}
                 </h2>
-                <p className="text-foreground/60 font-medium max-w-md">
-                  Browse the registry. Download a .md file. Ship your agent faster.
-                </p>
+                <p className="mt-3 max-w-md text-lg leading-[28px] text-subtle">{ABOUT.cta.body}</p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link href="/my-skills" className="btn btn-primary h-11 gap-2 px-5 text-sm">
+                  {ABOUT.cta.primary} <ArrowRight className="size-4" strokeWidth={1.5} />
+                </Link>
+                <Link
+                  href="/skills"
+                  className="btn h-11 border border-line bg-raised px-5 text-sm text-foreground hover:border-line-strong hover:bg-raised-strong"
+                >
+                  {ABOUT.cta.secondary}
+                </Link>
               </div>
             </div>
-
-            <div className="z-10 w-full md:w-auto">
-              <Link
-                href="/skills"
-                className="inline-flex items-center justify-center h-12 px-8 rounded-md bg-white text-[#0A0A0A] hover:bg-white/90 font-medium transition-colors w-full md:w-auto text-sm gap-2"
-              >
-                Browse Skills <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
+          </section>
+        </Reveal>
       </main>
     </div>
   );

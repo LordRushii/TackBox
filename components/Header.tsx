@@ -1,14 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUserAction, logoutAction } from "@/app/actions/auth";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { User, LogOut } from "lucide-react";
 
+// Transparent over the hero, a solid surface once the page scrolls under it
+const subscribeScroll = (cb: () => void) => {
+  window.addEventListener("scroll", cb, { passive: true });
+  return () => window.removeEventListener("scroll", cb);
+};
+const useScrolled = () =>
+  useSyncExternalStore(subscribeScroll, () => window.scrollY > 8, () => false);
+
 export default function Header() {
   const router = useRouter();
+  const scrolled = useScrolled();
   const { user: clerkUser, isSignedIn: isClerkSignedIn } = useUser();
   const { signOut: clerkSignOut } = useClerk();
   const [user, setUser] = useState<{
@@ -96,12 +105,16 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0A0A0A]/80 backdrop-blur-md">
+    <header
+      className={`sticky top-0 z-50 w-full border-b transition-[background-color,border-color] duration-200 ease-out ${
+        scrolled ? "border-line bg-background/85 backdrop-blur-md" : "border-transparent bg-transparent"
+      }`}
+    >
       <div className="navbar max-w-[1200px] mx-auto px-6 flex justify-between h-16">
         <div className="flex-1 flex items-center">
           <Link
             href="/"
-            className="group flex items-center justify-start w-40 h-10 overflow-hidden transition-opacity hover:opacity-80"
+            className="group flex items-center justify-start w-40 h-10 overflow-hidden transition-opacity duration-150 ease-out hover:opacity-80"
           >
             <img
               src="/logo.png"
@@ -112,11 +125,11 @@ export default function Header() {
         </div>
 
         <div className="hidden md:flex flex-1 justify-center">
-          <ul className="flex items-center gap-6 font-medium text-sm text-foreground/70">
+          <ul className="flex items-center gap-8 font-medium text-sm text-subtle">
             <li>
               <Link
                 href="/skills"
-                className="hover:text-foreground transition-colors"
+                className="transition-colors duration-150 ease-out hover:text-foreground"
               >
                 Explore
               </Link>
@@ -124,7 +137,7 @@ export default function Header() {
             <li>
               <Link
                 href="/#categories"
-                className="hover:text-foreground transition-colors"
+                className="transition-colors duration-150 ease-out hover:text-foreground"
               >
                 Categories
               </Link>
@@ -133,7 +146,7 @@ export default function Header() {
             <li>
               <Link
                 href="/about"
-                className="hover:text-foreground transition-colors"
+                className="transition-colors duration-150 ease-out hover:text-foreground"
               >
                 About
               </Link>
@@ -147,15 +160,15 @@ export default function Header() {
               <>
                 <Link
                   href="/my-skills"
-                  className="hidden sm:flex text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
+                  className="hidden sm:flex text-sm font-medium text-subtle transition-colors duration-150 ease-out hover:text-foreground"
                 >
-                  My Skills
+                  My skills
                 </Link>
                 <div className="dropdown dropdown-end p-0">
                   <div
                     tabIndex={0}
                     role="button"
-                    className="btn btn-ghost btn-circle avatar hover:bg-transparent overflow-hidden border border-white/10 w-9 h-9 flex items-center justify-center bg-white/[0.02]"
+                    className="btn btn-ghost btn-circle avatar hover:bg-transparent overflow-hidden border border-line w-9 h-9 flex items-center justify-center bg-card"
                   >
                     {displayUser.avatarUrl ? (
                       <img
@@ -164,7 +177,7 @@ export default function Header() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="font-medium text-sm text-foreground/80">
+                      <span className="font-medium text-sm text-subtle">
                         {displayUser.name
                           ? displayUser.name.charAt(0).toUpperCase()
                           : "U"}
@@ -173,32 +186,32 @@ export default function Header() {
                   </div>
                   <ul
                     tabIndex={0}
-                    className="menu menu-sm dropdown-content mt-3 z-[1] p-1.5 shadow-2xl shadow-black bg-[#0A0A0A] rounded-lg w-56 border border-white/10"
+                    className="menu menu-sm dropdown-content mt-3 z-[1] p-1.5 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] bg-card rounded-xl w-56 border border-line"
                   >
-                    <li className="px-3 py-2 border-b border-white/10 mb-1 pointer-events-none">
+                    <li className="px-3 py-2 border-b border-line mb-1 pointer-events-none">
                       <span className="text-sm font-medium text-foreground block">
                         {displayUser.name}
                       </span>
-                      <span className="text-xs font-normal text-foreground/50 block mt-0.5 truncate">
+                      <span className="text-xs font-normal text-muted block mt-0.5 truncate">
                         {displayUser.email}
                       </span>
                     </li>
                     <li>
                       <Link
                         href="/profile"
-                        className="px-3 py-2 rounded-md hover:bg-white/[0.04] text-foreground/80 hover:text-foreground transition-colors"
+                        className="px-3 py-2 rounded-lg text-subtle transition-colors duration-150 ease-out hover:bg-raised hover:text-foreground"
                       >
-                        <User className="w-4 h-4 mr-2 opacity-70" />
-                        Edit Profile
+                        <User className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                        Edit profile
                       </Link>
                     </li>
                     <li>
                       <button
                         onClick={handleLogout}
-                        className="px-3 py-2 rounded-md hover:bg-red-500/10 text-red-500/80 hover:text-red-500 transition-colors"
+                        className="px-3 py-2 rounded-lg text-negative transition-colors duration-150 ease-out hover:bg-negative/10"
                       >
-                        <LogOut className="w-4 h-4 mr-2 opacity-70" />
-                        Logout
+                        <LogOut className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                        Log out
                       </button>
                     </li>
                   </ul>
@@ -208,15 +221,15 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
+                  className="text-sm font-medium text-subtle transition-colors duration-150 ease-out hover:text-foreground"
                 >
-                  Sign In
+                  Sign in
                 </Link>
                 <Link
                   href="/register"
-                  className="h-9 px-4 rounded-lg flex items-center justify-center text-sm font-medium text-foreground bg-white/[0.02] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all"
+                  className="h-9 px-4 rounded-[10px] flex items-center justify-center text-sm font-medium text-foreground bg-raised border border-line transition-colors duration-150 ease-out hover:border-line-strong hover:bg-raised-strong"
                 >
-                  Get Started
+                  Get started
                 </Link>
               </>
             )}
