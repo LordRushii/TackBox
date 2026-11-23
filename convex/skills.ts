@@ -236,24 +236,6 @@ export const incrementDownloads = mutation({
   handler: (ctx, args) => countOnce(ctx, args, "downloads"),
 });
 
-/**
- * One-off migration: clears the legacy `title` copy from every skill, so the field can be
- * dropped from the schema. Safe to re-run. `npx convex run skills:dropLegacyTitles` (`--prod`).
- */
-export const dropLegacyTitles = internalMutation({
-  args: {},
-  handler: async (ctx) => {
-    const skills = await ctx.db.query("skills").collect();
-    let updated = 0;
-    for (const skill of skills) {
-      if (skill.title === undefined) continue;
-      await ctx.db.patch(skill._id, { title: undefined });
-      updated++;
-    }
-    return { updated, total: skills.length };
-  },
-});
-
 /** Deletes expired rate-limit windows. Runs hourly from crons.ts. */
 export const cleanupRateLimits = internalMutation({
   args: {},

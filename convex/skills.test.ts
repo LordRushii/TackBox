@@ -1,7 +1,7 @@
 // @vitest-environment edge-runtime
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { api, internal } from "./_generated/api";
+import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 import { modules } from "./test.setup";
@@ -59,31 +59,5 @@ describe("slugs", () => {
     await expect(t.mutation(api.skills.createSkill, { sessionToken, name: "   ", ...fields })).rejects.toThrow(
       "Name is required",
     );
-  });
-});
-
-describe("dropLegacyTitles", () => {
-  test("clears the legacy title and leaves the name and slug alone", async () => {
-    const { t, authorId, read } = await setup();
-    const id = await t.run((ctx) =>
-      ctx.db.insert("skills", {
-        name: "Code Reviewer",
-        slug: "code-reviewer",
-        title: "Code Reviewer",
-        ...fields,
-        authorId,
-        views: 0,
-        downloads: 0,
-        stars: 0,
-        createdAt: 1,
-        updatedAt: 1,
-      }),
-    );
-
-    expect(await t.mutation(internal.skills.dropLegacyTitles, {})).toEqual({ updated: 1, total: 1 });
-    const skill = await read(id);
-    expect(skill).toMatchObject({ name: "Code Reviewer", slug: "code-reviewer" });
-    expect(skill?.title).toBeUndefined();
-    expect(await t.mutation(internal.skills.dropLegacyTitles, {})).toEqual({ updated: 0, total: 1 });
   });
 });

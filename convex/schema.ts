@@ -23,8 +23,6 @@ export default defineSchema({
     name: v.string(),
     // Registry path skills/<slug>/SKILL.md: assigned once at creation, unique, never changed
     slug: v.string(),
-    // Legacy copy of `name`, being removed: skills:dropLegacyTitles clears it from every row
-    title: v.optional(v.string()),
     description: v.string(),
     category: v.string(),
     tags: v.optional(v.array(v.string())),
