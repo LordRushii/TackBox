@@ -42,3 +42,24 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# agent skills, AI context and planning files: kept on disk, never pushed
+# (skills/ is NOT listed: it is the live registry the app publishes to)
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+CONTEXT.md
+.claude/
+.agents/
+.cursor/
+.opencode/
+.vscode/
+skills-lock.json
+convex/_generated/ai/
+planning/
+docs/plans/
+docs/adr/
+PLAN.md
+*.plan.md
+TODO.md
+NOTES.md
