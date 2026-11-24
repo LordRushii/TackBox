@@ -106,7 +106,7 @@ export async function updateProfileAction(name: string, image: string): Promise<
 
   // Read after the update: getViewer caches per request, so the layout reuses this fresh copy
   const viewer = await getViewer();
-  if (!viewer) return { ok: false, error: "Please sign in again" };
+  if (!viewer) return { ok: false, error: "Please log in again" };
 
   revalidatePath("/", "layout");
   return { ok: true, viewer };

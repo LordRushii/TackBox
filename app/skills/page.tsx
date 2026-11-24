@@ -178,7 +178,7 @@ export default function BrowseSkillsPage({ searchParams }: BrowseSkillsPageProps
           <p className="mt-2 max-w-md text-[15px] leading-6 text-subtle">
             {user
               ? "Write a skill in Markdown or upload a file you already have."
-              : "Sign in to write a skill in Markdown or upload one you already have. Public skills show who wrote them."}
+              : "Log in to write a skill in Markdown or upload one you already have. Public skills show who wrote them."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -190,10 +190,10 @@ export default function BrowseSkillsPage({ searchParams }: BrowseSkillsPageProps
           ) : (
             <>
               <Link href="/login?redirect=/my-skills" className="btn btn-primary h-10 px-4 text-sm">
-                Sign in
+                Log in
               </Link>
               <Link href="/register" className="btn btn-secondary h-10 px-4 text-sm">
-                Create an account
+                Sign up
               </Link>
             </>
           )}

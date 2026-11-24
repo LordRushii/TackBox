@@ -135,13 +135,13 @@ export default function Header() {
                   href="/login"
                   className="text-sm font-medium text-subtle transition-colors duration-150 ease-out hover:text-foreground"
                 >
-                  Sign in
+                  Log in
                 </Link>
                 <Link
                   href="/register"
                   className="h-9 px-4 rounded-[10px] flex items-center justify-center text-sm font-medium text-foreground bg-raised border border-line transition-colors duration-150 ease-out hover:border-line-strong hover:bg-raised-strong"
                 >
-                  Get started
+                  Sign up
                 </Link>
               </>
             )}

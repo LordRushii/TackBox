@@ -73,7 +73,7 @@ export async function registerUser(input: unknown): Promise<AuthResult> {
         ? "Too many sign-up attempts. Try again in an hour"
         // Without email verification a taken address can't be hidden, since a free one signs
         // you straight in. The signup limit above caps how fast this can be probed
-        : "Couldn't create an account with this email. If it's yours, sign in instead",
+        : "Couldn't create an account with this email. If it's yours, log in instead",
     };
   }
 

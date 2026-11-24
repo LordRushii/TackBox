@@ -41,7 +41,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
       const result = await loginAction({ email, password });
 
       if (result.ok) {
-        setSuccess("Signed in, redirecting");
+        setSuccess("Logged in, redirecting");
         setViewer(result.viewer);
         setTimeout(() => router.push(safeRedirect(first(params.redirect))), 1200);
       } else {
@@ -58,7 +58,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <div className="w-full max-w-[400px] rounded-2xl border border-line bg-card p-8">
-        <h1 className="font-heading text-2xl font-medium text-foreground">Sign in to Tackbox</h1>
+        <h1 className="font-heading text-2xl font-medium text-foreground">Log in to Tackbox</h1>
         <p className="mt-2 text-sm text-subtle">Publish skills and manage the ones you&apos;ve written</p>
 
         {error && (
@@ -75,7 +75,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
         )}
 
         <div className="mt-6">
-          <GoogleButton mode="signIn" />
+          <GoogleButton mode="logIn" redirectTo={first(params.redirect)} />
         </div>
 
         <div className="my-6 flex items-center gap-3 text-xs text-muted">
@@ -118,14 +118,14 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
 
           <button type="submit" disabled={loading} className="btn btn-primary mt-2 h-10 w-full gap-2 text-sm">
             {loading && <span className="loading loading-spinner loading-xs" />}
-            {loading ? "Signing in" : "Sign in"}
+            {loading ? "Logging in" : "Log in"}
           </button>
         </form>
 
         <p className="mt-6 border-t border-line pt-6 text-center text-sm text-muted">
           No account yet?{" "}
           <Link href="/register" className="text-foreground underline-offset-4 hover:underline">
-            Create one
+            Sign up
           </Link>
         </p>
       </div>
