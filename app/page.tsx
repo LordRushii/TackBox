@@ -174,8 +174,9 @@ function Hero({ installCommand, publishHref }: { installCommand: string; publish
 
   return (
     <section ref={ref} className="relative isolate -mt-16 w-full overflow-hidden pt-16">
+      {/* From the very top of the page, behind the floating navbar: 64px taller than the hero */}
+      <HeroBackdrop className="h-[684px] sm:h-[804px]" calm="center" />
       <div className="relative">
-        <HeroBackdrop className="h-[620px] sm:h-[740px]" calm="center" />
 
         <div className="relative flex flex-col items-center px-6 pt-20 text-center sm:pt-28">
           <motion.p

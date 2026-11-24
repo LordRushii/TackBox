@@ -36,8 +36,9 @@ export default function AboutPage() {
     <div className="flex w-full flex-col items-center bg-background pb-32">
       {/* Hero */}
       <section className="relative isolate -mt-16 w-full overflow-hidden pt-16">
+        {/* From the very top of the page, behind the floating navbar */}
+        <HeroBackdrop />
         <div className="relative">
-          <HeroBackdrop />
           <div className="relative mx-auto flex max-w-[1200px] items-end justify-between gap-12 px-6 pb-36 pt-24 sm:pb-44 sm:pt-32">
             <div className="flex flex-col">
               <Reveal>
