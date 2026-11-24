@@ -1,29 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { getSkillsRepo } from "@/lib/github";
+import { installCommands } from "@/features/registry/repo";
 import { CopyButton } from "./SkillFile";
 
-interface SkillInstallProps {
-  slug: string;
-  /** Kept for API compatibility; the page already shows the name */
-  skillName?: string;
-}
 
 const TABS = [
   { id: "cli", label: "npx skills", caption: "Run it from the root of your agent workspace." },
   { id: "degit", label: "degit", caption: "Copies the skill folder from GitHub without the git history." },
 ] as const;
 
-export default function SkillInstall({ slug }: SkillInstallProps) {
+export default function SkillInstall({ slug }: { slug: string }) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]["id"]>("cli");
-  const { owner, repo } = getSkillsRepo();
-
-  const commands = {
-    cli: `npx skills add ${owner}/${repo}/skills/${slug}`,
-    degit: `npx degit ${owner}/${repo}/skills/${slug} ${slug}`,
-  };
-  const command = commands[activeTab];
+  const command = installCommands(slug)[activeTab];
   const caption = TABS.find((t) => t.id === activeTab)!.caption;
 
   return (

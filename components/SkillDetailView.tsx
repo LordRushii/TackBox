@@ -8,6 +8,7 @@ import { type SkillDraft, draftFrom, draftToEdit } from "@/features/skills/draft
 import { toSlug } from "@/features/skills/slug";
 import { incrementViewsAction, incrementDownloadsAction, toggleStarAction } from "@/features/skills/actions";
 import { useViewer } from "@/features/auth/viewer";
+import { skillFilePath } from "@/features/registry/repo";
 import Toast from "./Toast";
 import SkillInstall from "./SkillInstall";
 import SkillFile, { CopyButton, FileLines } from "./SkillFile";
@@ -282,7 +283,7 @@ export default function SkillDetailView({ initialSkill }: SkillDetailViewProps) 
         {/* The file itself */}
         <div className="flex min-w-0 flex-col gap-8">
           <SkillFile
-            path={`skills/${slug}/SKILL.md`}
+            path={skillFilePath(slug)}
             content={skill.content || "# No content yet"}
             actions={<CopyButton text={skill.content} label="Copy file" />}
           />

@@ -18,7 +18,7 @@ import {
   Terminal,
 } from "lucide-react";
 import { fetchStatsAction } from "@/features/skills/actions";
-import { getSkillsRepo } from "@/lib/github";
+import { installCommands } from "@/features/registry/repo";
 import { HOME } from "@/lib/site-copy";
 import { useViewer } from "@/features/auth/viewer";
 import HeroBackdrop from "@/components/landing/HeroBackdrop";
@@ -46,8 +46,7 @@ export default function Home() {
   // undefined while loading, null if the stats query failed
   const [stats, setStats] = useState<Stats | null | undefined>(undefined);
 
-  const { owner, repo } = getSkillsRepo();
-  const installCommand = `npx skills add ${owner}/${repo}/skills/code-reviewer`;
+  const installCommand = installCommands("code-reviewer").cli;
   const publishHref = isLoggedIn ? "/my-skills" : "/login";
 
   useEffect(() => {

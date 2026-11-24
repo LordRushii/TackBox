@@ -7,7 +7,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { convex, serverSecret } from "@/lib/convex";
 import { viewerKey } from "@/lib/rate-keys";
 import { getViewer, requireSessionToken, getSessionToken } from "@/features/auth/server";
-import { publishSkillToGitHub } from "@/lib/github-publish";
+import { publishSkillToGitHub } from "@/features/registry/publish";
 import { Skill, SkillEdit, SkillRow, toSkill } from "./skill";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
