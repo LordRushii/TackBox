@@ -24,7 +24,7 @@ describe("registry paths", () => {
 
   test("install commands point at the skill's folder", () => {
     expect(installCommands("code-reviewer", repo)).toEqual({
-      cli: "npx skills add someone/skills/skills/code-reviewer",
+      cli: "npx skills add someone/skills@code-reviewer",
       degit: "npx degit someone/skills/skills/code-reviewer code-reviewer",
     });
     expect(repoUrl(repo)).toBe("https://github.com/someone/skills");

@@ -42,7 +42,8 @@ export function skillFilePath(slug: string): string {
 export function installCommands(slug: string, repo: RepoRef = registryRepo()) {
   const folder = `${repo.owner}/${repo.repo}/skills/${slug}`;
   return {
-    cli: `npx skills add ${folder}`,
+    // The skills CLI finds the skill by its frontmatter name, which is the slug
+    cli: `npx skills add ${repo.owner}/${repo.repo}@${slug}`,
     degit: `npx degit ${folder} ${slug}`,
   };
 }

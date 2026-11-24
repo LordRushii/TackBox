@@ -13,7 +13,7 @@ Tackbox is an open registry for AI agent skills. A skill is one Markdown file wi
 Skills are stored in Convex. When you publish a public skill, the server commits it to this GitHub repo at `skills/<slug>/SKILL.md`, so every skill has a git history and a stable URL. Install one with:
 
 ```bash
-npx skills add LordRushii/TackBox/skills/<slug>
+npx skills add LordRushii/TackBox@<slug>
 ```
 
 Each committed file carries a `tackbox-id` in its frontmatter, which stops a different skill with the same slug from overwriting it.

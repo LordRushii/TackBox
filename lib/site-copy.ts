@@ -55,7 +55,7 @@ export const HOME = {
       },
       {
         title: "One command to install",
-        body: "npx skills add <owner>/<repo>/skills/<name> installs the skill. If you'd rather copy it by hand, every skill also downloads as a .md file.",
+        body: "npx skills add <owner>/<repo>@<name> installs the skill. If you'd rather copy it by hand, every skill also downloads as a .md file.",
       },
       {
         title: "Stored in git",
@@ -95,7 +95,7 @@ export const ABOUT = {
     },
     {
       label: "Install path",
-      body: "Each skill has an address in the form <owner>/<repo>/skills/<name>. Pass it to npx skills add, or download the file directly.",
+      body: "Each skill lives at <owner>/<repo>/skills/<name>. Install it with npx skills add <owner>/<repo>@<name>, or download the file directly.",
     },
   ],
   principlesTitle: "What Tackbox tries to do",
