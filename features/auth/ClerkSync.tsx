@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { loginWithClerkAction } from "./actions";
 import { useSetViewer, useViewer } from "./viewer";
@@ -11,6 +12,9 @@ import { useSetViewer, useViewer } from "./viewer";
  */
 export default function ClerkSync() {
   const { isSignedIn, isLoaded } = useUser();
+  // The Google buttons pass through these two pages, and /auth/callback opens the session itself
+  const pathname = usePathname();
+  const onCallbackPage = pathname === "/sso-callback" || pathname === "/auth/callback";
   const viewer = useViewer();
   const setViewer = useSetViewer();
   // One attempt per Clerk sign-in. A viewer counts as done, so signing out of Tackbox
@@ -18,7 +22,7 @@ export default function ClerkSync() {
   const settled = useRef(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || onCallbackPage) return;
     if (!isSignedIn) {
       settled.current = false;
       return;
@@ -35,7 +39,7 @@ export default function ClerkSync() {
         if (result.ok) setViewer(result.viewer);
       })
       .catch((err) => console.error("Failed to sync Clerk user to Convex:", err));
-  }, [isLoaded, isSignedIn, viewer, setViewer]);
+  }, [isLoaded, isSignedIn, onCallbackPage, viewer, setViewer]);
 
   return null;
 }

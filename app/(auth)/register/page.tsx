@@ -68,7 +68,7 @@ export default function RegisterPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <div className="w-full max-w-[400px] rounded-2xl border border-line bg-card p-8">
-        <h1 className="font-heading text-2xl font-medium text-foreground">Create your account</h1>
+        <h1 className="font-heading text-2xl font-medium text-foreground">Sign up for Tackbox</h1>
         <p className="mt-2 text-sm text-subtle">Publish skills under your own name</p>
 
         {error && (
@@ -129,14 +129,14 @@ export default function RegisterPage() {
 
           <button type="submit" disabled={loading} className="btn btn-primary mt-2 h-10 w-full gap-2 text-sm">
             {loading && <span className="loading loading-spinner loading-xs" />}
-            {loading ? "Creating account" : "Create account"}
+            {loading ? "Signing up" : "Sign up"}
           </button>
         </form>
 
         <p className="mt-6 border-t border-line pt-6 text-center text-sm text-muted">
           Already have an account?{" "}
           <Link href="/login" className="text-foreground underline-offset-4 hover:underline">
-            Sign in
+            Log in
           </Link>
         </p>
       </div>
