@@ -102,14 +102,9 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="login-password" className="field-label">
-                Password
-              </label>
-              <a href="#" className="text-xs text-muted transition-colors duration-150 ease-out hover:text-foreground">
-                Forgot password?
-              </a>
-            </div>
+            <label htmlFor="login-password" className="field-label">
+              Password
+            </label>
             <input
               id="login-password"
               type="password"
@@ -120,11 +115,6 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
               required
             />
           </div>
-
-          <label className="flex cursor-pointer select-none items-center gap-2 text-[13px] text-subtle">
-            <input type="checkbox" className="size-4 accent-amber" />
-            Remember this device
-          </label>
 
           <button type="submit" disabled={loading} className="btn btn-primary mt-2 h-10 w-full gap-2 text-sm">
             {loading && <span className="loading loading-spinner loading-xs" />}
