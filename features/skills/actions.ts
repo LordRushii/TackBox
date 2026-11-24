@@ -196,19 +196,23 @@ async function counterArgs(id: string) {
   };
 }
 
-export async function incrementViewsAction(id: string) {
+/** Counts a view; true when it counted (each viewer counts once a day). */
+export async function incrementViewsAction(id: string): Promise<boolean> {
   try {
-    await convex.mutation(api.skills.incrementViews, await counterArgs(id));
+    return await convex.mutation(api.skills.incrementViews, await counterArgs(id));
   } catch (e) {
     console.error("Failed to increment views:", e);
+    return false;
   }
 }
 
-export async function incrementDownloadsAction(id: string) {
+/** Counts a download; true when it counted (each viewer counts once a day). */
+export async function incrementDownloadsAction(id: string): Promise<boolean> {
   try {
-    await convex.mutation(api.skills.incrementDownloads, await counterArgs(id));
+    return await convex.mutation(api.skills.incrementDownloads, await counterArgs(id));
   } catch (e) {
     console.error("Failed to increment downloads:", e);
+    return false;
   }
 }
 
