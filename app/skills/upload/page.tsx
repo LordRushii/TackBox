@@ -1,10 +1,8 @@
 "use client";
 
-import { useActionState, useState, useEffect, useRef } from "react";
+import { useActionState, useState, useRef } from "react";
 import { createSkill } from "@/features/skills/actions";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getCurrentUserAction } from "@/app/actions/auth";
 import { AlertTriangle, ArrowLeft, FileText, FileUp } from "lucide-react";
 import SkillMetaFields from "@/components/SkillMetaFields";
 
@@ -17,25 +15,9 @@ type UploadedFile = {
 const initialState = { message: "" };
 
 export default function UploadSkillPage() {
-  const router = useRouter();
   const [state, formAction, pending] = useActionState(createSkill, initialState);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    async function syncSession() {
-      try {
-        const dbUser = await getCurrentUserAction();
-        if (!dbUser) {
-          localStorage.removeItem("user");
-          router.push("/login?redirect=/skills/upload");
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    syncSession();
-  }, [router]);
 
   // The first file becomes the skill, the rest are bundled with it
   const handleFormAction = (formData: FormData) => {

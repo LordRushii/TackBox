@@ -2,39 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Plus, Upload } from "lucide-react";
 import { fetchUserSkills, toggleStarAction } from "@/features/skills/actions";
 import type { Skill } from "@/features/skills/skill";
+import { useViewer } from "@/features/auth/viewer";
 import SkillCard, { SkillCardSkeleton } from "@/components/SkillCard";
-import { getCurrentUserAction } from "@/app/actions/auth";
-import { Plus, Upload } from "lucide-react";
 
 export default function MySkillsPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  // The layout only renders this page for a signed-in viewer
+  const user = useViewer();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadSkills() {
-      try {
-        const dbUser = await getCurrentUserAction();
-        if (!dbUser) {
-          localStorage.removeItem("user");
-          router.push("/login?redirect=/my-skills");
-          return;
-        }
-        setUser(dbUser);
-        localStorage.setItem("user", JSON.stringify(dbUser));
-        setSkills(await fetchUserSkills());
-      } catch (err) {
-        console.error("Failed to load agent skills:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadSkills();
-  }, [router]);
+    fetchUserSkills()
+      .then(setSkills)
+      .catch((err) => console.error("Failed to load agent skills:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleStarToggle = async (id: string) => {
     if (!user) return;

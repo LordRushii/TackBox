@@ -12,7 +12,7 @@ import {
   incrementDownloadsAction,
   toggleStarAction,
 } from "@/features/skills/actions";
-import { getCurrentUserAction } from "@/app/actions/auth";
+import { useViewer } from "@/features/auth/viewer";
 import Toast from "./Toast";
 import ConfirmModal from "./ConfirmModal";
 import SkillInstall from "./SkillInstall";
@@ -51,8 +51,8 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
   const [isEditing, setIsEditing] = useState(false);
 
   // Auth
-  const [loggedInUser, setLoggedInUser] = useState<any>(null);
-  const [hasEditPermission, setHasEditPermission] = useState(isOwner);
+  const loggedInUser = useViewer();
+  const hasEditPermission = isOwner || loggedInUser?.id === skill.authorId;
 
   // Edit form
   const [name, setName] = useState(skill.name);
@@ -80,35 +80,12 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
   const [isDeleting, setIsDeleting] = useState(false);
   const [expandedSubSkills, setExpandedSubSkills] = useState<Record<number, boolean>>({});
 
-  // Read the signed-in user and count the view
+  // Count the view
   useEffect(() => {
-    async function init() {
-      try {
-        const dbUser = await getCurrentUserAction();
-        if (dbUser) {
-          setLoggedInUser(dbUser);
-          localStorage.setItem("user", JSON.stringify(dbUser));
-          if (isOwner || dbUser.id === skill.authorId) {
-            setHasEditPermission(true);
-          }
-        } else {
-          setLoggedInUser(null);
-          localStorage.removeItem("user");
-          setHasEditPermission(false);
-        }
-      } catch (err) {
-        console.error("Failed to sync session in detail view:", err);
-      }
-
-      try {
-        await incrementViewsAction(skill.id);
-        setViewsCount((prev) => prev + 1);
-      } catch (err) {
-        console.error("Failed to increment views:", err);
-      }
-    }
-    init();
-  }, [skill, isOwner]);
+    incrementViewsAction(skill.id)
+      .then(() => setViewsCount((prev) => prev + 1))
+      .catch((err) => console.error("Failed to increment views:", err));
+  }, [skill.id]);
 
   // Sync when the server sends a fresh skill
   useEffect(() => {
@@ -187,7 +164,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
   };
 
   const handleToggleStar = async () => {
-    if (!loggedInUser && !localStorage.getItem("user")) {
+    if (!loggedInUser) {
       router.push(`/login?redirect=/skills/${skill.id}`);
       return;
     }

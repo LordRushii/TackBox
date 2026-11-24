@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { registerAction } from "@/app/actions/auth";
 import { AlertTriangle, Check } from "lucide-react";
+import { registerAction } from "@/features/auth/actions";
+import { useSetViewer } from "@/features/auth/viewer";
 import GoogleButton from "@/components/GoogleButton";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const setViewer = useSetViewer();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,19 +40,15 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("confirmPassword", confirmPassword);
+      const result = await registerAction({ name, email, password, confirmPassword });
 
-      const result = await registerAction(null, formData);
-
-      if (result?.success) {
-        setSuccess("Account created, taking you to sign in");
-        setTimeout(() => router.push(`/login?email=${encodeURIComponent(email)}`), 1500);
+      // Creating the account also signs you in
+      if (result.ok) {
+        setSuccess("Account created, taking you to your skills");
+        setViewer(result.viewer);
+        setTimeout(() => router.push("/my-skills"), 1200);
       } else {
-        setError(result?.message || "Couldn't create the account. Try again.");
+        setError(result.error || "Couldn't create the account. Try again.");
       }
     } catch (err) {
       console.error(err);

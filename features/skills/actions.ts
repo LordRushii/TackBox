@@ -6,8 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { convex, serverSecret } from "@/lib/convex";
 import { viewerKey } from "@/lib/rate-keys";
-import { getSessionCookie } from "@/lib/cookies";
-import { getSessionUser, requireSessionToken } from "@/lib/auth";
+import { getViewer, requireSessionToken, getSessionToken } from "@/features/auth/server";
 import { publishSkillToGitHub } from "@/lib/github-publish";
 import { Skill, SkillEdit, SkillRow, toSkill } from "./skill";
 import { revalidatePath } from "next/cache";
@@ -54,7 +53,7 @@ const skillUpdateSchema = z
 export async function fetchSkills(): Promise<Skill[]> {
   try {
     const dbSkills = await convex.query(api.skills.getPublicSkills);
-    const liked = await likedIds(await getSessionCookie());
+    const liked = await likedIds(await getSessionToken());
     return dbSkills.map((s) => toSkill(s, liked));
   } catch (err) {
     console.error("Failed to fetch public skills:", err);
@@ -64,7 +63,7 @@ export async function fetchSkills(): Promise<Skill[]> {
 
 export async function fetchUserSkills(): Promise<Skill[]> {
   try {
-    const sessionToken = await getSessionCookie();
+    const sessionToken = await getSessionToken();
     if (!sessionToken) return [];
     const dbSkills = await convex.query(api.skills.getMySkills, { sessionToken });
     const liked = await likedIds(sessionToken);
@@ -77,7 +76,7 @@ export async function fetchUserSkills(): Promise<Skill[]> {
 
 export async function fetchSkillById(id: string): Promise<Skill | null> {
   try {
-    const sessionToken = await getSessionCookie();
+    const sessionToken = await getSessionToken();
     const dbSkill = await convex.query(api.skills.getSkill, {
       id: id as Id<"skills">,
       sessionToken,
@@ -91,8 +90,8 @@ export async function fetchSkillById(id: string): Promise<Skill | null> {
 }
 
 export async function createSkill(prevState: unknown, formData: FormData) {
-  const user = await getSessionUser();
-  const sessionToken = await getSessionCookie();
+  const user = await getViewer();
+  const sessionToken = await getSessionToken();
   if (!user || !sessionToken) {
     return { message: "You must be logged in to create skills." };
   }
@@ -147,7 +146,7 @@ export async function createSkill(prevState: unknown, formData: FormData) {
 
 export async function updateSkillAction(id: string, edit: SkillEdit) {
   const sessionToken = await requireSessionToken();
-  const user = await getSessionUser();
+  const user = await getViewer();
   if (!user) throw new Error("You must be logged in to update skills.");
 
   // Only editable fields pass; counters, the slug and anything else are dropped
@@ -189,7 +188,7 @@ export async function deleteSkillAction(id: string) {
 }
 
 async function counterArgs(id: string) {
-  const user = await getSessionUser();
+  const user = await getViewer();
   return {
     secret: serverSecret(),
     id: id as Id<"skills">,

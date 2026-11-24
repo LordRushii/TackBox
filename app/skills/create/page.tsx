@@ -1,10 +1,8 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useActionState, useState } from "react";
 import { createSkill } from "@/features/skills/actions";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getCurrentUserAction } from "@/app/actions/auth";
 import { AlertTriangle, ArrowLeft, ArrowUpRight, Plus } from "lucide-react";
 import SkillMetaFields from "@/components/SkillMetaFields";
 import SkillEditor from "@/components/SkillEditor";
@@ -21,7 +19,6 @@ function generateId() {
 }
 
 export default function NewSkillPage() {
-  const router = useRouter();
   const [state, formAction, pending] = useActionState(createSkill, initialState);
   const [mainContent, setMainContent] = useState("");
   const [mainTab, setMainTab] = useState<"write" | "preview">("write");
@@ -29,21 +26,6 @@ export default function NewSkillPage() {
   // Additional skills bundled with the main one
   const [skillEntries, setSkillEntries] = useState<SkillEntry[]>([]);
   const [entryTabs, setEntryTabs] = useState<Record<string, "write" | "preview">>({});
-
-  useEffect(() => {
-    async function syncSession() {
-      try {
-        const dbUser = await getCurrentUserAction();
-        if (!dbUser) {
-          localStorage.removeItem("user");
-          router.push("/login?redirect=/skills/create");
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    syncSession();
-  }, [router]);
 
   const handleFormAction = (formData: FormData) => {
     formData.set("mainContent", mainContent);
