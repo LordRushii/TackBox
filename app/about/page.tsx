@@ -4,7 +4,6 @@ import { ABOUT } from "@/lib/site-copy";
 import { installCommands, registryRepo, repoUrl } from "@/features/registry/repo";
 import HeroBackdrop from "@/components/landing/HeroBackdrop";
 import Reveal from "@/components/landing/Reveal";
-import PixelC from "@/components/pixel/PixelC";
 
 export const metadata = {
   title: "About · Tackbox",
@@ -54,7 +53,6 @@ export default function AboutPage() {
                 </h1>
               </Reveal>
             </div>
-            <PixelC tile={22} gap={5} className="mb-2 hidden lg:block" />
           </div>
         </div>
       </section>
