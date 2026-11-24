@@ -1,12 +1,14 @@
 import "server-only";
+import { cache } from "react";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { convex, serverSecret } from "./convex";
-import { getSessionCookie, removeSessionCookie, setSessionCookie } from "./cookies";
-import { generateSessionToken } from "./session";
+import { convex, serverSecret } from "@/lib/convex";
+import { clientEmailKey, clientKey } from "@/lib/rate-keys";
+import { generateSessionToken, getSessionCookie, removeSessionCookie, setSessionCookie } from "./session-cookie";
 import { hashPassword, verifyPassword } from "./password";
-import { clientEmailKey, clientKey } from "./rate-keys";
+import type { Viewer } from "./viewer";
 
 export const registerSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(80, "Name must be at most 80 characters"),
@@ -23,18 +25,17 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required").max(1024),
 });
 
-export interface AuthenticatedUser {
-  id: Id<"users">;
-  name: string;
-  email: string;
-  image?: string;
-  role: string;
-}
+export type AuthResult = { ok: true; viewer: Viewer } | { ok: false; error: string };
 
 const SESSION_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Compared against when the email doesn't exist, so response time doesn't reveal which emails have accounts
 const DUMMY_HASH = "$2b$10$IeQVCcz28THQb2ZQZP9qCe39xQLBSPF8qC4SHPiO4nd5bsXgO1gCq";
+
+/** Only these fields reach the browser. */
+export function toViewer(user: { id: string; name: string; email: string; image?: string }): Viewer {
+  return { id: user.id, name: user.name, email: user.email, image: user.image };
+}
 
 /** Creates a session for a user the server has already authenticated. */
 export async function startSession(userId: Id<"users">) {
@@ -50,10 +51,10 @@ export async function startSession(userId: Id<"users">) {
   return sessionToken;
 }
 
-export async function registerUser(input: unknown) {
+export async function registerUser(input: unknown): Promise<AuthResult> {
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
+    return { ok: false, error: parsed.error.issues[0].message };
   }
   const { name, email, password } = parsed.data;
 
@@ -67,7 +68,7 @@ export async function registerUser(input: unknown) {
   });
   if (!result.ok) {
     return {
-      success: false,
+      ok: false,
       error: result.reason === "limited"
         ? "Too many sign-up attempts. Try again in an hour"
         // Without email verification a taken address can't be hidden, since a free one signs
@@ -75,20 +76,15 @@ export async function registerUser(input: unknown) {
         : "Couldn't create an account with this email. If it's yours, sign in instead",
     };
   }
-  const userId = result.userId;
 
-  await startSession(userId);
-
-  return {
-    success: true,
-    user: { id: userId, name, email, role: "Member" },
-  };
+  await startSession(result.userId);
+  return { ok: true, viewer: { id: result.userId, name, email } };
 }
 
-export async function loginUser(input: unknown) {
+export async function loginUser(input: unknown): Promise<AuthResult> {
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
+    return { ok: false, error: parsed.error.issues[0].message };
   }
   const { email, password } = parsed.data;
   const keys = {
@@ -99,7 +95,7 @@ export async function loginUser(input: unknown) {
 
   const result = await convex.mutation(api.users.beginLogin, { ...keys, email });
   if (result.limited) {
-    return { success: false, error: "Too many attempts. Try again in 15 minutes" };
+    return { ok: false, error: "Too many attempts. Try again in 15 minutes" };
   }
 
   const user = result.user;
@@ -109,16 +105,14 @@ export async function loginUser(input: unknown) {
     await convex.mutation(api.users.recordLoginFailure, keys);
     // One message for every failure, so it doesn't reveal which emails exist or use Google
     return {
-      success: false,
+      ok: false,
       error: "Invalid email or password. If you signed up with Google, use the Google button",
     };
   }
 
   await convex.mutation(api.users.clearLoginFailures, keys);
   await startSession(user.id);
-
-  const { passwordHash: _, ...safeUser } = user;
-  return { success: true, user: safeUser };
+  return { ok: true, viewer: toViewer(user) };
 }
 
 export async function logout() {
@@ -127,16 +121,32 @@ export async function logout() {
     await convex.mutation(api.sessions.deleteSession, { sessionToken: token });
   }
   await removeSessionCookie();
-  return { success: true };
 }
 
-export async function getSessionUser(): Promise<AuthenticatedUser | null> {
+/**
+ * The signed-in user for this request, or null. Cached per request, so the root layout,
+ * a page guard and an action can all ask without repeating the Convex lookup.
+ */
+export const getViewer = cache(async (): Promise<Viewer | null> => {
   const token = await getSessionCookie();
   if (!token) return null;
-  return await convex.query(api.sessions.getSessionUser, { sessionToken: token });
+  const user = await convex.query(api.sessions.getSessionUser, { sessionToken: token });
+  return user ? toViewer(user) : null;
+});
+
+/** For pages that need a signed-in user: sends everyone else to sign in, then back here. */
+export async function requireViewer(returnTo: string): Promise<Viewer> {
+  const viewer = await getViewer();
+  if (!viewer) redirect(`/login?redirect=${encodeURIComponent(returnTo)}`);
+  return viewer;
 }
 
-/** The current session token, for Convex functions that resolve the caller themselves. */
+/** The session token, if any, for Convex functions that resolve the caller themselves. */
+export async function getSessionToken(): Promise<string | undefined> {
+  return await getSessionCookie();
+}
+
+/** Like getSessionToken, for calls that need a signed-in caller. */
 export async function requireSessionToken(): Promise<string> {
   const token = await getSessionCookie();
   if (!token) throw new Error("You must be logged in");

@@ -1,29 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Skill, SkillEdit } from "@/features/skills/skill";
+import { type SkillDraft, draftFrom, draftToEdit } from "@/features/skills/draft";
 import { toSlug } from "@/features/skills/slug";
-import {
-  updateSkillAction,
-  deleteSkillAction,
-  incrementViewsAction,
-  incrementDownloadsAction,
-  toggleStarAction,
-} from "@/features/skills/actions";
-import { getCurrentUserAction } from "@/app/actions/auth";
+import { incrementViewsAction, incrementDownloadsAction, toggleStarAction } from "@/features/skills/actions";
+import { useViewer } from "@/features/auth/viewer";
+import { skillFilePath } from "@/features/registry/repo";
 import Toast from "./Toast";
-import ConfirmModal from "./ConfirmModal";
 import SkillInstall from "./SkillInstall";
 import SkillFile, { CopyButton, FileLines } from "./SkillFile";
-import SkillEditor from "./SkillEditor";
-import { CATEGORIES } from "./SkillMetaFields";
-import { ArrowLeft, ChevronDown, Download, Eye, FileText, Package, Pencil, Plus, Star, Trash2, X } from "lucide-react";
+import SkillEditForm from "./SkillEditForm";
+import { ArrowLeft, ChevronDown, Download, FileText, Package, Pencil, Star } from "lucide-react";
 
 type SkillDetailViewProps = {
   initialSkill: Skill;
-  isOwner?: boolean;
 };
 
 type ToastState = { show: boolean; message: string; type: "success" | "error" };
@@ -44,104 +37,56 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export default function SkillDetailView({ initialSkill, isOwner = false }: SkillDetailViewProps) {
+export default function SkillDetailView({ initialSkill }: SkillDetailViewProps) {
   const router = useRouter();
+  const viewer = useViewer();
+  const isOwner = viewer?.id === initialSkill.authorId;
 
-  const [skill, setSkill] = useState<Skill>(initialSkill);
+  // The saved skill, counters included. A fresh copy from the server replaces it
+  const [saved, setSaved] = useState<Skill>(initialSkill);
+  const [fromServer, setFromServer] = useState(initialSkill);
+  if (fromServer !== initialSkill) {
+    setFromServer(initialSkill);
+    setSaved(initialSkill);
+  }
+
+  // The owner's unsaved edit. Previewing keeps it; saving or cancelling drops it
+  const [draft, setDraft] = useState<SkillDraft | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Auth
-  const [loggedInUser, setLoggedInUser] = useState<any>(null);
-  const [hasEditPermission, setHasEditPermission] = useState(isOwner);
-
-  // Edit form
-  const [name, setName] = useState(skill.name);
-  const [category, setCategory] = useState(skill.category);
-  const [visibility, setVisibility] = useState<"public" | "private">(skill.visibility || "public");
-  const [description, setDescription] = useState(skill.description);
-  const [content, setContent] = useState(skill.content || "");
-  const [tags, setTags] = useState<string[]>(skill.tags || []);
-  const [tagInput, setTagInput] = useState("");
-  // Additional skills bundled with this one (no title needed, just content)
-  const [editSkillEntries, setEditSkillEntries] = useState<Array<{ id: string; content: string }>>(
-    (skill.subSkills || []).map((s, i) => ({ id: String(i), content: s.content }))
-  );
-  const [editEntryTabs, setEditEntryTabs] = useState<Record<string, "write" | "preview">>({});
-  const [editorTab, setEditorTab] = useState<"write" | "preview">("write");
-
-  // Counters and UI
-  const [starred, setStarred] = useState(skill.hasStarred || false);
-  const [starsCount, setStarsCount] = useState(skill.stars || 0);
-  const [viewsCount, setViewsCount] = useState(skill.views || 0);
-  const [downloadsCount, setDownloadsCount] = useState(skill.downloads || 0);
   const [toast, setToast] = useState<ToastState>({ show: false, message: "", type: "success" });
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [expandedSubSkills, setExpandedSubSkills] = useState<Record<number, boolean>>({});
 
-  // Read the signed-in user and count the view
-  useEffect(() => {
-    async function init() {
-      try {
-        const dbUser = await getCurrentUserAction();
-        if (dbUser) {
-          setLoggedInUser(dbUser);
-          localStorage.setItem("user", JSON.stringify(dbUser));
-          if (isOwner || dbUser.id === skill.authorId) {
-            setHasEditPermission(true);
-          }
-        } else {
-          setLoggedInUser(null);
-          localStorage.removeItem("user");
-          setHasEditPermission(false);
-        }
-      } catch (err) {
-        console.error("Failed to sync session in detail view:", err);
-      }
+  // While previewing a draft the page shows it in place of the saved skill
+  const skill: Skill = draft ? { ...saved, ...draftToEdit(draft) } : saved;
+  const subSkills = skill.subSkills;
+  // The registry path and every download file name use the stored slug
+  const slug = skill.slug;
 
-      try {
-        await incrementViewsAction(skill.id);
-        setViewsCount((prev) => prev + 1);
-      } catch (err) {
-        console.error("Failed to increment views:", err);
-      }
-    }
-    init();
-  }, [skill, isOwner]);
-
-  // Sync when the server sends a fresh skill
+  // Count the view once per page load; the server counts each viewer once a day
   useEffect(() => {
-    setSkill(initialSkill);
-    setName(initialSkill.name);
-    setCategory(initialSkill.category);
-    setVisibility(initialSkill.visibility || "public");
-    setDescription(initialSkill.description);
-    setContent(initialSkill.content || "");
-    setTags(initialSkill.tags || []);
-    setEditSkillEntries((initialSkill.subSkills || []).map((s, i) => ({ id: String(i), content: s.content })));
-    setStarred(initialSkill.hasStarred || false);
-    setStarsCount(initialSkill.stars || 0);
-    setViewsCount(initialSkill.views || 0);
-    setDownloadsCount(initialSkill.downloads || 0);
-  }, [initialSkill]);
+    incrementViewsAction(initialSkill.id).then((counted) => {
+      if (counted) setSaved((s) => ({ ...s, views: s.views + 1 }));
+    });
+  }, [initialSkill.id]);
 
   const triggerToast = (message: string, type: ToastState["type"] = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast((t) => ({ ...t, show: false })), 2500);
   };
 
-  const subSkills = skill.subSkills || [];
-  // The registry path and every download file name use the stored slug
-  const slug = skill.slug;
+  const countDownload = async () => {
+    if (await incrementDownloadsAction(skill.id)) {
+      setSaved((s) => ({ ...s, downloads: s.downloads + 1 }));
+    }
+  };
 
   const handleDownloadMd = async () => {
     const filename = `${slug}.md`;
     try {
-      await incrementDownloadsAction(skill.id);
-      downloadBlob(new Blob([content], { type: "text/markdown" }), filename);
+      downloadBlob(new Blob([skill.content], { type: "text/markdown" }), filename);
       triggerToast(`Downloaded ${filename}`);
-      setDownloadsCount((prev) => prev + 1);
+      await countDownload();
     } catch (e) {
       console.error(e);
       triggerToast("Download failed", "error");
@@ -152,23 +97,21 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
     try {
       const JSZip = (await import("jszip")).default;
       const zip = new JSZip();
-      const slugBase = slug;
 
-      if (content) {
-        zip.file(`${slugBase}/README.md`, `# ${name}\n\n${content}`);
+      if (skill.content) {
+        zip.file(`${slug}/README.md`, `# ${skill.name}\n\n${skill.content}`);
       }
       subSkills.forEach((sub, idx) => {
         const subSlug = toSlug(sub.title) || `sub-skill-${idx + 1}`;
         zip.file(
-          `${slugBase}/${String(idx + 1).padStart(2, "0")}-${subSlug}.md`,
+          `${slug}/${String(idx + 1).padStart(2, "0")}-${subSlug}.md`,
           `# ${sub.title || `Sub-Skill ${idx + 1}`}\n\n${sub.content}`
         );
       });
 
-      downloadBlob(await zip.generateAsync({ type: "blob" }), `${slugBase}.zip`);
-      await incrementDownloadsAction(skill.id);
-      triggerToast(`Downloaded ${slugBase}.zip`);
-      setDownloadsCount((prev) => prev + 1);
+      downloadBlob(await zip.generateAsync({ type: "blob" }), `${slug}.zip`);
+      triggerToast(`Downloaded ${slug}.zip`);
+      await countDownload();
     } catch (e) {
       console.error(e);
       triggerToast("ZIP download failed", "error");
@@ -187,91 +130,38 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
   };
 
   const handleToggleStar = async () => {
-    if (!loggedInUser && !localStorage.getItem("user")) {
+    if (!viewer) {
       router.push(`/login?redirect=/skills/${skill.id}`);
       return;
     }
-    const next = !starred;
-    setStarred(next);
-    setStarsCount((c) => Math.max(0, c + (next ? 1 : -1)));
+    const star = (on: boolean) =>
+      setSaved((s) => ({ ...s, hasStarred: on, stars: Math.max(0, s.stars + (on ? 1 : -1)) }));
+    const next = !saved.hasStarred;
+    star(next);
     try {
       await toggleStarAction(skill.id);
     } catch (err) {
       console.error("Failed to toggle star", err);
-      setStarred(!next);
-      setStarsCount((c) => Math.max(0, c + (next ? -1 : 1)));
+      star(!next);
       triggerToast("Couldn't update the star", "error");
     }
   };
 
-  // Edit mode helpers
-  const addEditEntry = () => {
-    const id = Math.random().toString(36).slice(2, 10);
-    setEditSkillEntries((prev) => [...prev, { id, content: "" }]);
-    setEditEntryTabs((prev) => ({ ...prev, [id]: "write" }));
-  };
-  const removeEditEntry = (id: string) => setEditSkillEntries((prev) => prev.filter((e) => e.id !== id));
-  const updateEditEntryContent = (id: string, val: string) =>
-    setEditSkillEntries((prev) => prev.map((e) => (e.id === id ? { ...e, content: val } : e)));
-
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      const val = tagInput.trim().replace(/,/g, "");
-      if (val && !tags.includes(val)) {
-        setTags([...tags, val]);
-        setTagInput("");
-      }
-    }
+  const startEditing = () => {
+    setDraft((d) => d ?? draftFrom(saved));
+    setIsEditing(true);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !description || !category) {
-      triggerToast("Name, category and description are required", "error");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const subSkillsToSave = editSkillEntries
-        .filter((entry) => entry.content.trim())
-        .map((entry, i) => ({ title: `Skill ${i + 2}`, content: entry.content }));
-
-      const updatedData: SkillEdit = {
-        name,
-        category,
-        visibility,
-        description,
-        content,
-        subSkills: subSkillsToSave,
-        tags,
-      };
-
-      await updateSkillAction(skill.id, updatedData);
-      setSkill((prev) => ({ ...prev, ...updatedData, updatedAt: new Date().toISOString() }));
-      setIsEditing(false);
-      triggerToast("Changes saved");
-    } catch (err) {
-      console.error("Save error:", err);
-      triggerToast("Couldn't save the changes", "error");
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSaved = (edit: SkillEdit) => {
+    setSaved((prev) => ({ ...prev, ...edit, updatedAt: new Date().toISOString() }));
+    setDraft(null);
+    setIsEditing(false);
+    triggerToast("Changes saved");
   };
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      await deleteSkillAction(skill.id);
-      triggerToast("Skill deleted");
-      setTimeout(() => router.push("/my-skills"), 1000);
-    } catch (err) {
-      console.error("Delete error:", err);
-      triggerToast("Couldn't delete the skill", "error");
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
-    }
+  const stopEditing = () => {
+    setDraft(null);
+    setIsEditing(false);
   };
 
   const toastEl = (
@@ -284,205 +174,26 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
   );
 
   /* ───────────── Edit mode ───────────── */
-  if (isEditing) {
+  if (isEditing && draft) {
     return (
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 pb-24 pt-8">
         {toastEl}
-        <ConfirmModal
-          isOpen={showDeleteConfirm}
-          title={`Delete ${name}?`}
-          message="This deletes the skill and every skill bundled with it. It can't be undone."
-          confirmText="Delete skill"
-          isProcessing={isDeleting}
-          onConfirm={handleDelete}
-          onCancel={() => setShowDeleteConfirm(false)}
+        <SkillEditForm
+          skill={saved}
+          draft={draft}
+          onDraftChange={setDraft}
+          onSaved={handleSaved}
+          onPreview={() => setIsEditing(false)}
+          onCancel={stopEditing}
+          onDownload={handleDownloadMd}
+          notify={triggerToast}
         />
-
-        <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-sm text-muted">
-          <Link href="/my-skills" className="shrink-0 transition-colors duration-150 ease-out hover:text-foreground">
-            My skills
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="truncate text-subtle">{skill.name}</span>
-        </nav>
-
-        <header className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="font-heading text-[32px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground">
-              Edit skill
-            </h1>
-            <p className="mt-2 text-[15px] leading-6 text-subtle">Changes show on the skill page once you save</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="btn btn-danger h-9 gap-2 px-3 text-sm">
-              <Trash2 className="size-4" strokeWidth={1.5} />
-              Delete
-            </button>
-            <button type="button" onClick={handleDownloadMd} className="btn btn-quiet h-9 gap-2 px-3 text-sm">
-              <Download className="size-4" strokeWidth={1.5} />
-              Download .md
-            </button>
-            <button type="button" onClick={() => setIsEditing(false)} className="btn btn-secondary h-9 gap-2 px-3 text-sm">
-              <Eye className="size-4" strokeWidth={1.5} />
-              Preview
-            </button>
-          </div>
-        </header>
-
-        <form onSubmit={handleSave} className="mt-8 flex flex-col gap-8">
-          <div className="flex flex-col gap-6 rounded-2xl border border-line bg-card p-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="edit-name" className="field-label">
-                  Name
-                </label>
-                <input
-                  id="edit-name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="field h-10 px-3"
-                  required
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="edit-category" className="field-label">
-                  Category
-                </label>
-                <select
-                  id="edit-category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="field h-10 pl-3"
-                  required
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="edit-visibility" className="field-label">
-                  Visibility
-                </label>
-                <select
-                  id="edit-visibility"
-                  value={visibility}
-                  onChange={(e) => setVisibility(e.target.value as "public" | "private")}
-                  className="field h-10 pl-3"
-                >
-                  <option value="public">Public, anyone can view it</option>
-                  <option value="private">Private, only you can view it</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="edit-tags" className="field-label">
-                Tags
-              </label>
-              <div className="field flex min-h-10 flex-wrap items-center gap-2 px-2 py-1.5">
-                {tags.map((tag) => (
-                  <span key={tag} className="tag pr-1">
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => setTags(tags.filter((t) => t !== tag))}
-                      aria-label={`Remove tag ${tag}`}
-                      className="grid size-4 place-items-center rounded text-muted transition-colors duration-150 ease-out hover:text-foreground"
-                    >
-                      <X className="size-3" strokeWidth={1.5} />
-                    </button>
-                  </span>
-                ))}
-                <input
-                  id="edit-tags"
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleAddTag}
-                  placeholder="Add a tag"
-                  className="h-6 min-w-[120px] flex-1 bg-transparent px-1 text-sm text-foreground outline-none placeholder:text-muted focus:outline-none"
-                />
-              </div>
-              <p className="text-xs text-muted">Press Enter to add</p>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-baseline justify-between">
-                <label htmlFor="edit-description" className="field-label">
-                  Description
-                </label>
-                <span className="font-mono text-xs tabular-nums text-muted">{description.length}/200</span>
-              </div>
-              <textarea
-                id="edit-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value.slice(0, 200))}
-                rows={3}
-                placeholder="What the skill does and when to use it"
-                className="field resize-y px-3 py-2.5"
-                required
-              />
-            </div>
-          </div>
-
-          <SkillEditor
-            id="edit-content"
-            label="Skill file"
-            split
-            required
-            content={content}
-            onContentChange={setContent}
-            tab={editorTab}
-            onTabChange={setEditorTab}
-          />
-
-          {editSkillEntries.map((entry, idx) => (
-            <SkillEditor
-              key={entry.id}
-              id={`edit-entry-${entry.id}`}
-              label={`Skill ${idx + 2}`}
-              content={entry.content}
-              onContentChange={(v) => updateEditEntryContent(entry.id, v)}
-              tab={editEntryTabs[entry.id] ?? "write"}
-              onTabChange={(t) => setEditEntryTabs((prev) => ({ ...prev, [entry.id]: t }))}
-              onRemove={() => removeEditEntry(entry.id)}
-              disabled={isSaving}
-            />
-          ))}
-
-          <div>
-            <button type="button" onClick={addEditEntry} disabled={isSaving} className="btn btn-secondary h-9 gap-2 px-3 text-sm">
-              <Plus className="size-4" strokeWidth={1.5} />
-              Add another skill
-            </button>
-          </div>
-
-          <div className="flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[13px] text-muted">
-              Last saved{" "}
-              {new Date(skill.updatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
-            </p>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setIsEditing(false)} disabled={isSaving} className="btn btn-secondary h-10 px-4 text-sm">
-                Cancel
-              </button>
-              <button type="submit" disabled={isSaving} className="btn btn-primary h-10 gap-2 px-4 text-sm">
-                {isSaving && <span className="loading loading-spinner loading-xs" />}
-                {isSaving ? "Saving" : "Save changes"}
-              </button>
-            </div>
-          </div>
-        </form>
       </main>
     );
   }
 
   /* ───────────── View mode ───────────── */
-  const visibleTags = tags.filter((t) => t.toLowerCase() !== skill.category.toLowerCase());
+  const visibleTags = skill.tags.filter((t) => t.toLowerCase() !== skill.category.toLowerCase());
   const authorName = skill.authorName || "Unknown author";
   const authorInitials = authorName
     .split(" ")
@@ -496,7 +207,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
     ["Created", formatDate(skill.createdAt)],
     ["Updated", formatDate(skill.updatedAt)],
     ...(subSkills.length > 0 ? [["Skills in package", String(subSkills.length + 1)] as [string, string]] : []),
-    ["Visibility", visibility === "public" ? "Public" : "Private"],
+    ["Visibility", skill.visibility === "public" ? "Public" : "Private"],
   ];
 
   return (
@@ -516,7 +227,7 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
       <header className="mt-8 flex flex-col gap-6 border-b border-line pb-8 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 max-w-3xl">
           <p className="font-mono text-xs text-muted">
-            {skill.category} · {visibility === "public" ? "Public" : "Private"}
+            {skill.category} · {skill.visibility === "public" ? "Public" : "Private"}
           </p>
           <h1 className="mt-3 break-words font-heading text-[32px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground sm:text-[40px]">
             {skill.name}
@@ -534,25 +245,26 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {hasEditPermission && (
-            <button type="button" onClick={() => setIsEditing(true)} className="btn btn-quiet h-9 gap-2 px-3 text-sm">
+          {isOwner && draft && <span className="text-[13px] text-muted">Previewing unsaved changes</span>}
+          {isOwner && (
+            <button type="button" onClick={startEditing} className="btn btn-quiet h-9 gap-2 px-3 text-sm">
               <Pencil className="size-4" strokeWidth={1.5} />
-              Edit
+              {draft ? "Back to editing" : "Edit"}
             </button>
           )}
           <button
             type="button"
             onClick={handleToggleStar}
-            aria-pressed={starred}
+            aria-pressed={skill.hasStarred}
             className="btn btn-secondary h-9 gap-2 px-3 text-sm"
           >
             <Star
-              className={`size-4 ${starred ? "text-amber" : ""}`}
-              fill={starred ? "currentColor" : "none"}
+              className={`size-4 ${skill.hasStarred ? "text-amber" : ""}`}
+              fill={skill.hasStarred ? "currentColor" : "none"}
               strokeWidth={1.5}
             />
-            {starred ? "Starred" : "Star"}
-            <span className="font-mono text-xs tabular-nums text-muted">{formatCount(starsCount)}</span>
+            {skill.hasStarred ? "Starred" : "Star"}
+            <span className="font-mono text-xs tabular-nums text-muted">{formatCount(skill.stars)}</span>
           </button>
           {subSkills.length > 0 && (
             <button type="button" onClick={handleDownloadZip} className="btn btn-secondary h-9 gap-2 px-3 text-sm">
@@ -571,9 +283,9 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
         {/* The file itself */}
         <div className="flex min-w-0 flex-col gap-8">
           <SkillFile
-            path={`skills/${slug}/SKILL.md`}
-            content={content || "# No content yet"}
-            actions={<CopyButton text={content} label="Copy file" />}
+            path={skillFilePath(slug)}
+            content={skill.content || "# No content yet"}
+            actions={<CopyButton text={skill.content} label="Copy file" />}
           />
 
           {subSkills.length > 0 && (
@@ -634,8 +346,8 @@ export default function SkillDetailView({ initialSkill, isOwner = false }: Skill
 
           <dl className="grid grid-cols-2 divide-x divide-line rounded-2xl border border-line bg-card">
             {[
-              ["Views", viewsCount],
-              ["Downloads", downloadsCount],
+              ["Views", skill.views],
+              ["Downloads", skill.downloads],
             ].map(([label, value]) => (
               <div key={label} className="px-5 py-4">
                 <dt className="text-[13px] text-muted">{label}</dt>

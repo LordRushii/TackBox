@@ -1,26 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { safeRedirect } from "@/lib/safe-redirect";
 import Link from "next/link";
-import { loginAction } from "@/app/actions/auth";
 import { AlertTriangle, Check } from "lucide-react";
+import { loginAction } from "@/features/auth/actions";
+import { safeRedirect } from "@/features/auth/safe-redirect";
+import { useSetViewer } from "@/features/auth/viewer";
 import GoogleButton from "@/components/GoogleButton";
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ email?: string | string[]; redirect?: string | string[] }>;
+};
+
+const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
+
+export default function LoginPage({ searchParams }: LoginPageProps) {
+  const params = use(searchParams);
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const setViewer = useSetViewer();
+  const [email, setEmail] = useState(first(params.email) ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Prefill the email when coming from registration
-  useEffect(() => {
-    const registeredEmail = new URLSearchParams(window.location.search).get("email");
-    if (registeredEmail) setEmail(registeredEmail);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,24 +38,14 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", password);
+      const result = await loginAction({ email, password });
 
-      const result = await loginAction(null, formData);
-
-      if (result?.success) {
+      if (result.ok) {
         setSuccess("Signed in, redirecting");
-        localStorage.setItem("user", JSON.stringify(result.user));
-        // Let the header know the user changed
-        window.dispatchEvent(new Event("storage"));
-
-        setTimeout(() => {
-          const redirectUrl = safeRedirect(new URLSearchParams(window.location.search).get("redirect"));
-          router.push(redirectUrl);
-        }, 1200);
+        setViewer(result.viewer);
+        setTimeout(() => router.push(safeRedirect(first(params.redirect))), 1200);
       } else {
-        setError(result?.message || "Wrong email or password");
+        setError(result.error || "Wrong email or password");
       }
     } catch (err) {
       console.error(err);
@@ -109,14 +102,9 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="login-password" className="field-label">
-                Password
-              </label>
-              <a href="#" className="text-xs text-muted transition-colors duration-150 ease-out hover:text-foreground">
-                Forgot password?
-              </a>
-            </div>
+            <label htmlFor="login-password" className="field-label">
+              Password
+            </label>
             <input
               id="login-password"
               type="password"
@@ -127,11 +115,6 @@ export default function LoginPage() {
               required
             />
           </div>
-
-          <label className="flex cursor-pointer select-none items-center gap-2 text-[13px] text-subtle">
-            <input type="checkbox" className="size-4 accent-amber" />
-            Remember this device
-          </label>
 
           <button type="submit" disabled={loading} className="btn btn-primary mt-2 h-10 w-full gap-2 text-sm">
             {loading && <span className="loading loading-spinner loading-xs" />}

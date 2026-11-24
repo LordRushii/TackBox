@@ -1,32 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import SkillCard, { SkillCardSkeleton } from "@/components/SkillCard";
 import { fetchSkills, toggleStarAction } from "@/features/skills/actions";
 import type { Skill } from "@/features/skills/skill";
+import { useViewer } from "@/features/auth/viewer";
 
-export default function BrowseSkillsPage() {
-  const [user, setUser] = useState<any>(null);
+type BrowseSkillsPageProps = {
+  searchParams: Promise<{ category?: string | string[] }>;
+};
+
+export default function BrowseSkillsPage({ searchParams }: BrowseSkillsPageProps) {
+  const { category } = use(searchParams);
+  const user = useViewer();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  useEffect(() => {
-    const category = new URLSearchParams(window.location.search).get("category");
-    if (category) setSelectedCategory(category);
-
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        setUser(null);
-      }
-    }
-  }, []);
+  const [selectedCategory, setSelectedCategory] = useState((Array.isArray(category) ? category[0] : category) || "All");
 
   useEffect(() => {
     async function loadSkills() {

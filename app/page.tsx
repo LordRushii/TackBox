@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import {
   ArrowRight,
@@ -18,8 +18,9 @@ import {
   Terminal,
 } from "lucide-react";
 import { fetchStatsAction } from "@/features/skills/actions";
-import { getSkillsRepo } from "@/lib/github";
+import { installCommands } from "@/features/registry/repo";
 import { HOME } from "@/lib/site-copy";
+import { useViewer } from "@/features/auth/viewer";
 import HeroBackdrop from "@/components/landing/HeroBackdrop";
 import SkillWindow from "@/components/landing/SkillWindow";
 import Marquee from "@/components/landing/Marquee";
@@ -40,25 +41,12 @@ const CATEGORIES = [
 const ease = [0.22, 1, 0.36, 1] as const;
 const formatCount = (n: number) => n.toLocaleString("en-US");
 
-// The header keeps the signed-in user in localStorage; read it without a setState-in-effect
-const subscribeStorage = (cb: () => void) => {
-  window.addEventListener("storage", cb);
-  return () => window.removeEventListener("storage", cb);
-};
-const useIsLoggedIn = () =>
-  useSyncExternalStore(
-    subscribeStorage,
-    () => localStorage.getItem("user") !== null,
-    () => false
-  );
-
 export default function Home() {
-  const isLoggedIn = useIsLoggedIn();
+  const isLoggedIn = useViewer() !== null;
   // undefined while loading, null if the stats query failed
   const [stats, setStats] = useState<Stats | null | undefined>(undefined);
 
-  const { owner, repo } = getSkillsRepo();
-  const installCommand = `npx skills add ${owner}/${repo}/skills/code-reviewer`;
+  const installCommand = installCommands("code-reviewer").cli;
   const publishHref = isLoggedIn ? "/my-skills" : "/login";
 
   useEffect(() => {

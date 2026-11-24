@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Bot, Code, Hammer, Wrench } from "lucide-react";
 import { ABOUT } from "@/lib/site-copy";
-import { getSkillsRepo } from "@/lib/github";
+import { installCommands, registryRepo, repoUrl } from "@/features/registry/repo";
 import HeroBackdrop from "@/components/landing/HeroBackdrop";
 import Reveal from "@/components/landing/Reveal";
 import PixelC from "@/components/pixel/PixelC";
@@ -31,8 +31,7 @@ const sectionTitle =
   "font-heading text-[32px] font-medium leading-tight tracking-[-0.02em] text-foreground sm:text-[40px]";
 
 export default function AboutPage() {
-  const { owner, repo } = getSkillsRepo();
-  const repoUrl = `https://github.com/${owner}/${repo}`;
+  const { owner, repo } = registryRepo();
 
   return (
     <div className="flex w-full flex-col items-center bg-background pb-32">
@@ -109,7 +108,7 @@ export default function AboutPage() {
               <div className="flex h-12 items-center gap-3 border-l-2 border-t border-l-amber/30 border-t-line bg-card px-4 font-mono text-xs text-subtle">
                 <span className="text-amber">$</span>
                 <span className="truncate">
-                  npx skills add {owner}/{repo}/skills/code-reviewer
+                  {installCommands("code-reviewer").cli}
                 </span>
               </div>
             </Reveal>
@@ -201,7 +200,7 @@ export default function AboutPage() {
             </div>
             <p className="mt-4 text-[15px] leading-[24px] text-subtle">{ABOUT.builder.body}</p>
             <a
-              href={repoUrl}
+              href={repoUrl()}
               target="_blank"
               rel="noreferrer"
               className="mt-auto flex items-center gap-1.5 pt-6 text-sm text-foreground transition-colors duration-150 ease-out hover:text-amber"

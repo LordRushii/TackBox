@@ -1,4 +1,4 @@
-import { internalMutation, mutation, MutationCtx, query } from "./_generated/server";
+import { mutation, MutationCtx, query } from "./_generated/server";
 import { v } from "convex/values";
 import { Doc, Id } from "./_generated/dataModel";
 import {
@@ -6,11 +6,11 @@ import {
   checkLength,
   LIMITS,
   publicAuthor,
-  rateHit,
   requireUser,
   userFromSession,
 } from "./helpers";
 import { slugCandidates } from "../features/skills/slug";
+import { consume } from "./rateLimits";
 
 const subSkillValidator = v.array(
   v.object({
@@ -202,8 +202,6 @@ export const deleteSkill = mutation({
   },
 });
 
-const COUNT_ONCE_PER_MS = 24 * 60 * 60 * 1000;
-
 /**
  * Server only. A view or download counts once per viewer per skill per day, and only on
  * public skills, so refreshing or scripting the button can't inflate the numbers.
@@ -217,9 +215,7 @@ async function countOnce(
   assertServerSecret(args.secret);
   const skill = await ctx.db.get(args.id);
   if (!skill || skill.visibility !== "public") return false;
-  if ((await rateHit(ctx, `${field}:${args.id}:${args.viewerKey}`, COUNT_ONCE_PER_MS)) > 1) {
-    return false;
-  }
+  if (!(await consume(ctx, field, `${args.id}:${args.viewerKey}`))) return false;
   await ctx.db.patch(args.id, { [field]: (skill[field] || 0) + 1 });
   return true;
 }
@@ -234,19 +230,6 @@ export const incrementViews = mutation({
 export const incrementDownloads = mutation({
   args: counterArgs,
   handler: (ctx, args) => countOnce(ctx, args, "downloads"),
-});
-
-/** Deletes expired rate-limit windows. Runs hourly from crons.ts. */
-export const cleanupRateLimits = internalMutation({
-  args: {},
-  handler: async (ctx) => {
-    const expired = await ctx.db
-      .query("rateLimits")
-      .withIndex("by_expiresAt", (q) => q.lt("expiresAt", Date.now()))
-      .take(1000);
-    for (const row of expired) await ctx.db.delete(row._id);
-    return expired.length;
-  },
 });
 
 export const toggleStar = mutation({

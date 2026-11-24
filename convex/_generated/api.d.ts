@@ -10,6 +10,7 @@
 
 import type * as crons from "../crons.js";
 import type * as helpers from "../helpers.js";
+import type * as rateLimits from "../rateLimits.js";
 import type * as sessions from "../sessions.js";
 import type * as skills from "../skills.js";
 import type * as users from "../users.js";
@@ -23,6 +24,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   helpers: typeof helpers;
+  rateLimits: typeof rateLimits;
   sessions: typeof sessions;
   skills: typeof skills;
   users: typeof users;

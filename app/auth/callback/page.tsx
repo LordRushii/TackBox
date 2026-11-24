@@ -2,29 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { safeRedirect } from "@/lib/safe-redirect";
-import { loginWithClerkAction } from "@/app/actions/clerk";
 import { AlertTriangle } from "lucide-react";
+import { loginWithClerkAction } from "@/features/auth/actions";
+import { safeRedirect } from "@/features/auth/safe-redirect";
+import { useSetViewer } from "@/features/auth/viewer";
 import PixelLoader from "@/components/pixel/PixelLoader";
 
 export default function AuthCallback() {
   const router = useRouter();
+  const setViewer = useSetViewer();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function syncClerkUser() {
       try {
         const result = await loginWithClerkAction();
-        
-        if (result.success && result.user) {
-          // Save user session for UI
-          localStorage.setItem("user", JSON.stringify(result.user));
-          window.dispatchEvent(new Event("storage"));
-          
-          // Redirect
+
+        if (result.ok) {
+          setViewer(result.viewer);
           const searchParams = new URLSearchParams(window.location.search);
-          const redirectUrl = safeRedirect(searchParams.get("redirect"));
-          router.push(redirectUrl);
+          router.push(safeRedirect(searchParams.get("redirect")));
         } else {
           setError(result.error || "Your session couldn't be synced. Try signing in again.");
         }
@@ -35,7 +32,7 @@ export default function AuthCallback() {
     }
 
     syncClerkUser();
-  }, [router]);
+  }, [router, setViewer]);
 
   if (error) {
     return (

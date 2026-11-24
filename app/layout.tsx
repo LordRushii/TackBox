@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Inter, IBM_Plex_Mono, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import ClerkSyncProvider from "@/components/ClerkSyncProvider";
-import { ClerkProvider, GoogleOneTap, Show } from '@clerk/nextjs'
-
+import ClerkSync from "@/features/auth/ClerkSync";
+import { getViewer } from "@/features/auth/server";
+import { ViewerProvider, type Viewer } from "@/features/auth/viewer";
+import { ClerkProvider, GoogleOneTap, Show } from "@clerk/nextjs";
+import { unstable_rethrow } from "next/navigation";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,11 +30,25 @@ export const metadata: Metadata = {
     "A public registry for Markdown-based AI agent skills. Find a skill.md that does what you need, fork it, ship it.",
 };
 
-export default function RootLayout({
+/** A Convex outage shouldn't take down pages that don't need a user, so treat it as signed out. */
+async function viewerOrNull(): Promise<Viewer | null> {
+  try {
+    return await getViewer();
+  } catch (error) {
+    // Next.js signals dynamic rendering with a thrown error; that one must get through
+    unstable_rethrow(error);
+    console.error("Couldn't read the session:", error);
+    return null;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const viewer = await viewerOrNull();
+
   return (
     <ClerkProvider>
       <html
@@ -44,10 +60,11 @@ export default function RootLayout({
           <Show when="signed-out">
             <GoogleOneTap />
           </Show>
-          <ClerkSyncProvider>
+          <ViewerProvider initialViewer={viewer}>
+            <ClerkSync />
             <Header />
             {children}
-          </ClerkSyncProvider>
+          </ViewerProvider>
         </body>
       </html>
     </ClerkProvider>

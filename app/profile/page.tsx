@@ -1,35 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getCurrentUserAction, updateProfileAction } from "@/app/actions/auth";
+import { useState } from "react";
 import { Check } from "lucide-react";
+import { updateProfileAction } from "@/features/auth/actions";
+import { useSetViewer, useViewer } from "@/features/auth/viewer";
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  // The layout only renders this page for a signed-in viewer
+  const viewer = useViewer();
+  const setViewer = useSetViewer();
+  const [name, setName] = useState(viewer?.name ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(viewer?.image ?? "");
   const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    async function syncSession() {
-      try {
-        const dbUser = await getCurrentUserAction();
-        if (!dbUser) {
-          localStorage.removeItem("user");
-          router.push("/login");
-          return;
-        }
-        setName(dbUser.name || "");
-        setAvatarUrl(dbUser.image || "");
-        localStorage.setItem("user", JSON.stringify(dbUser));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    syncSession();
-  }, [router]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,27 +26,21 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess("");
+    setError("");
     setLoading(true);
 
     try {
       const result = await updateProfileAction(name, avatarUrl);
-      if (result?.success) {
-        const stored = localStorage.getItem("user");
-        let userObj = { role: "Member" };
-        if (stored) {
-          try {
-            userObj = JSON.parse(stored);
-          } catch {}
-        }
-        localStorage.setItem("user", JSON.stringify({ ...userObj, name, image: avatarUrl }));
-        // Let the header know the user changed
-        window.dispatchEvent(new Event("storage"));
-
+      if (result.ok) {
+        setViewer(result.viewer);
         setSuccess("Profile saved");
         setTimeout(() => setSuccess(""), 3000);
+      } else {
+        setError(result.error);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
+      setError("Couldn't save the profile. Try again.");
     } finally {
       setLoading(false);
     }
@@ -114,6 +92,11 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex items-center justify-end gap-4 border-t border-line pt-6">
+          {error && (
+            <span role="alert" className="text-[13px] text-negative">
+              {error}
+            </span>
+          )}
           {success && (
             <span role="status" className="flex items-center gap-2 text-[13px] text-positive">
               <Check className="size-4" strokeWidth={1.5} />
