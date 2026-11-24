@@ -1,4 +1,4 @@
-import { MutationCtx, QueryCtx } from "./_generated/server";
+import { QueryCtx } from "./_generated/server";
 import { Doc } from "./_generated/dataModel";
 import { toSlug } from "../features/skills/slug";
 
@@ -43,50 +43,6 @@ export async function requireUser(ctx: Reader, sessionToken: string): Promise<Do
   const user = await userFromSession(ctx, sessionToken);
   if (!user) throw new Error("Unauthorized: please sign in again");
   return user;
-}
-
-// ---- Rate limiting -------------------------------------------------------
-
-type Writer = { db: MutationCtx["db"] };
-
-async function windowFor(ctx: Reader, key: string, now: number) {
-  const row = await ctx.db
-    .query("rateLimits")
-    .withIndex("by_key", (q) => q.eq("key", key))
-    .unique();
-  return row && row.expiresAt > now ? row : null;
-}
-
-/** How many hits `key` has in its current window (0 if none or expired). */
-export async function rateCount(ctx: Reader, key: string): Promise<number> {
-  return (await windowFor(ctx, key, Date.now()))?.count ?? 0;
-}
-
-/** Records one hit for `key` and returns the new count within the window. */
-export async function rateHit(ctx: Writer, key: string, windowMs: number): Promise<number> {
-  const now = Date.now();
-  const row = await ctx.db
-    .query("rateLimits")
-    .withIndex("by_key", (q) => q.eq("key", key))
-    .unique();
-  if (row && row.expiresAt > now) {
-    await ctx.db.patch(row._id, { count: row.count + 1 });
-    return row.count + 1;
-  }
-  if (row) {
-    await ctx.db.patch(row._id, { count: 1, windowStart: now, expiresAt: now + windowMs });
-  } else {
-    await ctx.db.insert("rateLimits", { key, count: 1, windowStart: now, expiresAt: now + windowMs });
-  }
-  return 1;
-}
-
-export async function rateClear(ctx: Writer, key: string) {
-  const row = await ctx.db
-    .query("rateLimits")
-    .withIndex("by_key", (q) => q.eq("key", key))
-    .unique();
-  if (row) await ctx.db.delete(row._id);
 }
 
 // ---- Public profile ------------------------------------------------------

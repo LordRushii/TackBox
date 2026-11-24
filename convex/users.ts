@@ -1,27 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import {
-  assertServerSecret,
-  checkImageUrl,
-  checkLength,
-  LIMITS,
-  rateClear,
-  rateCount,
-  rateHit,
-  requireUser,
-  sessionUser,
-} from "./helpers";
-
-const MINUTE = 60 * 1000;
-
-// Failures are counted per client + email, so a stranger can't lock someone else out
-// by guessing their email from another network. Each client also gets an overall budget
-// across all emails, which stops one machine from spraying passwords at many accounts.
-const LOGIN_FAILURES_PER_CLIENT_AND_EMAIL = 10;
-const LOGIN_ATTEMPTS_PER_CLIENT = 30;
-const LOGIN_WINDOW_MS = 15 * MINUTE;
-const SIGNUPS_PER_CLIENT = 5;
-const SIGNUP_WINDOW_MS = 60 * MINUTE;
+import { assertServerSecret, checkImageUrl, checkLength, LIMITS, requireUser, sessionUser } from "./helpers";
+import { consume, isSpent, reset } from "./rateLimits";
 
 const loginKeys = {
   secret: v.string(),
@@ -38,12 +18,8 @@ export const beginLogin = mutation({
   handler: async (ctx, args) => {
     assertServerSecret(args.secret);
 
-    if ((await rateCount(ctx, `login-fail:${args.pairKey}`)) >= LOGIN_FAILURES_PER_CLIENT_AND_EMAIL) {
-      return { limited: true as const };
-    }
-    if ((await rateHit(ctx, `login:${args.clientKey}`, LOGIN_WINDOW_MS)) > LOGIN_ATTEMPTS_PER_CLIENT) {
-      return { limited: true as const };
-    }
+    if (await isSpent(ctx, "login-fail", args.pairKey)) return { limited: true as const };
+    if (!(await consume(ctx, "login", args.clientKey))) return { limited: true as const };
 
     const user = await ctx.db
       .query("users")
@@ -62,7 +38,7 @@ export const recordLoginFailure = mutation({
   args: loginKeys,
   handler: async (ctx, args) => {
     assertServerSecret(args.secret);
-    await rateHit(ctx, `login-fail:${args.pairKey}`, LOGIN_WINDOW_MS);
+    await consume(ctx, "login-fail", args.pairKey);
   },
 });
 
@@ -70,7 +46,7 @@ export const clearLoginFailures = mutation({
   args: loginKeys,
   handler: async (ctx, args) => {
     assertServerSecret(args.secret);
-    await rateClear(ctx, `login-fail:${args.pairKey}`);
+    await reset(ctx, "login-fail", args.pairKey);
   },
 });
 
@@ -93,7 +69,7 @@ export const createUser = mutation({
 
     // Every attempt counts, taken emails included, which caps how fast anyone can
     // probe which addresses have accounts
-    if ((await rateHit(ctx, `signup:${args.clientKey}`, SIGNUP_WINDOW_MS)) > SIGNUPS_PER_CLIENT) {
+    if (!(await consume(ctx, "signup", args.clientKey))) {
       return { ok: false as const, reason: "limited" as const };
     }
 
