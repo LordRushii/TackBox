@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import PixelC from "@/components/pixel/PixelC";
 
 export const metadata: Metadata = {
   title: "Page not found · Tackbox",
@@ -10,8 +9,7 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-      <PixelC tile={10} gap={3} />
-      <p className="mt-10 font-mono text-xs text-muted">404</p>
+      <p className="font-mono text-xs text-muted">404</p>
       <h1 className="mt-3 font-heading text-[32px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground">
         Nothing at this address
       </h1>

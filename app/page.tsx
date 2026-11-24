@@ -25,7 +25,6 @@ import HeroBackdrop from "@/components/landing/HeroBackdrop";
 import SkillWindow from "@/components/landing/SkillWindow";
 import Marquee from "@/components/landing/Marquee";
 import Reveal from "@/components/landing/Reveal";
-import PixelC from "@/components/pixel/PixelC";
 
 type Stats = { totalSkills: number; totalUsers: number; totalDownloads: number };
 
@@ -147,7 +146,7 @@ export default function Home() {
 
         {/* Final CTA */}
         <Reveal>
-          <section className="flex flex-col gap-12 overflow-hidden rounded-[20px] border border-line bg-card px-8 py-14 sm:px-14 sm:py-16 md:flex-row md:items-center md:justify-between">
+          <section className="overflow-hidden rounded-[20px] border border-line bg-card px-8 py-14 sm:px-14 sm:py-16">
             <div className="flex flex-col items-start">
               <h2 className="font-heading text-[32px] font-medium leading-tight tracking-[-0.02em] text-foreground sm:text-[44px]">
                 {HOME.finalCta.title}
@@ -157,7 +156,6 @@ export default function Home() {
                 {HOME.finalCta.button} <ArrowRight className="size-4" strokeWidth={1.5} />
               </Link>
             </div>
-            <PixelC tile={18} gap={4} className="self-center md:mr-4" />
           </section>
         </Reveal>
       </main>
